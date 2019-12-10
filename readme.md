@@ -1,25 +1,28 @@
-# Welcome to erela.js 👋
+# Erela.js
 
-A easy to use lavalink client for your Discord.js bot.
+An easy-to-use Lavalink client for Discord.js
 
 [![Version](https://img.shields.io/npm/v/erela.js.svg)](https://www.npmjs.com/package/erela.js)
 [![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](#)
 
-## Install
+## Installation
 
-```sh
+```bash
 npm install erela.js
 ```
 
-## Lavalink
+## Prerequisites
 
-You will need Lavalink in order to use this package. (And Java to run the Lavalink jar).
+Download & install the Java runtime built and download the Lavalink.jar file.
 
-Download the jar from the [CL server](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1).
+- [Java](https://www.java.com/en/download)
+- [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1)
 
-Put a `application.yml` file in your working directory and copy the [example](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example) into the created file and edit it with your configuration.
+## Getting Started
 
-Run the jar file using `java -jar Lavalink.jar`
+- Create an `application.yml` file in your working directory and copy the [example](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example) into the created file and edit it with your configuration.
+
+- Run the jar file by running `java -jar Lavalink.jar` in a Terminal window.
 
 ## Things to know
 
@@ -27,30 +30,28 @@ Erela.js works with discord.js versions master and stable.
 
 Only searches Youtube (At the time of creating this only Youtube worked for Lavalink).
 
-Documentation will come soon.
+Documentation is a work-in-progress.
 
-## Basic usage
+## Example usage
 
-```javascript
-// Require Discord.js and Erela.js.
-const { Client } = require("discord.js");
-const { ErelaClient } = require("erela.js");
+```javascript// To install Discord.js and Erela.js, run:
+// npm install discord.js erela.js
+const {Client} = require("discord.js");
+const {ErelaClient} = require("erela.js");
 
-// Create the Discord.js client and an array of nodes for Erela.js.
+// Initialize the Discord.js Client instance and an array of nodes for Erela.js.
 const client = new Client();
-const nodes = [
-    {
-        host: "localhost",
-        port: 2333,
-        password: "youshallnotpass",
-    }
-]
+const nodes = [{
+    host: "localhost",
+    port: 2333,
+    password: "youshallnotpass",
+}]
 
 // Ready event fires when the Discord.js client is ready.
 // Use once so it only fires once.
 client.once("ready", () => {
     console.log("I am ready!")
-    // Creates a Erela client with the Discord.js client and nodes.
+    // Initializes an Erela client with the Discord.js client and nodes.
     client.music = new ErelaClient(client, nodes);
     // Listens to events.
     client.music.on("nodeConnect", node => console.log("New node connected"));
@@ -64,7 +65,9 @@ client.once("ready", () => {
 
 client.on("message", async message => {
     if (message.content.startsWith("!play")) {
-        const { voiceChannel } = message.member;
+        const {
+            voiceChannel
+        } = message.member;
         // Note: for discord.js master you need to use
         // const { channel } = message.member.voice;
 
@@ -87,10 +90,9 @@ client.on("message", async message => {
         // The if statement is needed else it will play the current track again
         if (!player.playing) player.play();
     }
-})
+});
 
-client.login("your token")
-
+client.login("your token");
 ```
 
 ## Andesite-node
@@ -131,5 +133,3 @@ client.once("ready", () => {
 
 * Website: <https://warhammer.codes/>
 * Github: [@WarHammer414](https://github.com/WarHammer414)
-
-***
