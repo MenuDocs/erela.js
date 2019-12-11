@@ -18,7 +18,7 @@ Download & install the Java runtime built and download the Lavalink.jar file.
 - [Java](https://www.java.com/en/download)
 - [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1)
 
-> Note: Java v11 or newer is required to use the package.
+> Note: Java v11 or newer is required to run the Lavalink.jar.
 
 ## Getting Started
 
@@ -28,10 +28,11 @@ Download & install the Java runtime built and download the Lavalink.jar file.
 
 ## Example usage
 
-```javascript// To install Discord.js and Erela.js, run:
+```javascript
+// To install Discord.js and Erela.js, run:
 // npm install discord.js erela.js
-const {Client} = require("discord.js");
-const {ErelaClient} = require("erela.js");
+const { Client } = require("discord.js");
+const { ErelaClient } = require("erela.js");
 
 // Initialize the Discord.js Client instance and an array of nodes for Erela.js.
 const client = new Client();
@@ -133,5 +134,5 @@ Documentation is a work-in-progress.
 
 👤 **WarHammer414**
 
-* Website: <https://warhammer.codes/>
-* Github: [@WarHammer414](https://github.com/WarHammer414)
+- Website: <https://warhammer.codes/>
+- Github: [@WarHammer414](https://github.com/WarHammer414)
