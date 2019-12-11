@@ -1,6 +1,6 @@
 # Erela.js
 
-An easy-to-use Lavalink client for Discord.js
+An easy-to-use Lavalink client for Discord.js.
 
 [![Version](https://img.shields.io/npm/v/erela.js.svg)](https://www.npmjs.com/package/erela.js)
 [![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](#)
@@ -18,19 +18,13 @@ Download & install the Java runtime built and download the Lavalink.jar file.
 - [Java](https://www.java.com/en/download)
 - [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1)
 
+> Note: Java v11 or newer is required to use the package.
+
 ## Getting Started
 
 - Create an `application.yml` file in your working directory and copy the [example](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example) into the created file and edit it with your configuration.
 
 - Run the jar file by running `java -jar Lavalink.jar` in a Terminal window.
-
-## Things to know
-
-Erela.js works with discord.js versions master and stable.
-
-Only searches Youtube (At the time of creating this only Youtube worked for Lavalink).
-
-Documentation is a work-in-progress.
 
 ## Example usage
 
@@ -126,6 +120,14 @@ client.once("ready", () => {
     });
 });
 ```
+
+## Notes
+
+Erela.js works with discord.js versions master and stable.
+
+Only searches Youtube (At the time of creating this only Youtube worked for Lavalink).
+
+Documentation is a work-in-progress.
 
 ## Author
 
