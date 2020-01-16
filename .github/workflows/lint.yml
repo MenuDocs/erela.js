@@ -13,5 +13,6 @@ jobs:
       - name: Lint
         uses: mooyoul/tslint-actions@v1.1.1
         with:
-          job-name: Lint 
+          job-name: Lint
+          token: ${{ secrets.GITHUB_TOKEN }}
           pattern: '*.ts'
