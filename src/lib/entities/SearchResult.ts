@@ -1,53 +1,51 @@
-import { User } from "discord.js";
-import { ITrack, ITrackData } from "../structures/Track";
+import { Track, ITrackData } from "./Track";
+import { Type } from "../utils/Utils";
 
 /**
  * The IException interface
- * @export
- * @interface IException
  */
 export interface IException {
+    /**
+     * The message for the exception.
+     */
     readonly message: string;
+    /**
+     * The severity of the exception.
+     */
     readonly severity: string;
 }
 
 /**
- * The ISearchResult class.
- * @export
- * @interface ISearchResult
- */
-export interface ISearchResult {
-    readonly loadType: string;
-    readonly tracks: ITrack[];
-    readonly playlist: IPlaylist;
-    readonly exception?: IException;
-}
-
-/**
  * The IPlaylist class.
- * @export
- * @interface IPlaylist
  */
 export interface IPlaylist {
+    /**
+     * The info for the playlist.
+     */
     readonly info: IPlaylistInfo;
-    readonly tracks: ITrackData[];
+    /**
+     * The tracks for the playlist.
+     */
+    readonly tracks: Track[];
+    /**
+     * The total duration of the playlist.
+     */
+    readonly duration: number;
 }
-
 /**
- * The IPlaylistInfo class.
- * @export
- * @interface IPlaylistInfo
+ * The playlists info.
  */
-export interface IPlaylistInfo {
+interface IPlaylistInfo {
+    /**
+     * The name of the playlist.
+     */
     readonly name?: string;
+    /**
+     * The selected track of the playlist.
+     */
     readonly selectedTrack?: ITrackData|null;
 }
 
-/**
- * The ISearchResultData class.
- * @export
- * @interface ISearchResultData
- */
 export interface ISearchResultData {
     readonly loadType: string;
     readonly playlistInfo: IPlaylistInfo;
@@ -57,23 +55,31 @@ export interface ISearchResultData {
 
 /**
  * The SearchResult class.
- * @export
- * @class SearchResult
- * @implements {ISearchResult}
  */
-export class SearchResult implements ISearchResult {
+export class SearchResult {
+    /**
+     * The load type of the search result.
+     */
     public readonly loadType: string;
-    public readonly tracks: ITrack[];
+    /**
+     * The tracks of the search result.
+     */
+    public readonly tracks: Track[];
+    /**
+     * The playlist of the search result.
+     */
     public readonly playlist: IPlaylist;
+    /**
+     * The exception of the search result if one occurred.
+     */
     public readonly exception: IException|undefined;
     /**
      * Creates an instance of SearchResult.
-     * @param {SearchResultData} data - The search result data.
-     * @param {ITrack} track - The Track class.
-     * @param {User} user - The user who requested the track.
-     * @memberof SearchResult
+     * @param {any} data - The search result data.
+     * @param {Track} track - The Track class.
+     * @param {any} user - The user who requested the track.
      */
-    public constructor(data: ISearchResultData, track: ITrack, user: User) {
+    public constructor(data: ISearchResultData, track: Type<Track>, user: any) {
         if (!data || !track || !user) {
             throw new RangeError("SearchResult constructor must have all three parameters filled.");
         }
@@ -83,6 +89,7 @@ export class SearchResult implements ISearchResult {
         this.playlist = {
             info: data.playlistInfo,
             tracks: this.loadType === "PLAYLIST_LOADED" ? data.tracks.map((d) => new (track as any)(d, user)) : [],
+            duration: this.tracks.map((t) => t.duration).reduce((acc: number, cur: number) => acc + cur),
         };
 
         if (data.exception) {

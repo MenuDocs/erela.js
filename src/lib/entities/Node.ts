@@ -1,81 +1,160 @@
 import WebSocket from "ws";
-import { ErelaClient, INodeOptions } from "../ErelaClient";
+import { ErelaClient } from "../ErelaClient";
 
 /**
- * The NodeStats interface.
- * @export
- * @interface NodeStats
+ * The INodeOptions interface.
  */
-export interface INodeStats {
-    players: number;
-    playingPlayers: number;
-    uptime: number;
-    memory: {
-        free: number;
-        used: number;
-        allocated: number;
-        reservable: number;
-    };
-    cpu: {
-        cores: number;
-        systemLoad: number;
-        lavalinkLoad: number;
-    };
-    frameStats?: {
-        sent?: number;
-        nulled?: number;
-        deficit?: number;
-    };
+export interface INodeOptions {
+    /**
+     * The Nodes custom identifier.
+     */
+    readonly identifer?: string;
+    /**
+     * The host for the node.
+     */
+    readonly host: string;
+    /**
+     * The port for the node.
+     */
+    readonly port: number;
+    /**
+     * The password for the node.
+     */
+    readonly password: string;
+    /**
+     * The retry amount for the node.
+     */
+    readonly retryAmount?: number;
+    /**
+     * The retry delay for the node.
+     */
+    readonly retryDelay?: number;
 }
 
 /**
- * The INode interface.
- * @export
- * @interface INode
+ * The INodeMemoryStats interface.
  */
-export interface INode {
-    readonly erela: ErelaClient;
-    options: INodeOptions;
-    websocket: WebSocket|null;
-    stats: INodeStats;
-    reconnectTimeout?: NodeJS.Timeout;
-    reconnectAttempts: number;
-    retryAmount: number;
-    retryDelay: number;
-    calls: number;
-    readonly connected: boolean;
-    setOptions(options: INodeOptions): void;
-    connect(): void;
-    reconnect(): void;
-    destroy(): void;
-    send(message: object): void;
-    _onOpen(data: WebSocket.Data): void;
-    _onClose(code: number, reason: string): void;
-    _onMessage(data: WebSocket.Data): void;
-    _onError(error: Error): void;
+interface INodeMemoryStats {
+    /**
+     * The free memory.
+     */
+    free: number;
+    /**
+     * The used memory.
+     */
+    used: number;
+    /**
+     * The allocated memory.
+     */
+    allocated: number;
+    /**
+     * The reservable memory.
+     */
+    reservable: number;
+}
+
+/**
+ * The INodeCPUStats interface.
+ * @interface INodeCPUStats
+ */
+interface INodeCPUStats {
+    /**
+     * The amount of cores on the CPU.
+     */
+    cores: number;
+    /**
+     * The system load on the cores on the CPU.
+     */
+    systemLoad: number;
+    /**
+     * The lavalink load on the cores on the CPU.
+     */
+    lavalinkLoad: number;
+}
+
+/**
+ * The INodeFrameStats interface.
+ */
+interface INodeFrameStats {
+    /**
+     * The amount of sent frames.
+     */
+    sent?: number;
+    /**
+     * The amount of nulled frames.
+     */
+    nulled?: number;
+    /**
+     * The amount of deficit frames.
+     */
+    deficit?: number;
+}
+
+/**
+ * The INodeStats interface.
+ * @interface INodeStats
+ */
+interface INodeStats {
+    /**
+     * The amount of players on the node.
+     */
+    players: number;
+    /**
+     * The amount of players playing on the node.
+     */
+    playingPlayers: number;
+    /**
+     * The duration the node has been up.
+     */
+    uptime: number;
+    /**
+     * The nodes memory stats.
+     */
+    memory: INodeMemoryStats;
+    /**
+     * The nodes CPU stats.
+     */
+    cpu: INodeCPUStats;
+    /**
+     * The nodes frame stats.
+     */
+    frameStats?: INodeFrameStats;
 }
 
 /**
  * The Node class.
- * @export
- * @class Node
- * @implements {INode}
  */
-export class Node implements INode {
+export class Node {
     public readonly erela: ErelaClient;
+    /**
+     * The options for the new.
+     */
     public options: INodeOptions;
-    public websocket: WebSocket|null;
+    public websocket: WebSocket|null = null;
+    /**
+     * The stats for the node.
+     */
     public stats: INodeStats;
-    public reconnectTimeout?: NodeJS.Timeout;
+    public reconnectTimeout: NodeJS.Timeout | undefined;
+    /**
+     * The amount the node will try to reconnect.
+     */
     public reconnectAttempts: number = 0;
+    /**
+     * The amount the node will try to reconnect.
+     */
     public retryAmount: number;
+    /**
+     * The amount the node will delay after a failed reconnect.
+     */
     public retryDelay: number;
+    /**
+     * The amount of REST calls the node has made.
+     */
     public calls: number = 0;
 
     /**
      * Returns if connected to the Node.
-     * @returns {boolean}
-     * @memberof Node
      */
     public get connected(): boolean {
         if (!this.websocket) { return false; }
@@ -85,15 +164,13 @@ export class Node implements INode {
     /**
      * Creates an instance of Node and connects after being created.
      * @param {ErelaClient} erela - The Erela client.
-     * @param {NodeOptions} options - The Node options.
-     * @memberof Node
+     * @param {INodeOptions} options - The Node options.
      */
     public constructor(erela: ErelaClient, options: INodeOptions) {
         this.erela = erela;
         this.options = options;
         this.retryAmount = this.options.retryAmount || 5;
         this.retryDelay = this.options.retryDelay || 30e3;
-        this.websocket = null;
         this.stats = {
             players: 0,
             playingPlayers: 0,
@@ -116,7 +193,6 @@ export class Node implements INode {
     /**
      * Changes the node options and reconnects.
      * @param {INodeOptions} options - The new Nodes options.
-     * @memberof Node
      */
     public setOptions(options: INodeOptions): void {
         if (!options || !options.host || !options.port || !options.password) {
@@ -130,14 +206,12 @@ export class Node implements INode {
 
     /**
      * Connects to the Node.
-     * @returns {void}
-     * @memberof Node
      */
     public connect(): void {
         const headers = {
             "Authorization": this.options.password,
             "Num-Shards": String(this.erela.shardCount),
-            "User-Id": this.erela.client.user.id,
+            "User-Id": this.erela.userId,
         };
 
         this.websocket = new WebSocket(`ws://${this.options.host}:${this.options.port}/`, { headers });
@@ -150,8 +224,6 @@ export class Node implements INode {
 
     /**
      * Reconnects to the Node.
-     * @returns {void}
-     * @memberof Node
      */
     public reconnect(): void {
         this.reconnectTimeout = setTimeout(() => {
@@ -170,8 +242,6 @@ export class Node implements INode {
 
     /**
      * Destroys the Node.
-     * @returns {void}
-     * @memberof Node
      */
     public destroy(): void {
         if (!this.connected) { return; }
@@ -183,8 +253,6 @@ export class Node implements INode {
     /**
      * Sends data to the Node.
      * @param {object} data - The data to send.
-     * @returns {void}
-     * @memberof Node
      */
     public send(data: object): Promise<boolean> {
         return new Promise((resolve, reject) => {
@@ -200,35 +268,17 @@ export class Node implements INode {
         });
     }
 
-    /**
-     * Handles the websocket opening.
-     * @returns {void}
-     * @memberof Node
-     */
-    public _onOpen(): void {
+    private _onOpen(): void {
         if (this.reconnectTimeout) { clearTimeout(this.reconnectTimeout); }
         this.erela.emit("nodeConnect", this);
     }
 
-    /**
-     * Handles the websocket closing.
-     * @param {number} code - The close code.
-     * @param {string} reason - The close reason.
-     * @returns {void}
-     * @memberof Node
-     */
-    public _onClose(code: number, reason: string): void {
+    private _onClose(code: number, reason: string): void {
         this.erela.emit("nodeDisconnect", this, { code, reason });
         if (code !== 1000 || reason !== "destroy") { this.reconnect(); }
     }
 
-    /**
-     * Handles incoming messages from Erela.
-     * @param {Buffer|string} d - The message from the websocket.
-     * @returns {void}
-     * @memberof Node
-     */
-    public _onMessage(d: Buffer|string): void {
+    private _onMessage(d: Buffer|string): void {
         if (Array.isArray(d)) { d = Buffer.concat(d); } else if (d instanceof ArrayBuffer) { d = Buffer.from(d); }
 
         const message = JSON.parse(d.toString());
@@ -240,14 +290,9 @@ export class Node implements INode {
                 delete (this.stats as any).op;
                 break;
             case "playerUpdate":
-                const player = this.erela.players.get(message.guildId);
+                const player = this.erela.players!.get(message.guildId);
                 if (!player) { return; }
-                player.updateState({
-                    time: message.state.time,
-                    position: message.state.position || 0,
-                    volume: message.state.volume,
-                    equalizer: message.state.equalizer,
-                });
+                player.position = message.state.position || 0;
                 break;
             case "event":
                 this.handleEvent(message);
@@ -258,62 +303,55 @@ export class Node implements INode {
         }
     }
 
-    /**
-     * Handles errors from the websocket.
-     * @param {Error} error - The error.
-     * @returns {void}
-     * @memberof Node
-     */
-    public _onError(error: Error): void {
+    private _onError(error: Error): void {
         if (!error) { return; }
         this.erela.emit("nodeError", this, error);
         this.reconnect();
     }
 
-    /**
-     * Handles the events received from Erela.
-     * @param {*} message - The message sent from Erela.
-     * @returns {void}
-     * @memberof Node
-     */
-    public handleEvent(message: any): void {
+    private handleEvent(message: any): void {
         if (!message.guildId) { return; }
-        const player = this.erela.players.get(message.guildId);
+        const player = this.erela.players!.get(message.guildId);
         if (!player) { return; }
-        const track = player.queue.shift();
+        const track = player.queue[0];
         switch (message.type) {
+            case "TrackStartEvent": break;
             case "TrackEndEvent":
                 if (track && player.trackRepeat) {
                     this.erela.emit("trackEnd", player, track);
-                    player.queue.unshift(track);
                     player.play();
                 } else if (track && player.queueRepeat) {
                     this.erela.emit("trackEnd", player, track);
-                    player.queue.add(track);
+                    player.queue.add(player.queue.shift());
                     player.play();
-                } else if (player.queue.size === 0) {
-                    if (message.reason === "FINISHED") {
-                        player.playing = false;
+                } else if (player.queue.size === 1) {
+                    player.queue.shift();
+                    player.playing = false;
+                    if (["REPLACED", "FINISHED", "STOPPED"].includes(message.reason)) {
                         this.erela.emit("queueEnd", player);
                     }
                 } else if (player.queue.size > 0) {
+                    player.queue.shift();
                     this.erela.emit("trackEnd", player, track);
                     player.play();
                 }
                 break;
             case "TrackStuckEvent":
-                this.erela.emit("trackStuck", player, track);
+                player.queue.shift();
+                this.erela.emit("trackStuck", player, track, message);
                 break;
             case "TrackExceptionEvent":
-                this.erela.emit("trackError", player, track);
+                player.queue.shift();
+                this.erela.emit("trackError", player, track, message);
                 break;
             case "WebSocketClosedEvent":
+                console.log(message);
                 if ([4015, 4009].includes(message.code)) {
                     this.erela.sendWS({
                         op: 4,
                         d: {
-                            guild_id: player.guild.id,
-                            channel_id: player.voiceChannel.id,
+                            guild_id: message.guildId,
+                            channel_id: player.voiceChannel.id || player.voiceChannel,
                             self_mute: player.options.selfMute || false,
                             self_deaf: player.options.selfDeaf || false,
                         },
@@ -322,6 +360,8 @@ export class Node implements INode {
                 }
                 this.erela.emit("socketClosed", player, message);
                 break;
+            default:
+                throw new Error(`Node#event Unknown event '${message.type}'.`);
         }
     }
  }

@@ -135,4 +135,8 @@ Documentation is a work-in-progress.
 👤 **WarHammer414**
 
 - Website: <https://warhammer.codes/>
+<<<<<<< Updated upstream
 - Github: [@WarHammer414](https://github.com/WarHammer414)
+=======
+- Github: [@WarHammer414](https://github.com/WarHammer414)
+>>>>>>> Stashed changes

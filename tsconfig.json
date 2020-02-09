@@ -2,7 +2,6 @@
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
-    "declaration": true,
     "lib": [
       "es6"
     ],
@@ -11,6 +10,9 @@
     "strict": true,
     "esModuleInterop": true
   },
+  "files": [
+    "./typings/index.d.ts"
+  ],
   "include": [
     "src"
   ],
