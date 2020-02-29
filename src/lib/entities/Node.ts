@@ -345,7 +345,6 @@ export class Node {
                 this.erela.emit("trackError", player, track, message);
                 break;
             case "WebSocketClosedEvent":
-                console.log(message);
                 if ([4015, 4009].includes(message.code)) {
                     this.erela.sendWS({
                         op: 4,

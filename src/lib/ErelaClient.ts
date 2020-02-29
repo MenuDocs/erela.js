@@ -261,6 +261,10 @@ export class ErelaClient extends EventEmitter {
 
         if (typeof this.client !== "undefined") {
             client.on(this.library.ws.string, this.updateVoiceState.bind(this));
+            Object.defineProperty(client, "_erela_client_defined", {
+                value: true,
+                enumerable: false,
+            });
         }
     }
 

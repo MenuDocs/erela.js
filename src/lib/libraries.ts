@@ -1,12 +1,13 @@
+// tslint:disable: max-line-length
 const libraries: any = {
     "discord.js": {
         ws: {
             string: "raw",
             get: (client: any) => client.ws,
         },
-        findChannel: (client: any, ID: string) => client.channels.get(ID),
-        findGuildChannel: (guild: any, ID: any) => guild.channels.get(ID),
-        findGuild: (client: any, ID: string) =>  client.guilds.get(ID),
+        findChannel: (client: any, ID: string) => (client.channels.get ? client.channels : client.channels.cache).get(ID),
+        findGuildChannel: (guild: any, ID: any) => (guild.channels.get ? guild.channels : guild.channels.cache).get(ID),
+        findGuild: (client: any, ID: string) =>  (client.guilds.get ? client.guilds : client.guilds.cache).get(ID),
         isSharded: (client: any) => client.ws.shards,
         sendWS: (client: any, data: any) => client.ws.send(data),
         sendShardWS: (guild: any, data: any) => guild.shard.send(data),
