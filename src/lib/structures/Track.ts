@@ -39,6 +39,7 @@ export interface ITrack {
     readonly title: string;
     readonly uri: string;
     readonly thumbnail: string;
+    readonly hqThumbnail: string;
     readonly requester: User;
 }
 
@@ -58,6 +59,7 @@ export class Track implements ITrack {
     public title: string;
     public uri: string;
     public thumbnail: string;
+    public hqThumbnail: string;
     public requester: User;
     /**
      * Creates an instance of Track.
@@ -81,6 +83,8 @@ export class Track implements ITrack {
             this.uri = data.info.uri;
             this.thumbnail = this.uri.includes("youtube") ?
                 `https://img.youtube.com/vi/${this.identifier}/default.jpg` : "";
+            this.hqThumbnail = this.uri.includes("youtube") ?
+                `https://img.youtube.com/vi/${this.identifier}/hqdefault.jpg` : "";
             this.requester = user;
         } catch (err) {
             throw new RangeError(`Invalid track passed. Reason: ${err}`);
