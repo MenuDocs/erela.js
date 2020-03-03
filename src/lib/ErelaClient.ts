@@ -218,7 +218,7 @@ export class ErelaClient extends EventEmitter {
      * @memberof Erela
      */
     public sendWS(data: IPacket): void {
-        const guild = this.client.guilds.get(data.d.guild_id);
+        const guild = this.client.guilds.cache.get(data.d.guild_id);
         if (guild) { this.client.ws.shards ? guild.shard.send(data) : this.client.ws.send(data); }
     }
 }
