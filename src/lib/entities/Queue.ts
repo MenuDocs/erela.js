@@ -6,8 +6,6 @@ import { ErelaClient } from "../ErelaClient";
  * @noInheritDoc
  */
 export class Queue extends Array {
-    public readonly erela: ErelaClient;
-
     /**
      * Returns the total duration of the queue.
      * @returns {number} - The duration of the queue.
@@ -36,9 +34,8 @@ export class Queue extends Array {
      * Creates an instance of Queue.
      * @param {ErelaClient} erela - The Erela Client.
      */
-    public constructor(erela: ErelaClient) {
+    public constructor(public readonly erela: ErelaClient) {
         super();
-        this.erela = erela;
     }
 
     /**
@@ -93,7 +90,7 @@ export class Queue extends Array {
      */
     public remove(track: Track|number = 0): Track|null {
         const position = typeof track === "number" ? track : this.indexOf(track as Track);
-        if (this.indexOf(position) === -1) {
+        if (position === -1) {
             return null;
         }
         return this.splice(position, 1)[0];

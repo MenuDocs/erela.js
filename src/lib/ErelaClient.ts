@@ -14,8 +14,6 @@ import _ from "lodash";
 
 /**
  * The IErelaOptions interface.
- * @export
- * @interface IErelaOptions
  */
 export interface IErelaOptions {
     /**
@@ -46,6 +44,20 @@ export interface IErelaOptions {
      * The override library to use.
      */
     library?: string;
+}
+
+/**
+ * The IQuery interface.
+ */
+export interface IQuery {
+    /**
+     * The source to search from.
+     */
+    source?: "youtube" | "soundcloud";
+    /**
+     * The query to search for.
+     */
+    query: string;
 }
 
 const defaultOptions: IErelaOptions = {
@@ -81,31 +93,31 @@ export class ErelaClient extends EventEmitter {
     /**
      * The client user ID.
      */
-    public readonly userId: string;
+    public readonly userId!: string;
     /**
      * The custom Node class.
      */
-    public readonly node: Type<Node>;
+    public readonly node!: Type<Node>;
     /**
      * The custom Player class.
      */
-    public readonly player: Type<Player>;
+    public readonly player!: Type<Player>;
     /**
      * The custom Queue class.
      */
-    public readonly queue: Type<Queue>;
+    public readonly queue!: Type<Queue>;
     /**
      * The custom Track class.
      */
-    public readonly track: Type<Track>;
+    public readonly track!: Type<Track>;
     /**
      * The PlayerStore collection.
      */
-    public readonly players: PlayerStore;
+    public readonly players!: PlayerStore;
     /**
-     * The NodeStore collection.
+     * The NodeStore.
      */
-    public readonly nodes: NodeStore;
+    public readonly nodes!: NodeStore;
     public readonly library: any;
     private readonly voiceState: Map<string, any> = new Map();
 
@@ -213,9 +225,13 @@ export class ErelaClient extends EventEmitter {
     public constructor(client: any, nodes: INodeOptions[], options?: IErelaOptions) {
         super();
 
+        // @ts-ignore
+        if (process._erela_client_defined) { return; }
+
         let _nodes: any = [];
         let _options = defaultOptions;
-        const isObject = (obj: any) => !_.isUndefined(obj) && JSON.stringify(obj)[0] === "{";
+        const isObject = (obj: any) =>  typeof obj !== "undefined" && JSON.stringify(obj)[0] === "{";
+        const isClass = (obj: any) => typeof obj !== "undefined" && obj.constructor.toString().includes("class");
 
         if (_.isObject(client) && _.isArray(nodes) && !_.isUndefined(options)) { // client, nodes, options
             this.client = client;
@@ -232,14 +248,13 @@ export class ErelaClient extends EventEmitter {
             _options = nodes as unknown as IErelaOptions;
         } else if (_.isArray(client) && _.isUndefined(nodes) && _.isUndefined(options)) { // nodes
             _nodes = client as unknown as INodeOptions[];
-            // tslint:disable-next-line: max-line-length
-        } else if (client.constructor.toString().includes("class") && _.isUndefined(nodes) && _.isUndefined(options)) { // client
+        } else if (isClass(client) && _.isUndefined(nodes) && _.isUndefined(options)) { // client
             this.client = client;
         } else if (isObject(client) && _.isUndefined(nodes) && _.isUndefined(options)) { // options
             _options = client as unknown as IErelaOptions;
         }
 
-        this.userId = this.client ? this.client.user.id : _options.userId;
+        this.userId = isClass(this.client) && !_.isNull(this.client.user) ? this.client.user.id : _options.userId;
 
         if (!this.userId) {
             throw new RangeError("new ErelaClient() No user ID supplied.");
@@ -259,12 +274,8 @@ export class ErelaClient extends EventEmitter {
         this.players = new PlayerStore(this);
         this.nodes = new NodeStore(this, _nodes);
 
-        if (typeof this.client !== "undefined") {
+        if (isClass(client)) {
             client.on(this.library.ws.string, this.updateVoiceState.bind(this));
-            Object.defineProperty(client, "_erela_client_defined", {
-                value: true,
-                enumerable: false,
-            });
         }
     }
 
@@ -315,12 +326,12 @@ export class ErelaClient extends EventEmitter {
     }
 
     /**
-     * Searches YouTube with the query. Note: As of writing this only youtube worked.
-     * @param {string} query - The query to search against.
+     * Searches YouTube with the query.
+     * @param {(string|IQuery)} query - The query to search against.
      * @param {any} user - The user who requested the tracks.
      * @returns {Promise<SearchResult>} - The search result.
      */
-    public search(query: string, user: any): Promise<SearchResult> {
+    public search(query: string | IQuery, user: any): Promise<SearchResult> {
         return new Promise(async (resolve, reject) => {
             const node: Node = this.nodes.leastUsed.first() as Node;
 
@@ -328,14 +339,18 @@ export class ErelaClient extends EventEmitter {
                 throw new Error("ErelaClient#search() No available nodes.");
             }
 
-            if (!/^https?:\/\//.test(query)) {
-                query = `ytsearch:${query}`;
+            const source = { soundcloud: "sc" }[(query as IQuery).source] || "yt";
+            let search = (query as IQuery).query || query as string;
+
+            if (!/^https?:\/\//.test(search)) {
+                search = `${source}search:${search}`;
             }
+
             const url = `http://${node.options.host}:${node.options.port}/loadtracks`;
 
             const res = await Axios.get(url, {
                 headers: { Authorization: node.options.password },
-                params: { identifier: query },
+                params: { identifier: search },
             }).catch((err) => {
                 return reject(err);
             });

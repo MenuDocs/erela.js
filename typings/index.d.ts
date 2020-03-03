@@ -18,7 +18,6 @@ declare module "erela.js" {
         public readonly players: PlayerStore;
         public readonly nodes: NodeStore;
         public readonly library: any;
-        private readonly voiceState: Map<string, any>;
 
         public on(event: "playerCreate" | "playerDestroy" | "queueEnd", listener: (player: Player) => void): this;
         public on(event: "playerMove", listener: (player: Player, oldChannel: any, newChannel: any) => void): this;
@@ -37,8 +36,13 @@ declare module "erela.js" {
         public once(event: "nodeDisconnect" | "nodeError", listener: (node: Node, message: any) => void): this;
 
         public updateVoiceState(data: any): void;
-        public search(query: string, requester: any): Promise<SearchResult>;
+        public search(query: string | IQuery, requester: any): Promise<SearchResult>;
         public sendWS(data: any): void;
+    }
+    
+    export interface IQuery {
+        source?: "youtube" | "soundcloud";
+        query: string;
     }
 
     export interface IErelaOptions {

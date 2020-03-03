@@ -85,10 +85,10 @@ export class SearchResult {
         }
 
         this.loadType = data.loadType;
-        this.tracks = this.loadType !== "PLAYLIST_LOADED" ? data.tracks.map((d) => new (track as any)(d, user)) : [];
+        this.tracks = this.loadType !== "PLAYLIST_LOADED" ? data.tracks.map((d) => new track(d, user)) : [];
         this.playlist = {
             info: data.playlistInfo,
-            tracks: this.loadType === "PLAYLIST_LOADED" ? data.tracks.map((d) => new (track as any)(d, user)) : [],
+            tracks: this.loadType === "PLAYLIST_LOADED" ? data.tracks.map((d) => new track(d, user)) : [],
             duration: this.tracks.map((t) => t.duration).reduce((acc: number, cur: number) => acc + cur),
         };
 

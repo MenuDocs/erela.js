@@ -125,7 +125,6 @@ interface INodeStats {
  * The Node class.
  */
 export class Node {
-    public readonly erela: ErelaClient;
     /**
      * The options for the new.
      */
@@ -158,7 +157,7 @@ export class Node {
      */
     public get connected(): boolean {
         if (!this.websocket) { return false; }
-        return this.websocket!.readyState === WebSocket.OPEN;
+        return this.websocket.readyState === WebSocket.OPEN;
     }
 
     /**
@@ -166,8 +165,7 @@ export class Node {
      * @param {ErelaClient} erela - The Erela client.
      * @param {INodeOptions} options - The Node options.
      */
-    public constructor(erela: ErelaClient, options: INodeOptions) {
-        this.erela = erela;
+    public constructor(public readonly erela: ErelaClient, options: INodeOptions) {
         this.options = options;
         this.retryAmount = this.options.retryAmount || 5;
         this.retryDelay = this.options.retryDelay || 30e3;

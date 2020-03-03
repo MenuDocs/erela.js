@@ -125,16 +125,17 @@ export class Player {
      * @memberof Player
      */
     public setVoiceChannel(channel: any) {
-        if (!this.erela.library) { return; }
+        if (this.erela.library) {
+            if (typeof channel === "undefined") {
+                throw new RangeError("Player#setVoiceChannel(channel: any) Channel must be a voice channel.");
+            }
 
-        if (typeof channel === "undefined") {
-            throw new RangeError("Player#setVoiceChannel(channel: any) Channel must be a voice channel.");
-        }
+            const guild = this.erela.library.findGuild(this.erela.client, this.guild.id || this.guild);
 
-        const guild = this.erela.library.findGuild(this.erela.client, this.guild.id || this.guild);
-
-        if (!this.erela.library.findGuildChannel(guild, channel.id || channel)) {
-            throw new RangeError("Player#setVoiceChannel(channel: any) Cannot bind to a channel not in this guild.");
+            if (!this.erela.library.findGuildChannel(guild, channel.id || channel)) {
+                // tslint:disable-next-line: max-line-length
+                throw new RangeError("Player#setVoiceChannel(channel: any) Cannot bind to a channel not in this guild.");
+            }
         }
 
         this.voiceChannel = channel;
@@ -155,16 +156,16 @@ export class Player {
      * @memberof Player
      */
     public setTextChannel(channel: any) {
-        if (!this.erela.library) { return; }
+        if (this.erela.library) {
+            if (typeof channel === "undefined") {
+                throw new RangeError("Player#setTextChannel(channel: any) Channel must be a text channel.");
+            }
 
-        if (typeof channel === "undefined") {
-            throw new RangeError("Player#setTextChannel(channel: any) Channel must be a text channel.");
-        }
+            const guild = this.erela.library.findGuild(this.erela.client, this.guild.id || this.guild);
 
-        const guild = this.erela.library.findGuild(this.erela.client, this.guild.id || this.guild);
-
-        if (!this.erela.library.findGuildChannel(guild, channel.id || channel)) {
-            throw new RangeError("Player#setTextChannel(channel: any) Cannot bind to a channel not in this guild.");
+            if (!this.erela.library.findGuildChannel(guild, channel.id || channel)) {
+                throw new RangeError("Player#setTextChannel(channel: any) Cannot bind to a channel not in this guild.");
+            }
         }
 
         this.textChannel = channel;

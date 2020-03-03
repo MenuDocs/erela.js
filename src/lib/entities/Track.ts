@@ -1,3 +1,5 @@
+const sizes = ["0", "1", "2", "3", "default", "mqdefault", "hqdefault", "maxresdefault"];
+
 /**
  * The ITrackInfo interface.
  */
@@ -85,10 +87,6 @@ export class Track {
      */
     public readonly uri: string;
     /**
-     * The track's thumbnail.
-     */
-    public readonly thumbnail: string;
-    /**
      * The user who requested the track.
      */
     public readonly requester: any;
@@ -97,8 +95,8 @@ export class Track {
      * @param {ITrackData} data - The data to pass.
      * @param {any} user - The user who requested the track.
      */
-    public constructor(data: ITrackData, user: any) {
-        if (!data || !user) {
+    public constructor(data: ITrackData, requester: any) {
+        if (!data || !requester) {
             throw new RangeError("Track constructor must have all two parameters filled.");
         }
 
@@ -111,10 +109,18 @@ export class Track {
             this.isStream = data.info.isStream;
             this.title = data.info.title;
             this.uri = data.info.uri;
-            this.thumbnail = `https://img.youtube.com/vi/${this.identifier}/default.jpg`;
-            this.requester = user;
+            this.requester = requester;
         } catch (err) {
             throw new RangeError(`Invalid track passed. Reason: ${err}`);
         }
+    }
+
+    /**
+     * Returns the thumbnail for the track. Only works for YouTube videos due to other sources requiring a API token.
+     * @param {string} [size] - The size for the track.
+     */
+    public displayThumbnail(size?: string): string {
+        const finalSize = sizes.find((s) => s === size) || "default";
+        return this.uri.includes("youtube") ? `https://img.youtube.com/vi/${this.identifier}/${finalSize}.jpg` : "";
     }
 }

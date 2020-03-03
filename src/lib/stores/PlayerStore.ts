@@ -8,15 +8,12 @@ import _ from "lodash";
  * The PlayerStore class.
  */
 export default class PlayerStore extends Store<string, Player> {
-    private readonly erela: ErelaClient;
-
     /**
      * Creates an instance of PlayerStore.
      * @param {ErelaClient} erela - The ErelaClient.
      */
-    public constructor(erela: ErelaClient) {
+    public constructor(public readonly erela: ErelaClient) {
         super();
-        this.erela = erela;
     }
 
     /**
@@ -36,7 +33,7 @@ export default class PlayerStore extends Store<string, Player> {
             throw new Error("PlayerStore#spawn() No available nodes.");
         }
 
-        const player = new (this.erela.player as any)(this.erela, node, options, extra);
+        const player = new this.erela.player(this.erela, node, options, extra);
         this.set(options.guild.id || options.guild, player);
         this.erela.emit("playerCreate", player);
         this.erela.sendWS({

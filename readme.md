@@ -3,7 +3,13 @@
 An easy-to-use Lavalink client for Discord.js.
 
 [![Version](https://img.shields.io/npm/v/erela.js.svg)](https://www.npmjs.com/package/erela.js)
-[![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](#)
+[![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](#​)
+
+## Documentation
+
+> Note: Some links do not work, I'll fix them when I can. The sidebar menu has the links that are broken.
+
+You can find the documentation at <http://projects.warhammer.codes/erelajs> (*this* link does work)
 
 ## Installation
 
@@ -13,7 +19,7 @@ npm install erela.js
 
 ## Prerequisites
 
-Download & install the Java runtime built and download the Lavalink.jar file.
+Download & install the Java runtime and download the Lavalink.jar file.
 
 - [Java](https://www.java.com/en/download)
 - [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1)
@@ -27,6 +33,8 @@ Download & install the Java runtime built and download the Lavalink.jar file.
 - Run the jar file by running `java -jar Lavalink.jar` in a Terminal window.
 
 ## Example usage
+
+> Note: Discord.js is used in this example, but it does work with Eris with the same example.
 
 ```javascript
 // To install Discord.js and Erela.js, run:
@@ -122,21 +130,9 @@ client.once("ready", () => {
 });
 ```
 
-## Notes
-
-Erela.js works with discord.js versions master and stable.
-
-Only searches Youtube (At the time of creating this only Youtube worked for Lavalink).
-
-Documentation is a work-in-progress.
-
 ## Author
 
 👤 **WarHammer414**
 
 - Website: <https://warhammer.codes/>
-<<<<<<< Updated upstream
 - Github: [@WarHammer414](https://github.com/WarHammer414)
-=======
-- Github: [@WarHammer414](https://github.com/WarHammer414)
->>>>>>> Stashed changes

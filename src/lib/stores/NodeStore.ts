@@ -6,8 +6,6 @@ import { ErelaClient } from "../ErelaClient";
  * The NodeStore class.
  */
 export default class NodeStore extends Store<any, Node> {
-    private readonly erela: ErelaClient;
-
     /**
      * Filters the connected nodes and sorts them by the amount of rest calls it has made.
      */
@@ -31,9 +29,8 @@ export default class NodeStore extends Store<any, Node> {
      * @param {ErelaClient} erela - The ErelaClient.
      * @param {Array<INodeOptions>} nodes - The INodeOptions array.
      */
-    public constructor(erela: ErelaClient, nodes: INodeOptions[]) {
+    public constructor(public readonly erela: ErelaClient, nodes: INodeOptions[]) {
         super();
-        this.erela = erela;
         for (const node of nodes) { this.spawn(node); }
     }
 
@@ -43,7 +40,7 @@ export default class NodeStore extends Store<any, Node> {
      * @param {object} [extra={}] - The nodes extra data to pass when extending for custom classes.
      */
     public spawn(options: INodeOptions, extra: object = {}): void {
-        const node = new (this.erela.node as any)(this.erela, options, extra);
+        const node = new this.erela.node(this.erela, options, extra);
         this.set(options.identifer || this.size + 1, node);
         this.erela.emit("nodeCreate", node);
     }
