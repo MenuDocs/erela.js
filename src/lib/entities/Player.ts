@@ -131,14 +131,15 @@ export class Player {
             }
 
             const guild = this.erela.library.findGuild(this.erela.client, this.guild.id || this.guild);
+            channel = this.erela.library.findGuildChannel(guild, channel.id || channel);
 
-            if (!this.erela.library.findGuildChannel(guild, channel.id || channel)) {
+            if (!channel) {
                 // tslint:disable-next-line: max-line-length
                 throw new RangeError("Player#setVoiceChannel(channel: any) Cannot bind to a channel not in this guild.");
             }
         }
 
-        this.voiceChannel = channel;
+        this.voiceChannel = this.voiceChannel.id ? channel : channel.id;
         this.erela.sendWS({
             op: 4,
             d: {
@@ -162,13 +163,14 @@ export class Player {
             }
 
             const guild = this.erela.library.findGuild(this.erela.client, this.guild.id || this.guild);
+            channel = this.erela.library.findGuildChannel(guild, channel.id || channel);
 
-            if (!this.erela.library.findGuildChannel(guild, channel.id || channel)) {
+            if (!channel) {
                 throw new RangeError("Player#setTextChannel(channel: any) Cannot bind to a channel not in this guild.");
             }
         }
 
-        this.textChannel = channel;
+        this.textChannel = this.textChannel.id ? channel : channel.id;
     }
 
     /**

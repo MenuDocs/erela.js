@@ -1,9 +1,12 @@
 # Erela.js
 
-An easy-to-use Lavalink client for Discord.js.
+An easy-to-use Lavalink client for NodeJS.
 
-[![Version](https://img.shields.io/npm/v/erela.js.svg)](https://www.npmjs.com/package/erela.js)
-[![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](#​)
+[![Discord](https://discordapp.com/api/guilds/653436871858454538/embed.png)](https://discord.gg/D6FXw55)
+[![Downloads](https://badgen.net/npm/dt/erela.js)](https://www.npmjs.com/package/erela.js)
+[![Version](https://img.shields.io/npm/v/erela.js.svg?maxAge=3600)](https://www.npmjs.com/package/erela.js)
+[![GitHub Stars](https://badgen.net/github/stars/WarHammer414/erela.js)](https://github.com/WarHammer414/erela.js)
+[![License](https://badgen.net/github/license/WarHammer414/erela.js)](https://github.com/WarHammer414/erela.js/blob/master/LICENSE)
 
 ## Documentation
 

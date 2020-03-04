@@ -302,16 +302,14 @@ export class ErelaClient extends EventEmitter {
                 return;
             }
             state.sessionId = data.d.session_id;
-            if (player && data.d.channel_id) {
-                const newChannel = !this.client ? data.d.channel_id :
+            const channel = player.voiceChannel.id || player.voiceChannel;
+            if (channel !== data.d.channel_id) {
+                const found = !this.library ? data.d.channel_id :
                     this.library.findChannel(this.client, data.d.channel_id);
 
-                const currentChannel = player.voiceChannel.id || player.voiceChannel;
-
-                if (currentChannel !== data.d.channel_id) {
-                    this.emit("playerMove", player, currentChannel, data.d.channel_id);
-                }
-
+                const currentChannel = player.voiceChannel.id ? player.voiceChannel : player.voiceChannel;
+                const newChannel = player.voiceChannel.id ? found : found.id;
+                this.emit("playerMove", player, currentChannel, newChannel);
                 player.voiceChannel = newChannel;
             }
         }
