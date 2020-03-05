@@ -1,42 +1,46 @@
-import { Collection } from "discord.js";
-import { IPlayer } from "../structures/Player";
-import { ErelaClient, IPlayerOptions } from "../ErelaClient";
+import { Player, IPlayerOptions } from "../entities/Player";
+import Store from "../utils/Store";
+import { ErelaClient } from "../ErelaClient";
+import { Node } from "../entities/Node";
+import _ from "lodash";
 
-export default class PlayerStore extends Collection<string, IPlayer> {
-    private readonly erela: ErelaClient;
-
-    public constructor(erela: ErelaClient) {
+/**
+ * The PlayerStore class.
+ */
+export default class PlayerStore extends Store<string, Player> {
+    /**
+     * Creates an instance of PlayerStore.
+     * @param {ErelaClient} erela - The ErelaClient.
+     */
+    public constructor(public readonly erela: ErelaClient) {
         super();
-        this.erela = erela;
     }
 
     /**
      * Spawns a new player, or returns the player if it exists.
-     * @param {PlayerOptions} options - The options to spawn a player with.
+     * @param {IPlayerOptions} options - The options to spawn a player with.
      * @param {object} [extra={}] - Extra data to pass when extending for custom classes.
-     * @returns {IPlayer}
-     * @memberof PlayerStore
+     * @returns {Player} - The newly created Player.
      */
-    public spawn(options: IPlayerOptions, extra: object = {}): IPlayer {
-        if (this.has(options.guild.id)) {
-            return this.get(options.guild.id) as IPlayer;
+    public spawn(options: IPlayerOptions, extra: object = {}): Player {
+        if (this.has(options.guild.id || options.guild)) {
+            return this.get(options.guild.id || options.guild) as Player;
         }
 
-        const node = this.erela.nodes.leastLoad.first();
+        const node: Node = this.erela.nodes.leastLoad.first() as Node;
 
         if (!node) {
             throw new Error("PlayerStore#spawn() No available nodes.");
         }
 
-        // tslint:disable-next-line: max-line-length
-        const player = new (this.erela.player as any)(this.erela, node, options, extra);
-        this.set(options.guild.id, player);
+        const player = new this.erela.player(this.erela, node, options, extra);
+        this.set(options.guild.id || options.guild, player);
         this.erela.emit("playerCreate", player);
         this.erela.sendWS({
             op: 4,
             d: {
-                guild_id: options.guild.id,
-                channel_id: options.voiceChannel.id,
+                guild_id: options.guild.id || options.guild,
+                channel_id: options.voiceChannel.id || options.voiceChannel,
                 self_mute: options.selfMute || false,
                 self_deaf: options.selfDeaf || false,
             },
@@ -48,10 +52,9 @@ export default class PlayerStore extends Collection<string, IPlayer> {
     /**
      * Destroys a player.
      * @param {string} guildId - The guild ID to destroy the player with.
-     * @returns {(IPlayer|null)}
-     * @memberof Erela
+     * @returns {(Player|null)} - The Player or null if it does not exist.
      */
-    public destroy(guildId: string): IPlayer|null {
+    public destroy(guildId: string): Player|null {
         const player = this.get(guildId);
         if (!player) { return null; }
 

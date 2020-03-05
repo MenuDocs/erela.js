@@ -1,9 +1,18 @@
 # Erela.js
 
-An easy-to-use Lavalink client for Discord.js.
+An easy-to-use Lavalink client for NodeJS.
 
-[![Version](https://img.shields.io/npm/v/erela.js.svg)](https://www.npmjs.com/package/erela.js)
-[![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](#)
+[![Discord](https://discordapp.com/api/guilds/653436871858454538/embed.png)](https://discord.gg/D6FXw55)
+[![Downloads](https://badgen.net/npm/dt/erela.js)](https://www.npmjs.com/package/erela.js)
+[![Version](https://img.shields.io/npm/v/erela.js.svg?maxAge=3600)](https://www.npmjs.com/package/erela.js)
+[![GitHub Stars](https://badgen.net/github/stars/WarHammer414/erela.js)](https://github.com/WarHammer414/erela.js)
+[![License](https://badgen.net/github/license/WarHammer414/erela.js)](https://github.com/WarHammer414/erela.js/blob/master/LICENSE)
+
+## Documentation
+
+> Note: Some links do not work, I'll fix them when I can. The sidebar menu has the links that are broken.
+
+You can find the documentation at <http://projects.warhammer.codes/erelajs> (*this* link does work)
 
 ## Installation
 
@@ -13,7 +22,7 @@ npm install erela.js
 
 ## Prerequisites
 
-Download & install the Java runtime built and download the Lavalink.jar file.
+Download & install the Java runtime and download the Lavalink.jar file.
 
 - [Java](https://www.java.com/en/download)
 - [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1)
@@ -27,6 +36,8 @@ Download & install the Java runtime built and download the Lavalink.jar file.
 - Run the jar file by running `java -jar Lavalink.jar` in a Terminal window.
 
 ## Example usage
+
+> Note: Discord.js is used in this example, but it does work with Eris with the same example.
 
 ```javascript
 // To install Discord.js and Erela.js, run:
@@ -121,14 +132,6 @@ client.once("ready", () => {
     });
 });
 ```
-
-## Notes
-
-Erela.js works with discord.js versions master and stable.
-
-Only searches Youtube (At the time of creating this only Youtube worked for Lavalink).
-
-Documentation is a work-in-progress.
 
 ## Author
 

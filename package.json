@@ -1,15 +1,14 @@
 {
   "name": "erela.js",
-  "version": "1.0.4",
-  "description": "",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "version": "1.1.0",
+  "description": "An easy-to-use Lavalink client for NodeJS.",
+  "main": "./dist/index.js",
+  "types": "./typings/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/WarHammer414/erela.js.git"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
   },
   "keywords": [
@@ -17,7 +16,8 @@
     "lavalink client",
     "music",
     "discord bot",
-    "discord.js"
+    "discord.js",
+    "eris"
   ],
   "author": "WarHammer414",
   "license": "ISC",
@@ -25,15 +25,16 @@
     "@types/events": "^3.0.0",
     "@types/lodash": "^4.14.149",
     "@types/ws": "^6.0.4",
-    "jsdoc-markdown-cli": "^2.0.0",
     "tslint": "^5.20.1",
-    "typescript": "^3.7.2"
+    "typedoc": "^0.15.8",
+    "typedoc-plugin-no-inherit": "^1.1.10",
+    "typescript": "^3.7.5"
   },
   "dependencies": {
-    "axios": "^0.19.0",
-    "discord.js": "^11.5.1",
-    "events": "^3.0.0",
+    "axios": "^0.19.2",
+    "events": "^3.1.0",
     "lodash": "^4.17.15",
-    "ws": "^7.2.0"
+    "util": "^0.12.1",
+    "ws": "^7.2.1"
   }
 }

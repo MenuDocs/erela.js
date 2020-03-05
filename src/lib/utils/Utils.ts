@@ -1,18 +1,16 @@
-import { Collection } from "discord.js";
-
 // tslint:disable:max-line-length
+
+export type Type<T> = new (...args: any[]) => T;
+
 /**
  * The Utils class.
- * @export
- * @class Utils
  */
 export class Utils {
-
     /**
      * Formats the given duration into human readable format.
      * @param {number} milliseconds - The duration to format.
-     * @param {boolean?} minimal - Whether to use a minimal format.
-     * @returns {string} The formatted duration.
+     * @param {boolean?} [minimal=false] - Whether to use a minimal format.
+     * @returns {string} - The formatted duration.
      */
     public static formatTime(milliseconds: number, minimal: boolean = false): string {
         if (!milliseconds || isNaN(milliseconds) || milliseconds <= 0) {
@@ -88,7 +86,7 @@ export class Utils {
     /**
      * Parses the given duration into milliseconds.
      * @param {string} time - The duration to parse.
-     * @returns {number} The formatted duration.
+     * @returns {number} - The formatted duration.
      */
     public static parseTime(time: string): number|null {
         const regex = /\d+\.*\d*\D+/g;
