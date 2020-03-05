@@ -105,7 +105,7 @@ declare module "erela.js" {
         public get size(): number;
         public get empty(): boolean;
 
-        public add(track: Track|Track[], offset: number): void;
+        public add(track: Track|Track[], offset?: number): void;
         public removeFrom(start: number, end: number): Track[]|null;
         public remove(track: Track|number): Track|null;
         public clear(): void;
