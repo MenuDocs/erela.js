@@ -88,9 +88,9 @@ declare module "erela.js" {
         readonly guild: any;
         readonly textChannel: any;
         readonly voiceChannel: any;
-        readonly selfDeaf: boolean;
-        readonly selfMute: boolean;
-        readonly volume: number;
+        readonly selfDeaf?: boolean;
+        readonly selfMute?: boolean;
+        readonly volume?: number;
     }
 
     export interface IEqualizerBand {
@@ -219,7 +219,7 @@ declare module "erela.js" {
 
         private readonly erela: ErelaClient;
 
-        public spawn(options: IPlayerOptions, extra: any): Player;
+        public spawn(options: IPlayerOptions, extra?: any): Player;
         public destroy(guildId: string): Player | null;
     }
 
@@ -230,7 +230,7 @@ declare module "erela.js" {
         public get leastUsed(): Store<any, Node>;
         public get leastLoad(): Store<any, Node>;
 
-        public spawn(options: INodesOptions, extra: any): Node;
+        public spawn(options: INodesOptions, extra?: any): Node;
         public destroy(nodeId: any): Node | null;
     }
 
