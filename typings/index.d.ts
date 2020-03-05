@@ -123,8 +123,9 @@ declare module "erela.js" {
         public readonly isStream: boolean;
         public readonly title: string;
         public readonly uri: string;
-        public readonly thumbnail: string;
         public readonly requester: any;
+        
+        public displayThumbnail(size?): string;
     }
 
     export interface ITrackInfo {
