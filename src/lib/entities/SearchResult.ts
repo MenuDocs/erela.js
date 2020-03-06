@@ -89,7 +89,7 @@ export class SearchResult {
         this.playlist = {
             info: data.playlistInfo,
             tracks: this.loadType === "PLAYLIST_LOADED" ? data.tracks.map((d) => new track(d, user)) : [],
-            duration: this.tracks.map((t) => t.duration).reduce((acc: number, cur: number) => acc + cur),
+            duration: this.tracks.map((t) => t.duration).reduce((acc: number, cur: number) => acc + cur, 0),
         };
 
         if (data.exception) {
