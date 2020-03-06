@@ -11,7 +11,7 @@ export class Queue extends Array {
      * @returns {number} - The duration of the queue.
      */
     public get duration(): number {
-        return this.map((track: Track) => track.duration).reduce((acc: number, cur: number) => acc + cur);
+        return this.map((track: Track) => track.duration).reduce((acc: number, cur: number) => acc + cur, 0);
     }
 
     /**
