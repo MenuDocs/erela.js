@@ -10,7 +10,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "prePublishOnly": "npm run build"
+    "prePublishOnly": "npm run build",
+    "lint": "tslint --config tslint.json --project tsconfig.json"
   },
   "keywords": [
     "lavalink",
