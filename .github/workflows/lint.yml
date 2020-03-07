@@ -9,10 +9,6 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Prepare
-        run: npm install
+        run: npm i
       - name: Lint
-        uses: mooyoul/tslint-actions@v1.1.1
-        with:
-          job-name: Lint
-          token: ${{ secrets.GITHUB_TOKEN }}
-          pattern: '*.ts'
+        run: npm run lint

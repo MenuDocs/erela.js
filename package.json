@@ -9,7 +9,9 @@
     "url": "https://github.com/WarHammer414/erela.js.git"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prePublishOnly": "npm run build",
+    "lint": "tslint --config tslint.json --project tsconfig.json"
   },
   "keywords": [
     "lavalink",
