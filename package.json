@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "prePublishOnly": "npm run build",
+    "prepublishOnly": "npm run build",
     "lint": "tslint --config tslint.json --project tsconfig.json"
   },
   "keywords": [
