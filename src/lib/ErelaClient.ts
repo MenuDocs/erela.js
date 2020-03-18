@@ -228,7 +228,7 @@ export class ErelaClient extends EventEmitter {
         // @ts-ignore
         if (process._erela_client_defined) { return; }
 
-        let _nodes: any = [] || [{ host: "localhost", port: 2333, password: "youshallnotpass" }];
+        let _nodes: INodeOptions = [{ host: "localhost", port: 2333, password: "youshallnotpass" }];
         let _options = defaultOptions;
         const isObject = (obj: any) =>  typeof obj !== "undefined" && JSON.stringify(obj)[0] === "{";
         const isClass = (obj: any) => typeof obj !== "undefined" && obj.constructor.toString().includes("class");
