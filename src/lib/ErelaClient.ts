@@ -219,7 +219,7 @@ export class ErelaClient extends EventEmitter {
     /**
      * Creates an instance of ErelaClient.
      * @param {*} client - The Discord client.
-     * @param {Array<INodeOptions>} nodes - The nodes to use.
+     * @param {Array<INodeOptions>} [nodes=[{ host: "localhost", port: 2333, password: "youshallnotpass" }] - The nodes to use.
      * @param {IErelaOptions} [options=defaultOptions] - Options for the client.
      */
     public constructor(client: any, nodes: INodeOptions[], options?: IErelaOptions) {
