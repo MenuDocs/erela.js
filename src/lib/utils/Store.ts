@@ -61,16 +61,6 @@ export default class Store<K, V> extends Map {
         return false;
     }
 
-    public concat(...collections: Array<Store<any, any>>): Store<any, any> {
-        const newColl = new Store(this);
-        for (const coll of collections) {
-            for (const [key, val] of coll) {
-                newColl.set(key, val);
-            }
-        }
-        return newColl;
-    }
-
     public sort(compareFunction = (x: V, y: V) => + (x > y) || +(x === y) - 1): Store<K, V> {
         // @ts-ignore
         return new Store([...this.entries()].sort((a, b) => compareFunction(a[1], b[1], a[0], b[0])));

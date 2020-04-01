@@ -272,7 +272,9 @@ export class ErelaClient extends EventEmitter {
         this.queue = _options.queue || Queue;
         this.track = _options.track || Track;
         this.players = new PlayerStore(this);
-        this.nodes = new NodeStore(this, _nodes);
+        this.nodes = new NodeStore(this);
+
+        for (const node of nodes) { this.nodes.spawn(node); }
 
         if (isClass(client)) {
             client.on(this.library.ws.string, this.updateVoiceState.bind(this));

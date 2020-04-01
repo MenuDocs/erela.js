@@ -29,9 +29,8 @@ export default class NodeStore extends Store<any, Node> {
      * @param {ErelaClient} erela - The ErelaClient.
      * @param {Array<INodeOptions>} nodes - The INodeOptions array.
      */
-    public constructor(public readonly erela: ErelaClient, nodes: INodeOptions[]) {
+    public constructor(public readonly erela: ErelaClient) {
         super();
-        for (const node of nodes) { this.spawn(node); }
     }
 
     /**
@@ -40,8 +39,12 @@ export default class NodeStore extends Store<any, Node> {
      * @param {object} [extra={}] - The nodes extra data to pass when extending for custom classes.
      */
     public spawn(options: INodeOptions, extra: object = {}): void {
+        if (this.has(options.identifer || options.host)) {
+            throw new Error(`NodeStore#spawn() Node with identifier "${options.identifer || options.host}" already exists.`);
+        }
+
         const node = new this.erela.node(this.erela, options, extra);
-        this.set(options.identifer || this.size + 1, node);
+        this.set(options.identifer || options.host, node);
         this.erela.emit("nodeCreate", node);
     }
 
