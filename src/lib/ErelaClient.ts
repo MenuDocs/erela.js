@@ -219,7 +219,7 @@ export class ErelaClient extends EventEmitter {
     /**
      * Creates an instance of ErelaClient.
      * @param {*} client - The Discord client.
-     * @param {Array<INodeOptions>} nodes - The nodes to use.
+     * @param {Array<INodeOptions>} [nodes=[{host:"localhost",port:2333,password:"youshallnotpass"}] - The nodes to use.
      * @param {IErelaOptions} [options=defaultOptions] - Options for the client.
      */
     public constructor(client: any, nodes: INodeOptions[], options?: IErelaOptions) {
@@ -272,7 +272,9 @@ export class ErelaClient extends EventEmitter {
         this.queue = _options.queue || Queue;
         this.track = _options.track || Track;
         this.players = new PlayerStore(this);
-        this.nodes = new NodeStore(this, _nodes);
+        this.nodes = new NodeStore(this);
+
+        for (const node of nodes) { this.nodes.spawn(node); }
 
         if (isClass(client)) {
             client.on(this.library.ws.string, this.updateVoiceState.bind(this));
