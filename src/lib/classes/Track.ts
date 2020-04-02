@@ -50,8 +50,6 @@ export interface ITrackData {
 
 /**
  * The Track class.
- * @export
- * @class Track
  */
 export class Track {
     /**
@@ -83,6 +81,10 @@ export class Track {
      */
     public readonly title: string;
     /**
+     * The track's URL.
+     */
+    public readonly url: string;
+    /**
      * The track's URI.
      */
     public readonly uri: string;
@@ -90,10 +92,11 @@ export class Track {
      * The user who requested the track.
      */
     public readonly requester: any;
+
     /**
      * Creates an instance of Track.
-     * @param {ITrackData} data - The data to pass.
-     * @param {any} user - The user who requested the track.
+     * @param {ITrackData} data The data to pass.
+     * @param {any} user The user who requested the track.
      */
     public constructor(data: ITrackData, requester: any) {
         if (!data || !requester) {
@@ -109,6 +112,7 @@ export class Track {
             this.isStream = data.info.isStream;
             this.title = data.info.title;
             this.uri = data.info.uri;
+            this.url = data.info.uri;
             this.requester = requester;
         } catch (err) {
             throw new RangeError(`Invalid track passed. Reason: ${err}`);
@@ -117,7 +121,9 @@ export class Track {
 
     /**
      * Returns the thumbnail for the track. Only works for YouTube videos due to other sources requiring a API token.
-     * @param {string} [size] - The size for the track.
+     * Sizes that work: "0", "1", "2", "3", "default", "mqdefault", "hqdefault", "maxresdefault".
+     * @param {string} [size] The size for the track.
+     * @returns {string} The URL with the specified size, or the default one.
      */
     public displayThumbnail(size?: string): string {
         const finalSize = sizes.find((s) => s === size) || "default";

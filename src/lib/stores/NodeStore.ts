@@ -1,11 +1,11 @@
-import Store from "../utils/Store";
-import { Node, INodeOptions } from "../entities/Node";
+import { Store } from "../utils/Store";
+import { Node, INodeOptions } from "../classes/Node";
 import { ErelaClient } from "../ErelaClient";
 
 /**
  * The NodeStore class.
  */
-export default class NodeStore extends Store<any, Node> {
+export class NodeStore extends Store<string, Node> {
     /**
      * Filters the connected nodes and sorts them by the amount of rest calls it has made.
      */
@@ -26,8 +26,7 @@ export default class NodeStore extends Store<any, Node> {
 
     /**
      * Creates an instance of NodeStore.
-     * @param {ErelaClient} erela - The ErelaClient.
-     * @param {Array<INodeOptions>} nodes - The INodeOptions array.
+     * @param {ErelaClient} erela The ErelaClient.
      */
     public constructor(public readonly erela: ErelaClient) {
         super();
@@ -35,30 +34,30 @@ export default class NodeStore extends Store<any, Node> {
 
     /**
      * Adds a new Node.
-     * @param {INodeOptions} node - The node options.
-     * @param {object} [extra={}] - The nodes extra data to pass when extending for custom classes.
+     * @param {INodeOptions} node The node options.
      */
-    public spawn(options: INodeOptions, extra: object = {}): void {
+    public spawn(options: INodeOptions): void {
         if (this.has(options.identifer || options.host)) {
             throw new Error(`NodeStore#spawn() Node with identifier "${options.identifer || options.host}" already exists.`);
         }
 
-        const node = new this.erela.node(this.erela, options, extra);
+        const clazz = this.erela.classes.get("Node");
+        const node = new clazz(this.erela, options);
         this.set(options.identifer || options.host, node);
         this.erela.emit("nodeCreate", node);
     }
 
     /**
      * Removes a new Node.
-     * @param {any} nodeId - The node ID.
-     * @returns {(INode|null)} - The node that was removed, or null if it does not exist.
+     * @param {any} identifer The node identifer (or host if none was provided).
+     * @returns {(INode|null)} The node that was removed, or null if it does not exist.
      */
-    public remove(nodeId: any): Node|null {
-        const node = this.get(nodeId);
+    public remove(identifer: any): Node | null {
+        const node = this.get(identifer);
         if (!node) { return null; }
         this.erela.emit("nodeDestroy", node);
         node.destroy();
-        this.delete(nodeId);
+        this.delete(identifer);
         return node;
     }
 }

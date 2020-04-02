@@ -35,7 +35,7 @@ export interface IPlaylist {
 /**
  * The playlists info.
  */
-interface IPlaylistInfo {
+export interface IPlaylistInfo {
     /**
      * The name of the playlist.
      */
@@ -43,7 +43,7 @@ interface IPlaylistInfo {
     /**
      * The selected track of the playlist.
      */
-    readonly selectedTrack?: ITrackData|null;
+    readonly selectedTrack?: ITrackData | null;
 }
 
 export interface ISearchResultData {
@@ -75,9 +75,9 @@ export class SearchResult {
     public readonly exception: IException|undefined;
     /**
      * Creates an instance of SearchResult.
-     * @param {any} data - The search result data.
-     * @param {Track} track - The Track class.
-     * @param {any} user - The user who requested the track.
+     * @param {any} data The search result data.
+     * @param {Type<Track>} track The Track class.
+     * @param {any} user The user who requested the track.
      */
     public constructor(data: ISearchResultData, track: Type<Track>, user: any) {
         if (!data || !track || !user) {

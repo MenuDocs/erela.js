@@ -8,7 +8,7 @@ import { ErelaClient } from "../ErelaClient";
 export class Queue extends Array {
     /**
      * Returns the total duration of the queue.
-     * @returns {number} - The duration of the queue.
+     * @returns {number} The duration of the queue.
      */
     public get duration(): number {
         return this.map((track: Track) => track.duration).reduce((acc: number, cur: number) => acc + cur, 0);
@@ -16,7 +16,7 @@ export class Queue extends Array {
 
     /**
      * Returns the size of the queue.
-     * @returns {number} - The size of the queue.
+     * @returns {number} The size of the queue.
      */
     public get size(): number {
         return this.length;
@@ -24,7 +24,7 @@ export class Queue extends Array {
 
     /**
      * Returns if the queue is empty or not.
-     * @returns {boolean} - If the queue is empty or not.
+     * @returns {boolean} If the queue is empty or not.
      */
     get empty(): boolean {
         return this.size === 0;
@@ -32,7 +32,7 @@ export class Queue extends Array {
 
     /**
      * Creates an instance of Queue.
-     * @param {ErelaClient} erela - The Erela Client.
+     * @param {ErelaClient} erela The Erela Client.
      */
     public constructor(public readonly erela: ErelaClient) {
         super();
@@ -40,11 +40,11 @@ export class Queue extends Array {
 
     /**
      * Adds a track to the queue.
-     * @param {(Track|Track[])} track - The track or tracks to add.
-     * @param {number} [offset=0] - The offset to add the track at.
+     * @param {(Track|Track[])} track The track or tracks to add.
+     * @param {number} [offset=0] The offset to add the track at.
      */
-    public add(track: Track|Track[], offset: number = 0): void {
-        if (!(Array.isArray(track) || track instanceof this.erela.track)) {
+    public add(track: Track | Track[], offset: number = 0): void {
+        if (!(Array.isArray(track) || track instanceof Track)) {
             throw new RangeError("Queue#add(track: Track|Track[]) Track must be a \"Track\" or \"Track[]\".");
         }
 
@@ -65,9 +65,9 @@ export class Queue extends Array {
     }
 
     /**
-     * Removes a track to the queue. Defaults to the first track.
-     * @param {(Track|number)} [track=0] - The track to remove.
-     * @returns {(Track|null)} - The track that was removed, or null if the track does not exist.
+     * Removes several track from the queue within a range.
+     * @param {number} track The track to remove.
+     * @returns {(Track[]|null)} The tracks that was removed, or null if the tracks do not exist.
      */
     public removeFrom(start: number, end: number): Track[]|null {
         if (typeof start === "undefined") {
@@ -84,11 +84,11 @@ export class Queue extends Array {
     }
 
     /**
-     * Removes a track to the queue. Defaults to the first track.
-     * @param {(Track|number)} [track=0] - The track to remove.
-     * @returns {(Track|null)} - The track that was removed, or null if the track does not exist.
+     * Removes a track from the queue. Defaults to the first track.
+     * @param {(Track|number)} [track=0] The track to remove.
+     * @returns {(Track|null)} The track that was removed, or null if the track does not exist.
      */
-    public remove(track: Track|number = 0): Track|null {
+    public remove(track: Track | number = 0): Track|null {
         const position = typeof track === "number" ? track : this.indexOf(track as Track);
         if (position === -1) {
             return null;

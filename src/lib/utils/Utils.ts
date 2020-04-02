@@ -8,9 +8,9 @@ export type Type<T> = new (...args: any[]) => T;
 export class Utils {
     /**
      * Formats the given duration into human readable format.
-     * @param {number} milliseconds - The duration to format.
-     * @param {boolean?} [minimal=false] - Whether to use a minimal format.
-     * @returns {string} - The formatted duration.
+     * @param {number} milliseconds The duration to format.
+     * @param {boolean?} [minimal=false] Whether to use a minimal format.
+     * @returns {string} The formatted duration.
      */
     public static formatTime(milliseconds: number, minimal: boolean = false): string {
         if (!milliseconds || isNaN(milliseconds) || milliseconds <= 0) {
@@ -73,6 +73,10 @@ export class Utils {
             }
         }
 
+        if (minimal && finalTime.length === 1) {
+            finalTime.unshift("00");
+        }
+
         let time = finalTime.join(minimal ? ":" : ", ");
 
         if (time.includes(",")) {
@@ -85,10 +89,10 @@ export class Utils {
 
     /**
      * Parses the given duration into milliseconds.
-     * @param {string} time - The duration to parse.
-     * @returns {number} - The formatted duration.
+     * @param {string} time The duration to parse.
+     * @returns {(number|null)} The parsed duration, null if it could not be parsed..
      */
-    public static parseTime(time: string): number|null {
+    public static parseTime(time: string): number | null {
         const regex = /\d+\.*\d*\D+/g;
         time = time.split(/\s+/).join("");
 

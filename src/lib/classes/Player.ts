@@ -10,15 +10,15 @@ export interface IPlayerOptions {
     /**
      * The guild to connect to.
      */
-    guild: any;
+    guild: string;
     /**
      * The text channel to connect to.
      */
-    textChannel: any;
+    textChannel: string;
     /**
      * The voice channel to connect to.
      */
-    voiceChannel: any;
+    voiceChannel: string;
     /**
      * Whether to deafen the client.
      */
@@ -45,6 +45,21 @@ export interface IEqualizerBand {
      * The gain for the equalizer band.
      */
     gain: number;
+}
+
+export interface IPlayOptions {
+    /**
+     * The position to start the track.
+     */
+    readonly startTime?: number;
+    /**
+     * The position to end the track.
+     */
+    readonly endTime?: number;
+    /**
+     * Whether to not replace the track if a play playload is sent.
+     */
+    readonly noReplace?: boolean;
 }
 
 /**
@@ -103,115 +118,64 @@ export class Player {
 
     /**
      * Creates an instance of Player.
-     * @param {ErelaClient} erela - The Erela client.
-     * @param {Node} node - The Erela Node.
-     * @param {IPlayerOptions} options - The player options.
-     * @param {any} extra - Extra data to pass when extending for custom classes.
+     * @param {ErelaClient} erela The Erela client.
+     * @param {Node} node The Erela Node.
+     * @param {IPlayerOptions} options The player options.
      */
-    public constructor(erela: ErelaClient, node: Node, options: IPlayerOptions, extra: any) {
+    public constructor(erela: ErelaClient, node: Node, options: IPlayerOptions) {
         this.erela = erela;
         this.node = node;
         this.options = options;
         this.guild = options.guild;
         this.textChannel = options.textChannel;
         this.voiceChannel = options.voiceChannel;
-        this.queue = new Queue(erela);
+        const clazz = this.erela.classes.get("Queue");
+        this.queue = new clazz(erela);
         this.volume = options.volume || 100;
     }
 
     /**
-     * Changes the player's voice channel.
-     * @param {*} channel - The new voice channel to join.
-     * @memberof Player
-     */
-    public setVoiceChannel(channel: any) {
-        if (this.erela.library) {
-            if (typeof channel === "undefined") {
-                throw new RangeError("Player#setVoiceChannel(channel: any) Channel must be a voice channel.");
-            }
-
-            const guild = this.erela.library.findGuild(this.erela.client, this.guild.id || this.guild);
-            channel = this.erela.library.findGuildChannel(guild, channel.id || channel);
-
-            if (!channel) {
-                // tslint:disable-next-line: max-line-length
-                throw new RangeError("Player#setVoiceChannel(channel: any) Cannot bind to a channel not in this guild.");
-            }
-        }
-
-        this.voiceChannel = this.voiceChannel.id ? channel : channel.id;
-        this.erela.sendWS({
-            op: 4,
-            d: {
-                guild_id: this.guild.id || this.guild,
-                channel_id: this.voiceChannel.id || this.voiceChannel,
-                self_mute: this.options.selfMute || false,
-                self_deaf: this.options.selfDeaf || false,
-            },
-        });
-    }
-
-    /**
-     * Changes the player's text channel.
-     * @param {*} channel - The new text channel to send messages in.
-     * @memberof Player
-     */
-    public setTextChannel(channel: any) {
-        if (this.erela.library) {
-            if (typeof channel === "undefined") {
-                throw new RangeError("Player#setTextChannel(channel: any) Channel must be a text channel.");
-            }
-
-            const guild = this.erela.library.findGuild(this.erela.client, this.guild.id || this.guild);
-            channel = this.erela.library.findGuildChannel(guild, channel.id || channel);
-
-            if (!channel) {
-                throw new RangeError("Player#setTextChannel(channel: any) Cannot bind to a channel not in this guild.");
-            }
-        }
-
-        this.textChannel = this.textChannel.id ? channel : channel.id;
-    }
-
-    /**
      * Plays the next track in the queue.
+     * @param {IPlayOptions} [options={}] The options to send when playing a track.
      */
-    public play(): void {
+    public play(options: IPlayOptions = {}): void {
         if (!this.queue[0]) {
             throw new RangeError("Player#play() No tracks in the queue.");
         }
+
         this.playing = true;
         this.node.send({
             op: "play",
-            guildId: this.guild.id || this.guild,
+            guildId: this.guild,
             track: this.queue[0].track,
-            volume: this.volume,
+            ...options,
         });
+
         this.erela.emit("trackStart", this, this.queue[0]);
     }
 
     /**
      * Sets the players volume.
-     * @param {number} volume - The volume to set.
+     * @param {number} volume The volume to set.
      */
     public setVolume(volume: number): void {
         if (isNaN(volume)) {
             throw new RangeError("Player#setVolume(volume: number) Volume must be a number");
+        } else if (volume < 0 || volume > 1000) {
+            throw new RangeError("Player#setVolume(volume: number) Volume must be or be between 0 and 1000.");
         }
-        if (volume < 0 || volume > 1000) {
-            throw new RangeError("Player#setVolume(volume: number) Volume can not be lower than 0 or higher than 1000, must be or be between 0 and 1000.");
-        }
+
         this.volume = volume;
         this.node.send({
             op: "volume",
-            guildId: this.guild.id || this.guild,
+            guildId: this.guild,
             volume,
         });
     }
 
     /**
      * Sets the players equalizer. Pass a empty array to reset the bands.
-     * @param {Array<EqualizerBand>} bands - The array of bands to set.
+     * @param {EqualizerBand[]} bands The array of bands to set.
      * @example
      * player.setEQ([
      *      { band: 0, gain: 0.15 },
@@ -221,7 +185,7 @@ export class Player {
      */
     public setEQ(bands: IEqualizerBand[]): void {
         if (!Array.isArray(bands)) {
-            throw new RangeError("Player#setEQ(bands: IEqualizerBand[]) Bands must be a array of bands.");
+            throw new RangeError("Player#setEQ(bands: IEqualizerBand[]) Bands must be an array of bands.");
         }
 
         if (bands.length === 0) {
@@ -232,17 +196,20 @@ export class Player {
 
         this.node.send({
             op: "equalizer",
-            guildId: this.guild.id || this.guild,
+            guildId: this.guild,
             bands: this.bands.map((band) => band),
         });
     }
 
     /**
      * Sets the track repeat.
-     * @param {boolean} repeat - If track repeat should be enabled.
+     * @param {boolean} repeat If track repeat should be enabled.
      */
     public setTrackRepeat(repeat: boolean): void {
-        if (typeof repeat !== "boolean") { throw new RangeError("Player#setTrackRepeat(repeat: boolean) Repeat can only be \"true\" or \"false\"."); }
+        if (typeof repeat !== "boolean") {
+            throw new RangeError("Player#setTrackRepeat(repeat: boolean) Repeat must be a boolean.");
+        }
+
         if (repeat) {
             this.trackRepeat = true;
             this.queueRepeat = false;
@@ -254,10 +221,13 @@ export class Player {
 
     /**
      * Sets the queue repeat.
-     * @param {boolean} repeat - If queue repeat should be enabled.
+     * @param {boolean} repeat If queue repeat should be enabled.
      */
     public setQueueRepeat(repeat: boolean): void {
-        if (typeof repeat !== "boolean") { throw new RangeError("Player#setQueueRepeat(repeat: boolean) Repeat can only be \"true\" or \"false\"."); }
+        if (typeof repeat !== "boolean") {
+            throw new RangeError("Player#setQueueRepeat(repeat: boolean) Repeat must be a boolean.");
+        }
+
         if (repeat) {
             this.trackRepeat = false;
             this.queueRepeat = true;
@@ -273,37 +243,52 @@ export class Player {
     public stop(): void {
         this.node.send({
             op: "stop",
-            guildId: this.guild.id || this.guild,
+            guildId: this.guild,
         });
     }
 
     /**
      * Pauses the current track.
-     * @param {boolean} pause - Whether to pause the current track.
+     * @param {boolean} pause Whether to pause the current track.
      */
     public pause(pause: boolean): void {
-        if (typeof pause !== "boolean") { throw new RangeError("Player#pause(pause: boolean) Pause can only be \"true\" or \"false\"."); }
+        if (typeof pause !== "boolean") {
+            throw new RangeError("Player#pause(pause: boolean) Pause must be a boolean.");
+        }
+
         this.playing = !pause;
         this.node.send({
             op: "pause",
-            guildId: this.guild.id || this.guild,
+            guildId: this.guild,
             pause,
         });
     }
 
     /**
      * Seeks to the position in the current track.
-     * @param {boolean} pause - Whether to pause the current track.
+     * @param {boolean} pause Whether to pause the current track.
      */
     public seek(position: number): void {
-        if (!this.queue[0]) { throw new RangeError("Player#seek(position: number) Can only seek when theres a track in the queue."); }
-        if (isNaN(position)) { throw new RangeError("Player#seek(position: number) Position must be a number."); }
-        if (position < 0 || position > this.queue[0].duration) { throw new RangeError(`Player#seek(position: number) Position can not be smaller than 0 or bigger than ${this.queue[0].duration}.`); }
+        if (!this.queue[0]) {
+            throw new RangeError("Player#seek(position: number) Can only seek when theres a track in the queue.");
+        } else if (isNaN(position)) {
+            throw new RangeError("Player#seek(position: number) Position must be a number.");
+        } else if (position < 0 || position > this.queue[0].duration) {
+            throw new RangeError(`Player#seek(position: number) Position can not be smaller than 0 or bigger than ${this.queue[0].duration}.`);
+        }
+
         this.position = position;
         this.node.send({
             op: "seek",
-            guildId: this.guild.id || this.guild,
+            guildId: this.guild,
             position,
         });
+    }
+
+    /**
+     * Destroys the player.
+     */
+    public destroy(): void {
+        this.erela.players.destroy(this.guild);
     }
 }

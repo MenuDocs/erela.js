@@ -1,5 +1,7 @@
-import WebSocket from "ws";
 import { ErelaClient } from "../ErelaClient";
+import { Player } from "./Player";
+import { Track } from "./Track";
+import WebSocket from "ws";
 
 /**
  * The INodeOptions interface.
@@ -34,7 +36,7 @@ export interface INodeOptions {
 /**
  * The INodeMemoryStats interface.
  */
-interface INodeMemoryStats {
+export interface INodeMemoryStats {
     /**
      * The free memory.
      */
@@ -55,9 +57,8 @@ interface INodeMemoryStats {
 
 /**
  * The INodeCPUStats interface.
- * @interface INodeCPUStats
  */
-interface INodeCPUStats {
+export interface INodeCPUStats {
     /**
      * The amount of cores on the CPU.
      */
@@ -75,7 +76,7 @@ interface INodeCPUStats {
 /**
  * The INodeFrameStats interface.
  */
-interface INodeFrameStats {
+export interface INodeFrameStats {
     /**
      * The amount of sent frames.
      */
@@ -94,7 +95,7 @@ interface INodeFrameStats {
  * The INodeStats interface.
  * @interface INodeStats
  */
-interface INodeStats {
+export interface INodeStats {
     /**
      * The amount of players on the node.
      */
@@ -121,6 +122,11 @@ interface INodeStats {
     frameStats?: INodeFrameStats;
 }
 
+const defaultOptions: Partial<INodeOptions> = {
+    retryAmount: 5,
+    retryDelay: 30e3,
+};
+
 /**
  * The Node class.
  */
@@ -129,28 +135,17 @@ export class Node {
      * The options for the new.
      */
     public options: INodeOptions;
-    public websocket: WebSocket|null = null;
     /**
      * The stats for the node.
      */
     public stats: INodeStats;
-    public reconnectTimeout: NodeJS.Timeout | undefined;
-    /**
-     * The amount the node will try to reconnect.
-     */
-    public reconnectAttempts: number = 0;
-    /**
-     * The amount the node will try to reconnect.
-     */
-    public retryAmount: number;
-    /**
-     * The amount the node will delay after a failed reconnect.
-     */
-    public retryDelay: number;
     /**
      * The amount of REST calls the node has made.
      */
     public calls: number = 0;
+    private reconnectTimeout?: NodeJS.Timeout;
+    private reconnectAttempts: number = 0;
+    private websocket: WebSocket|null = null;
 
     /**
      * Returns if connected to the Node.
@@ -162,13 +157,11 @@ export class Node {
 
     /**
      * Creates an instance of Node and connects after being created.
-     * @param {ErelaClient} erela - The Erela client.
-     * @param {INodeOptions} options - The Node options.
+     * @param {ErelaClient} erela The Erela client.
+     * @param {INodeOptions} options The Node options.
      */
     public constructor(public readonly erela: ErelaClient, options: INodeOptions) {
-        this.options = options;
-        this.retryAmount = this.options.retryAmount || 5;
-        this.retryDelay = this.options.retryDelay || 30e3;
+        this.options = { ...defaultOptions, ...options };
         this.stats = {
             players: 0,
             playingPlayers: 0,
@@ -190,15 +183,13 @@ export class Node {
 
     /**
      * Changes the node options and reconnects.
-     * @param {INodeOptions} options - The new Nodes options.
+     * @param {INodeOptions} options The new Nodes options.
      */
     public setOptions(options: INodeOptions): void {
         if (!options || !options.host || !options.port || !options.password) {
             throw new RangeError("Player#setOption(options: INodeOptions) Options must be of type INodeOptions.");
         }
-        this.options = options;
-        this.retryAmount = options.retryAmount || this.retryAmount;
-        this.retryDelay = options.retryDelay || this.retryDelay;
+        this.options = { ...defaultOptions, ...options };
         this.connect();
     }
 
@@ -206,18 +197,21 @@ export class Node {
      * Connects to the Node.
      */
     public connect(): void {
+        if (this.connected) {
+            throw new Error("Player#connect() Already connected to the WebSocket.");
+        }
+
         const headers = {
             "Authorization": this.options.password,
-            "Num-Shards": String(this.erela.shardCount),
-            "User-Id": this.erela.userId,
+            "Num-Shards": String(this.erela.options.shardCount),
+            "User-Id": this.erela.options.userId,
         };
 
         this.websocket = new WebSocket(`ws://${this.options.host}:${this.options.port}/`, { headers });
-
-        this.websocket.on("open", this._onOpen.bind(this));
-        this.websocket.on("close", this._onClose.bind(this));
-        this.websocket.on("message", this._onMessage.bind(this));
-        this.websocket.on("error", this._onError.bind(this));
+        this.websocket.on("open", this.open.bind(this));
+        this.websocket.on("close", this.close.bind(this));
+        this.websocket.on("message", this.message.bind(this));
+        this.websocket.on("error", this.error.bind(this));
     }
 
     /**
@@ -225,17 +219,18 @@ export class Node {
      */
     public reconnect(): void {
         this.reconnectTimeout = setTimeout(() => {
-            if (this.reconnectAttempts >= this.retryAmount) {
-                this.erela.emit("nodeError", this, new Error(`Unable to connect after ${this.retryAmount}`));
+            if (this.reconnectAttempts >= this.options.retryAmount) {
+                this.erela.emit("nodeError", this, new Error(`Unable to connect after ${this.options.retryAmount}`));
+                clearTimeout(this.reconnectTimeout);
                 this.destroy();
                 return;
             }
-            this.websocket!.removeAllListeners();
+            this.websocket.removeAllListeners();
             this.websocket = null;
             this.erela.emit("nodeReconnect", this);
             this.connect();
             this.reconnectAttempts++;
-        }, this.retryDelay);
+        }, this.options.retryDelay);
     }
 
     /**
@@ -243,20 +238,20 @@ export class Node {
      */
     public destroy(): void {
         if (!this.connected) { return; }
-        this.websocket!.close(1000, "destroy");
-        this.websocket!.removeAllListeners();
+        this.websocket.close(1000, "destroy");
+        this.websocket.removeAllListeners();
         this.websocket = null;
     }
 
     /**
      * Sends data to the Node.
-     * @param {object} data - The data to send.
+     * @param {any} data The data to send.
      */
-    public send(data: object): Promise<boolean> {
+    public send(data: any): Promise<boolean> {
         return new Promise((resolve, reject) => {
             if (!this.connected) { return resolve(false); }
             if (!data || !JSON.stringify(data).startsWith("{")) { return reject(false); }
-            this.websocket!.send(JSON.stringify(data), (error: any) => {
+            this.websocket.send(JSON.stringify(data), (error: any) => {
                 if (error) {
                     reject(error);
                 } else {
@@ -266,99 +261,109 @@ export class Node {
         });
     }
 
-    private _onOpen(): void {
+    private open(): void {
         if (this.reconnectTimeout) { clearTimeout(this.reconnectTimeout); }
         this.erela.emit("nodeConnect", this);
     }
 
-    private _onClose(code: number, reason: string): void {
+    private close(code: number, reason: string): void {
         this.erela.emit("nodeDisconnect", this, { code, reason });
         if (code !== 1000 || reason !== "destroy") { this.reconnect(); }
     }
 
-    private _onMessage(d: Buffer|string): void {
-        if (Array.isArray(d)) { d = Buffer.concat(d); } else if (d instanceof ArrayBuffer) { d = Buffer.from(d); }
+    private message(d: Buffer|string): void {
+        if (Array.isArray(d)) {
+            d = Buffer.concat(d);
+        } else if (d instanceof ArrayBuffer) {
+            d = Buffer.from(d);
+        }
 
-        const message = JSON.parse(d.toString());
-        if (!message.op) { return; }
+        const payload = JSON.parse(d.toString());
+        if (!payload.op) { return; }
 
-        switch (message.op) {
+        switch (payload.op) {
             case "stats":
-                this.stats = { ...message };
-                delete (this.stats as any).op;
+                delete payload.op;
+                this.stats = { ...payload };
                 break;
             case "playerUpdate":
-                const player = this.erela.players!.get(message.guildId);
-                if (!player) { return; }
-                player.position = message.state.position || 0;
+                const player = this.erela.players.get(payload.guildId);
+                if (player) {
+                    player.position = payload.state.position || 0;
+                }
                 break;
             case "event":
-                this.handleEvent(message);
+                this.handleEvent(payload);
                 break;
             default:
-                this.erela.emit("nodeError", new Error(`Unexpected op "${message.op}" with data ${message}`));
+                this.erela.emit("nodeError", this, new Error(`Unexpected op "${payload.op}" with data ${payload}`));
                 return;
         }
     }
 
-    private _onError(error: Error): void {
+    private error(error: Error): void {
         if (!error) { return; }
         this.erela.emit("nodeError", this, error);
         this.reconnect();
     }
 
-    private handleEvent(message: any): void {
-        if (!message.guildId) { return; }
-        const player = this.erela.players!.get(message.guildId);
+    private handleEvent(payload: any): void {
+        if (!payload.guildId) { return; }
+        const player = this.erela.players.get(payload.guildId);
         if (!player) { return; }
         const track = player.queue[0];
-        switch (message.type) {
-            case "TrackStartEvent": break;
+        switch (payload.type) {
+            case "TrackStartEvent":
+                break;
             case "TrackEndEvent":
-                if (track && player.trackRepeat) {
-                    this.erela.emit("trackEnd", player, track);
-                    player.play();
-                } else if (track && player.queueRepeat) {
-                    this.erela.emit("trackEnd", player, track);
-                    player.queue.add(player.queue.shift());
-                    player.play();
-                } else if (player.queue.size === 1) {
-                    player.queue.shift();
-                    player.playing = false;
-                    if (["REPLACED", "FINISHED", "STOPPED"].includes(message.reason)) {
-                        this.erela.emit("queueEnd", player);
-                    }
-                } else if (player.queue.size > 0) {
-                    player.queue.shift();
-                    this.erela.emit("trackEnd", player, track);
-                    player.play();
-                }
+                this.trackEnd(player, track, payload);
                 break;
             case "TrackStuckEvent":
-                player.queue.shift();
-                this.erela.emit("trackStuck", player, track, message);
+                this.trackStuck(player, track, payload);
                 break;
             case "TrackExceptionEvent":
-                player.queue.shift();
-                this.erela.emit("trackError", player, track, message);
+                this.trackError(player, track, payload);
                 break;
             case "WebSocketClosedEvent":
-                if ([4015, 4009].includes(message.code)) {
-                    this.erela.sendWS({
-                        op: 4,
-                        d: {
-                            guild_id: message.guildId,
-                            channel_id: player.voiceChannel.id || player.voiceChannel,
-                            self_mute: player.options.selfMute || false,
-                            self_deaf: player.options.selfDeaf || false,
-                        },
-                    });
-                    break;
-                }
-                this.erela.emit("socketClosed", player, message);
+                this.socketClosed(player, track, payload);
                 break;
             default:
-                throw new Error(`Node#event Unknown event '${message.type}'.`);
+                this.erela.emit("nodeError", this, new Error(`Node#event Unknown event '${payload.type}'.`));
         }
+    }
+
+    private trackEnd(player: Player, track: Track, payload: any): void {
+        if (track && player.trackRepeat) {
+            this.erela.emit("trackEnd", player, track);
+            if (this.erela.options.autoPlay) { player.play(); }
+        } else if (track && player.queueRepeat) {
+            player.queue.add(player.queue.shift());
+            this.erela.emit("trackEnd", player, track);
+            if (this.erela.options.autoPlay) { player.play(); }
+        } else if (player.queue.size === 1) {
+            player.queue.shift();
+            player.playing = false;
+            if (["REPLACED", "FINISHED", "STOPPED"].includes(payload.reason)) {
+                this.erela.emit("queueEnd", player);
+            }
+        } else if (player.queue.size > 0) {
+            player.queue.shift();
+            this.erela.emit("trackEnd", player, track);
+            if (this.erela.options.autoPlay) { player.play(); }
+        }
+    }
+
+    private trackStuck(player: Player, track: Track, payload: any): void {
+        player.queue.shift();
+        this.erela.emit("trackStuck", player, track, payload);
+    }
+
+    private trackError(player: Player, track: Track, payload: any): void {
+        player.queue.shift();
+        this.erela.emit("trackError", player, track, payload);
+    }
+
+    private socketClosed(player: Player, track: Track, payload: any): void {
+        this.erela.emit("socketClosed", player, payload);
     }
  }
