@@ -1,18 +1,18 @@
 # Erela.js
 
-An easy-to-use Lavalink client for NodeJS.
-
 [![Discord](https://discordapp.com/api/guilds/653436871858454538/embed.png)](https://discord.gg/D6FXw55)
 [![Downloads](https://badgen.net/npm/dt/erela.js)](https://www.npmjs.com/package/erela.js)
-[![Version](https://img.shields.io/npm/v/erela.js.svg?maxAge=3600)](https://www.npmjs.com/package/erela.js)
+[![Version](https://img.shields.io/npm/v/erela.js.svg)](https://www.npmjs.com/package/erela.js)
 [![GitHub Stars](https://badgen.net/github/stars/WarHammer414/erela.js)](https://github.com/WarHammer414/erela.js)
 [![License](https://badgen.net/github/license/WarHammer414/erela.js)](https://github.com/WarHammer414/erela.js/blob/master/LICENSE)
+
+> An easy-to-use Lavalink client for NodeJS.
 
 ## Documentation
 
 > Note: Some links do not work, I'll fix them when I can. The sidebar menu has the links that are broken.
 
-You can find the documentation at <http://projects.warhammer.codes/erelajs> (*this* link does work)
+New to Erela.js? Check out the [API documentation](http://projects.warhammer.codes/erelajs).
 
 ## Installation
 
@@ -22,7 +22,7 @@ npm install erela.js
 
 ## Prerequisites
 
-Download & install the Java runtime and download the Lavalink.jar file.
+You will have to install Java runtime and Lavalink.jar file to run Erela.js. You can find both of them here:
 
 - [Java](https://www.java.com/en/download)
 - [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1)
@@ -31,17 +31,15 @@ Download & install the Java runtime and download the Lavalink.jar file.
 
 ## Getting Started
 
-- Create an `application.yml` file in your working directory and copy the [example](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example) into the created file and edit it with your configuration.
-
-- Run the jar file by running `java -jar Lavalink.jar` in a Terminal window.
+- Create an `application.yml` file in your working directory and copy the [example](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example) content into the created file (`application.yml`) and modify it with your configuration.
+- Run the `Lavalink.jar` file by running `java -jar Lavalink.jar` in your Terminal/cmd/Powershell.
 
 ## Example usage
 
-> Note: Discord.js is used in this example, but it does work with Eris with the same example.
+> Note: Erela.js does not work with Eris, thus we are using [Discord.js](https://discord.js.org) for this example.
 
 ```javascript
-// To install Discord.js and Erela.js, run:
-// npm install discord.js erela.js
+// To install Discord.js, run `npm i discord.js` in your console.
 const { Client } = require("discord.js");
 const { ErelaClient } = require("erela.js");
 
@@ -51,30 +49,30 @@ const nodes = [{
     host: "localhost",
     port: 2333,
     password: "youshallnotpass",
-}]
+}];
 
-// Ready event fires when the Discord.js client is ready.
-// Use once so it only fires once.
+// Ready event fires when the Discord.js client has sucessfulyl connected to the API.
+// Use EventEmitter#once to fire the event only once.
 client.once("ready", () => {
     console.log("I am ready!")
     // Initializes an Erela client with the Discord.js client and nodes.
     client.music = new ErelaClient(client, nodes);
     // Listens to events.
-    client.music.on("nodeConnect", node => console.log("New node connected"));
-    client.music.on("nodeError", (node, error) => console.log(`Node error: ${error.message}`));
-    client.music.on("trackStart", (player, track) => player.textChannel.send(`Now playing: ${track.title}`));
-    client.music.on("queueEnd", player => {
-        player.textChannel.send("Queue has ended.")
-        client.music.players.destroy(player.guild.id);
-    });
+    client.music
+        .on("nodeConnect", node => console.log("New node connected"));
+        .on("nodeError", (node, error) => console.log(`Node error: ${error.message}`));
+        .on("trackStart", (player, track) => player.textChannel.send(`Now playing: ${track.title}`));
+        .on("queueEnd", player => {
+            player.textChannel.send("Queue has ended.")
+            client.music.players.destroy(player.guild.id);
+        });
 });
 
 client.on("message", async message => {
     if (message.content.startsWith("!play")) {
-        const {
-            voiceChannel
-        } = message.member;
-        // Note: for discord.js master you need to use
+        // For Discord.js v11 or older:
+        const { voiceChannel } = message.member;
+        // For discord.js stable version (v12), you need to use:
         // const { channel } = message.member.voice;
 
         // Spawns a player and joins the voice channel.
