@@ -717,6 +717,8 @@ declare module "erela.js" {
 	 * The Plugin class for adding additional functionality.
 	 */
 	export class Plugin {
+		[property: string]: any;
+
 	    readonly erela: ErelaClient;
 	    /**
 	     * Creates an instance of Plugin.

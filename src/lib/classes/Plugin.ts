@@ -24,6 +24,8 @@ export interface IPlugin {
  * The Plugin class for adding additional functionality.
  */
 export class Plugin {
+    [property: string]: any;
+
     /**
      * Creates an instance of Plugin.
      * @param {ErelaClient} erela The ErelaClient.
