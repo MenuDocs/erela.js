@@ -11,6 +11,8 @@ const classes = {
     Queue: require("../classes/Queue").Queue,
     SearchResult: require("../classes/SearchResult").SearchResult,
     Track: require("../classes/Track").Track,
+    NodeStore: require("../stores/NodeStore").NodeStore,
+    PlayerStore: require("../stores/PlayerStore").PlayerStore,
 };
 
 /**

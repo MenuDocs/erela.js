@@ -204,7 +204,7 @@ export class ErelaClient extends EventEmitter implements IEvents {
      * A Map of the classes Erela uses.
      */
     public readonly classes = Classes;
-    private readonly voiceState: Map<string, any> = new Map();
+    protected readonly voiceState: Map<string, any> = new Map();
 
     /**
      * Creates an instance of ErelaClient.
@@ -282,12 +282,9 @@ export class ErelaClient extends EventEmitter implements IEvents {
                 return;
             }
             state.sessionId = data.d.session_id;
-            const channel = player.voiceChannel.id || player.voiceChannel;
-            if (channel !== data.d.channel_id) {
-                const currentChannel = player.voiceChannel;
-                const newChannel = data.d.channel_id;
-                this.emit("playerMove", player, currentChannel, newChannel);
-                player.voiceChannel = newChannel;
+            if (player.voiceChannel !== data.d.channel_id) {
+                this.emit("playerMove", player, player.voiceChannel, data.d.channel_id);
+                player.voiceChannel = data.d.channel_id;
             }
         }
 

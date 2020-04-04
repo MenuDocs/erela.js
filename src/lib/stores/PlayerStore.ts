@@ -32,6 +32,12 @@ export class PlayerStore extends Store<string, Player> {
             throw new Error("PlayerStore#spawn() No available nodes.");
         }
 
+        options = {
+            ...options,
+            selfDeaf: options.selfDeaf || false,
+            selfMute: options.selfMute || false,
+        };
+
         const clazz = this.erela.classes.get("Player");
         const player = new clazz(this.erela, node, options) as Player;
         this.set(options.guild, player);

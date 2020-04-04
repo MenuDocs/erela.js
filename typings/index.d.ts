@@ -1,5 +1,6 @@
 declare module "erela.js" {
-	import { EventEmitter } from "events"
+	import { EventEmitter } from "events";
+
 	export type Type<T> = new (...args: any[]) => T;
 	/**
 	 * The Utils class.
@@ -201,15 +202,15 @@ declare module "erela.js" {
 	    /**
 	     * The guild to connect to.
 	     */
-	    guild: string;
+	    guild: any;
 	    /**
 	     * The text channel to connect to.
 	     */
-	    textChannel: string;
+	    textChannel: any;
 	    /**
 	     * The voice channel to connect to.
 	     */
-	    voiceChannel: string;
+	    voiceChannel: any;
 	    /**
 	     * Whether to deafen the client.
 	     */
@@ -531,10 +532,10 @@ declare module "erela.js" {
 	    private message;
 	    private error;
 	    private handleEvent;
-	    private trackEnd;
-	    private trackStuck;
-	    private trackError;
-	    private socketClosed;
+	    protected trackEnd(player: Player, track: Track, payload: any): void;
+	    protected trackStuck(player: Player, track: Track, payload: any): void;
+	    protected trackError(player: Player, track: Track, payload: any): void;
+	    protected socketClosed(player: Player, payload: any): void;
 	}
 	/**
 	 * The IException interface
@@ -717,9 +718,8 @@ declare module "erela.js" {
 	 * The Plugin class for adding additional functionality.
 	 */
 	export class Plugin {
-		[property: string]: any;
-
-	    readonly erela: ErelaClient;
+		readonly erela: ErelaClient;
+	    [property: string]: any;
 	    /**
 	     * Creates an instance of Plugin.
 	     * @param {ErelaClient} erela The ErelaClient.
@@ -949,13 +949,27 @@ declare module "erela.js" {
 	     * A Map of the classes Erela uses.
 	     */
 	    readonly classes: typeof Classes;
-	    private readonly voiceState;
+	    protected readonly voiceState: Map<string, any>;
 	    /**
 	     * Creates an instance of ErelaClient.
 	     * @param {INodeOptions[]} [nodes=[{host:"localhost",port:2333,password:"youshallnotpass"}] The nodes to use.
 	     * @param {IErelaOptions} [options=defaultOptions] Options for the client.
 	     */
 	    constructor(nodes?: INodeOptions[] | IErelaOptions, options?: IErelaOptions);
+		on(event: "playerCreate" | "playerDestroy" | "queueEnd", listener: (player: Player) => void): this;
+		on(event: "playerMove", listener: (player: Player, oldChannel: any, newChannel: any) => void): this;
+		on(event: "trackStart" | "trackEnd", listener: (player: Player, track: Track) => void): this;
+		on(event: "trackStuck" | "trackError", listener: (player: Player, track: Track, message: any) => void): this;
+		on(event: "socketClosed", listener: (player: Player, message: any) => void): this;
+		on(event: "nodeCreate" | "nodeDestroy" | "nodeConnect" | "nodeReconnect", listener: (node: Node) => void): this;
+		on(event: "nodeDisconnect" | "nodeError", listener: (node: Node, message: any) => void): this;
+		once(event: "playerCreate" | "playerDestroy" | "queueEnd", listener: (player: Player) => void): this;
+		once(event: "playerMove", listener: (player: Player, oldChannel: any, newChannel: any) => void): this;
+		once(event: "trackStart" | "trackEnd", listener: (player: Player, track: Track) => void): this;
+		once(event: "trackStuck" | "trackError", listener: (player: Player, track: Track, message: any) => void): this;
+		once(event: "socketClosed", listener: (player: Player, message: any) => void): this;
+		once(event: "nodeCreate" | "nodeDestroy" | "nodeConnect" | "nodeReconnect", listener: (node: Node) => void): this;
+		once(event: "nodeDisconnect" | "nodeError", listener: (node: Node, message: any) => void): this;
 	    /**
 	     * Sends voice data to the Lavalink server.
 	     * @param {*} data TThe data to send.
@@ -969,7 +983,6 @@ declare module "erela.js" {
 	     */
 	    search(query: string | IQuery, user: any): Promise<SearchResult>;
 	}
-
 	export enum LoadType {
 	    TRACK_LOADED = "TRACK_LOADED",
 	    PLAYLIST_LOAD = "PLAYLIST_LOADED",
@@ -977,7 +990,6 @@ declare module "erela.js" {
 	    LOAD_FAILED = "LOAD_FAILED",
 	    NO_RESULTS = "NO_RESULTS"
 	}
-
 	export enum Status {
 	    CONNECTED = "CONNECTED",
 	    CONNECTING = "CONNECTING",

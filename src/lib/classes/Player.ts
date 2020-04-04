@@ -10,15 +10,15 @@ export interface IPlayerOptions {
     /**
      * The guild to connect to.
      */
-    guild: string;
+    guild: any;
     /**
      * The text channel to connect to.
      */
-    textChannel: string;
+    textChannel: any;
     /**
      * The voice channel to connect to.
      */
-    voiceChannel: string;
+    voiceChannel: any;
     /**
      * Whether to deafen the client.
      */

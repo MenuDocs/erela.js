@@ -1,3 +1,4 @@
+// tslint:disable: member-ordering
 import { ErelaClient } from "../ErelaClient";
 import { Player } from "./Player";
 import { Track } from "./Track";
@@ -325,14 +326,14 @@ export class Node {
                 this.trackError(player, track, payload);
                 break;
             case "WebSocketClosedEvent":
-                this.socketClosed(player, track, payload);
+                this.socketClosed(player, payload);
                 break;
             default:
                 this.erela.emit("nodeError", this, new Error(`Node#event Unknown event '${payload.type}'.`));
         }
     }
 
-    private trackEnd(player: Player, track: Track, payload: any): void {
+    protected trackEnd(player: Player, track: Track, payload: any): void {
         if (track && player.trackRepeat) {
             this.erela.emit("trackEnd", player, track);
             if (this.erela.options.autoPlay) { player.play(); }
@@ -353,17 +354,17 @@ export class Node {
         }
     }
 
-    private trackStuck(player: Player, track: Track, payload: any): void {
+    protected trackStuck(player: Player, track: Track, payload: any): void {
         player.queue.shift();
         this.erela.emit("trackStuck", player, track, payload);
     }
 
-    private trackError(player: Player, track: Track, payload: any): void {
+    protected trackError(player: Player, track: Track, payload: any): void {
         player.queue.shift();
         this.erela.emit("trackError", player, track, payload);
     }
 
-    private socketClosed(player: Player, track: Track, payload: any): void {
+    protected socketClosed(player: Player, payload: any): void {
         this.erela.emit("socketClosed", player, payload);
     }
  }

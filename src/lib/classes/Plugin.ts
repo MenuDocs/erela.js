@@ -1,6 +1,6 @@
 // tslint:disable: no-empty
 import { Type } from "../utils/Utils";
-import { ErelaClient } from "erela.js";
+import { ErelaClient } from "../ErelaClient";
 
 /**
  * The IPlugin interface.
