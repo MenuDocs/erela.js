@@ -215,7 +215,7 @@ declare module "erela.js" {
         public sort(fn: ((a: [any, any], b: [any, any]) => number) | undefined): Store<K, V>;
     }
 
-    export class PlayerStore extends Store {
+    export class PlayerStore<K = string, V = Player> extends Store<K, V> {
         constructor(erela: ErelaClient);
 
         private readonly erela: ErelaClient;
@@ -224,7 +224,7 @@ declare module "erela.js" {
         public destroy(guildId: string): Player | null;
     }
 
-    export class NodeStore {
+    export class NodeStore<K = any, V = Node> extends Store<K, V> {
         constructor(erela: ErelaClient);
 
         private readonly erela: ErelaClient;
