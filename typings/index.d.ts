@@ -201,7 +201,7 @@ declare module "erela.js" {
         readonly deficit?: number;
     }
 
-    export class Store<K, V> extends Map {
+    export class Store<K, V> extends Map<K, V> {
         constructor(iterable?: Iterable<any>);
 
         public get(key: K): V | null;
@@ -215,7 +215,7 @@ declare module "erela.js" {
         public sort(fn: ((a: [any, any], b: [any, any]) => number) | undefined): Store<K, V>;
     }
 
-    export class PlayerStore {
+    export class PlayerStore<K, V> extends Store<K, V> {
         constructor(erela: ErelaClient);
 
         private readonly erela: ErelaClient;
