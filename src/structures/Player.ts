@@ -1,4 +1,5 @@
 import { Manager } from "./Manager";
+import { Extendable } from "./Utils";
 
 export interface PlayerOptions {
     guild: string;
@@ -10,7 +11,7 @@ export interface PlayerOptions {
     selfDeafen?: boolean;
 }
 
-export class Player {
+export class Player extends Extendable {
     public static manager: Manager | null;
 
     public static init(manager: Manager): void {
@@ -18,6 +19,6 @@ export class Player {
     }
 
     constructor(protected options: PlayerOptions) {
-        
+        super();
     }
 }

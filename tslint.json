@@ -31,11 +31,7 @@
         "computed-property-spacing": "error",
         "consistent-return": "error",
         "consistent-this": "error",
-        "curly": [
-            true,
-            "multi-line",
-            "consistent"
-        ],
+        "curly": false,
         "dot-location": [
             "error",
             "property"
