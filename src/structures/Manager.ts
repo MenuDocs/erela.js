@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
 import { Player } from './Player';
 
-export class ManagerOptions {
+export interface ManagerOptions {
     nodes: object[];
 }
 
