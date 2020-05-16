@@ -1,5 +1,6 @@
 import { Manager } from "./Manager";
-import { Extendable } from "./Utils";
+import { Extendable, mix } from "./Utils";
+import { EventEmitter } from "events";
 
 export interface PlayerOptions {
     guild: string;
@@ -11,7 +12,9 @@ export interface PlayerOptions {
     selfDeafen?: boolean;
 }
 
-export class Player extends Extendable {
+export interface Player extends Extendable, EventEmitter {}
+
+export class Player {
     public static manager: Manager | null;
 
     public static init(manager: Manager): void {
@@ -19,6 +22,11 @@ export class Player extends Extendable {
     }
 
     constructor(protected options: PlayerOptions) {
-        super();
+        if (Player.manager.players.has(options.guild)) {
+            return Player.manager.players.get(options.guild);
+        }
+        Player.manager.players.set(options.guild, this);
     }
 }
+
+mix(Player, Extendable, EventEmitter);

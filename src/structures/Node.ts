@@ -1,5 +1,6 @@
 import { Manager } from "./Manager";
 import { Extendable } from "./Utils";
+import WebSocket from "ws";
 
 export interface NodeOptions {
     readonly host: string;
@@ -11,6 +12,8 @@ export interface NodeOptions {
 }
 
 export class Node extends Extendable {
+    protected readonly socket: WebSocket | null;
+
     constructor(
         protected manager: Manager,
         protected options: NodeOptions,

@@ -14,11 +14,11 @@ export interface ManagerOptions {
 }
 
 export class Manager extends EventEmitter {
-    protected players = new Map<string, Player>();
-    protected nodes = new Map<string, Node>();
-    protected options: ManagerOptions;
+    public readonly players = new Map<string, Player>();
+    public readonly nodes = new Map<string, Node>();
+    public readonly options: ManagerOptions;
 
-    constructor(options: ManagerOptions) {
+    constructor(options?: ManagerOptions) {
         super();
 
         this.options = {
@@ -31,7 +31,7 @@ export class Manager extends EventEmitter {
             ...options,
         };
 
-        options.nodes.forEach((node: NodeOptions) => {
+        this.options.nodes.forEach((node: NodeOptions) => {
             const identifier = node.identifier || node.host;
             this.nodes.set(identifier, new Node(this, node));
         });
