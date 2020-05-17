@@ -1,4 +1,4 @@
-export { Extendable } from "./structures/Utils";
+export { Structure } from "./structures/Utils";
 export { Manager } from "./structures/Manager";
 export { Player } from "./structures/Player";
 export { Queue } from "./structures/Queue";
