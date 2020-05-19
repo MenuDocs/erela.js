@@ -1,6 +1,5 @@
 // tslint:disable: member-ordering
 import { Track, Player } from "./Player";
-import { Structure } from "./Utils";
 import { Manager } from "./Manager";
 import WebSocket from "ws";
 
@@ -19,15 +18,54 @@ export interface NodeOptions {
     /** The retryDelay for the node. */
     readonly retryDelay?: number;
 }
+/** The NodeOptions interface. */
+export interface NodeStats {
+    /** The amount of players on the node. */
+    players: number;
+    /** The amount of playing players on the node. */
+    playingPlayers: number;
+    /** The uptime for the node. */
+    uptime: number;
+    /** The memory stats for the node. */
+    memory: {
+        /** The free memory of the allocated amount. */
+        free: number;
+        /** The used memory of the allocated amount. */
+        used: number;
+        /** The total allocated memory. */
+        allocated: number;
+        /** The reservable memory. */
+        reservable: number;
+    };
+    /** The cpu stats for the node. */
+    cpu: {
+        /** The core amount the host machine has. */
+        cores: number;
+        /** The system load. */
+        systemLoad: number;
+        /** The lavalink load. */
+        lavalinkLoad: number;
+    };
+    /** The frame stats for the node. */
+    frameStats: {
+        /** The amount of sent frames. */
+        sent?: number;
+        /** The amount of nulled frames. */
+        nulled?: number;
+        /** The amount of deficit frames. */
+        deficit?: number;
+    };
+}
 
 /** The Node class. */
-export class Node extends Structure {
+export class Node {
     /** The socket for the node. */
     public socket: WebSocket | null;
     /** The amount of rest calls the node has made. */
     public calls = 0;
     /** The stats for the node. */
-    public stats: any;
+    public stats: NodeStats;
+
     private reconnectTimeout?: NodeJS.Timeout;
     private reconnectAttempts: number = 0;
 
@@ -43,11 +81,31 @@ export class Node extends Structure {
      * @param {NodeOptions} options The NodeOptions to pass.
      */
     constructor(public manager: Manager, public options: NodeOptions ) {
-        super();
+        this.stats = {
+            players: 0,
+            playingPlayers: 0,
+            uptime: 0,
+            memory: {
+                free: 0,
+                used: 0,
+                allocated: 0,
+                reservable: 0,
+            },
+            cpu: {
+                cores: 0,
+                systemLoad: 0,
+                lavalinkLoad: 0,
+            },
+            frameStats: {
+                sent: 0,
+                nulled: 0,
+                deficit: 0,
+            },
+        };
     }
 
     /** Connects to the Node. */
-    public connect(): void {
+    public connect() {
         if (this.connected) return;
 
         const headers = {
@@ -63,27 +121,24 @@ export class Node extends Structure {
         this.socket.on("error", this.error.bind(this));
     }
 
-    /**
-     * Reconnects to the Node.
-     */
-    public reconnect(): void {
+    /** Reconnects to the Node. */
+    public reconnect() {
         this.reconnectTimeout = setTimeout(() => {
-            if (this.reconnectAttempts >= this.options.retryAmount) {
+            if (this.reconnectAttempts >= (this.options.retryAmount || 5)) {
                 this.manager.emit("nodeError", this, new Error(`Unable to connect after ${this.options.retryAmount}`));
-                clearTimeout(this.reconnectTimeout);
                 this.destroy();
-                return;
+                return clearTimeout(this.reconnectTimeout);
             }
             this.socket.removeAllListeners();
             this.socket = null;
             this.manager.emit("nodeReconnect", this);
             this.connect();
             this.reconnectAttempts++;
-        }, this.options.retryDelay);
+        }, this.options.retryDelay || 30e3);
     }
 
     /** Destroys the Node. */
-    public destroy(): void {
+    public destroy() {
         if (!this.connected) return;
         this.socket.close(1000, "destroy");
         this.socket.removeAllListeners();
@@ -105,17 +160,17 @@ export class Node extends Structure {
         });
     }
 
-    protected open(): void {
+    protected open() {
         if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
         this.manager.emit("nodeConnect", this);
     }
 
-    protected close(code: number, reason: string): void {
+    protected close(code: number, reason: string) {
         this.manager.emit("nodeDisconnect", this, { code, reason });
         if (code !== 1000 || reason !== "destroy") this.reconnect();
     }
 
-    protected message(d: Buffer|string): void {
+    protected message(d: Buffer|string) {
         if (Array.isArray(d)) d = Buffer.concat(d);
         else if (d instanceof ArrayBuffer) d = Buffer.from(d);
 
@@ -140,13 +195,13 @@ export class Node extends Structure {
         }
     }
 
-    protected error(error: Error): void {
+    protected error(error: Error) {
         if (!error) return;
         this.manager.emit("nodeError", this, error);
         this.reconnect();
     }
 
-    protected handleEvent(payload: any): void {
+    protected handleEvent(payload: any) {
         if (!payload.guildId) { return; }
         const player = this.manager.players.get(payload.guildId);
         if (!player) return;
@@ -172,7 +227,7 @@ export class Node extends Structure {
         }
     }
 
-    protected trackEnd(player: Player, track: Track, payload: any): void {
+    protected trackEnd(player: Player, track: Track, payload: any) {
         if (track && player.trackRepeat) {
             this.manager.emit("trackEnd", player, track);
             if (this.manager.options.autoPlay) player.play();
@@ -193,22 +248,22 @@ export class Node extends Structure {
         }
     }
 
-    protected trackStart(player: Player, track: Track, payload: any): void {
+    protected trackStart(player: Player, track: Track, payload: any) {
         player.playing = true;
         this.manager.emit("trackStart", player, track, payload);
     }
 
-    protected trackStuck(player: Player, track: Track, payload: any): void {
+    protected trackStuck(player: Player, track: Track, payload: any) {
         player.queue.shift();
         this.manager.emit("trackStuck", player, track, payload);
     }
 
-    protected trackError(player: Player, track: Track, payload: any): void {
+    protected trackError(player: Player, track: Track, payload: any) {
         player.queue.shift();
         this.manager.emit("trackError", player, track, payload);
     }
 
-    protected socketClosed(player: Player, payload: any): void {
+    protected socketClosed(player: Player, payload: any) {
         this.manager.emit("socketClosed", player, payload);
     }
 }

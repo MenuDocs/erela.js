@@ -1,4 +1,3 @@
-import { Structure, mix } from "./Utils";
 import { Track } from "./Player";
 
 const template = [
@@ -6,26 +5,25 @@ const template = [
     "isSeekable", "isStream", "uri", "thumbnail", "user",
 ];
 
-export interface Queue extends Structure, Array<Track> {}
 /** The Queue class. */
-export class Queue {
+export class Queue extends Array<Track> {
     /**
      * Adds a track to the queue.
      * @param {(Track|Track[])} track The track or tracks to add.
      * @param {number} [offset=0] The offset to add the track at.
      */
-    public add(track: Track | Track[], offset: number = null): void {
+    public add(track: Track | Track[], offset: number = null) {
         if (!(Array.isArray(track) || !template.every((v) => Object.keys(track).includes(v)))) {
-            throw new RangeError("Queue#add(track: Track|Track[]) Track must be a \"Track\" or \"Track[]\".");
+            throw new RangeError("Queue#add() Track must be a \"Track\" or \"Track[]\".");
         }
 
         if (offset !== null) {
             if (isNaN(offset)) {
-                throw new RangeError("Queue#add(track: Track|Track[], offset: number) Offset must be a number.");
+                throw new RangeError("Queue#add() Offset must be a number.");
             }
 
             if (offset < 0 || offset > this.length) {
-                throw new RangeError(`Queue#add(track: Track|Track[], offset: number) Offset must be or between 0 and ${this.length}.`);
+                throw new RangeError(`Queue#add() Offset must be or between 0 and ${this.length}.`);
             }
         }
 
@@ -35,6 +33,55 @@ export class Queue {
             if (track instanceof Array)  this.splice(offset, 0, ...track); else this.splice(offset, 0, track);
         }
     }
-}
 
-mix(Queue, Array, Structure);
+    /**
+     * Removes a track to the queue. Defaults to the first track.
+     * @param {(Track|number)} [track=0] - The track to remove.
+     * @returns {(Track|null)} - The track that was removed, or null if the track does not exist.
+     */
+    public removeFrom(start: number, end: number): Track[] | null {
+        if (typeof start === "undefined") {
+            throw new RangeError(`Queue#removeFrom() Missing "start" parameter.`);
+        } else if (typeof end === "undefined") {
+            throw new RangeError(`Queue#removeFrom() Missing "end" parameter.`);
+        } else if (start >= end) {
+            throw new RangeError(`Queue#removeFrom() Start can not be bigger than end.`);
+        } else if (start >= this.length) {
+            throw new RangeError(`Queue#removeFrom() Start can not be bigger than ${this.length}.`);
+        }
+
+        return this.splice(start, end);
+    }
+
+    /**
+     * Removes a track to the queue. Defaults to the first track.
+     * @param {(Track|number)} [track=0] - The track to remove.
+     * @returns {(Track|null)} - The track that was removed, or null if the track does not exist.
+     */
+    public remove(track: Track|number = 0): Track | null {
+        const position = typeof track === "number" ? track : this.indexOf(track as Track);
+        if (position === -1) {
+            return null;
+        }
+        return this.splice(position, 1)[0];
+    }
+
+    /**
+     * Clears the queue.
+     */
+    public clear() {
+        this.splice(1);
+    }
+
+    /**
+     * Shuffles the queue.
+     */
+    public shuffle() {
+        const track = this.shift();
+        for (let i = this.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [this[i], this[j]] = [this[j], this[i]];
+        }
+        this.unshift(track);
+    }
+}

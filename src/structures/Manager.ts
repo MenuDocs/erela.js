@@ -1,7 +1,8 @@
-import { LoadType, buildTrack } from "./Utils";
+import { LoadType, buildTrack, Plugin, Structure } from "./Utils";
 import { Node, NodeOptions } from "./Node";
 import { EventEmitter } from "events";
 import { Player, Track } from "./Player";
+import Collection from "@discordjs/collection";
 import Axios from "axios";
 
 /** The ManagerOptions interface. */
@@ -13,7 +14,7 @@ export interface ManagerOptions {
     /** The shard count. */
     shards?: number;
     /** A array of plugins to use. */
-    plugins?: any[];
+    plugins?: Plugin[];
     /** Whether players should automatically play the next song. */
     autoPlay?: boolean;
     /**
@@ -45,12 +46,19 @@ export interface SearchResult {
             /** The playlist name. */
             name: string;
             /** The playlist selected track. */
-            selectedTrack: Track;
+            selectedTrack?: Track;
         };
         /** The tracks in the playlist. */
         tracks: Track[];
         /** The duration of the playlist. */
         length: number;
+    };
+    /** The exception when searching if one. */
+    exception?: {
+        /** The message for the exception. */
+        message: string;
+        /** The severity of exception. */
+        severity: string;
     };
 }
 
@@ -59,11 +67,12 @@ const template = JSON.stringify(["event", "guildId", "op", "sessionId"]);
 /** The Manager class. */
 export class Manager extends EventEmitter {
     /** The map of players. */
-    public readonly players = new Map<string, Player>();
+    public readonly players: Collection<string, Player> = new Collection<string, Player>();
     /** The map of nodes. */
-    public readonly nodes = new Map<string, Node>();
+    public readonly nodes = new Collection<string, Node>();
     /** The options that were set. */
     public readonly options: ManagerOptions;
+
     protected readonly voiceStates: Map<string, any> = new Map();
 
     /**
@@ -73,7 +82,10 @@ export class Manager extends EventEmitter {
     constructor(options?: ManagerOptions) {
         super();
 
+        if (!options.send) throw new RangeError("Missing send method in ManageOptions.");
+
         this.options = {
+            plugins: [],
             nodes: [{
                 host: "localhost",
                 port: 2333,
@@ -84,19 +96,36 @@ export class Manager extends EventEmitter {
             ...options,
         };
 
+        this.options.plugins.forEach((plugin) => plugin.load(this));
+
         this.options.nodes.forEach((node: NodeOptions) => {
             const identifier = node.identifier || node.host;
-            this.nodes.set(identifier, new Node(this, node));
+            this.nodes.set(identifier, new (Structure.get("Node"))(this, node));
         });
+    }
+
+    /**
+     * Initiates the manager (with a client ID if none provided in ManagerOptions).
+     * @param {string} clientId The client ID to use.
+     */
+    public init(clientId?: string) {
+        if (clientId) this.options.clientId = clientId;
+        if (!this.options.clientId) {
+            throw new Error("\"clientId\" is not set. Pass it in Manager#init() or as a option in the constructor.");
+        }
+
+        this.nodes.forEach((node: Node) => node.connect());
+        Structure.get("Player").init(this);
+        return this;
     }
 
     /**
      * Searches YouTube with the query.
      * @param {(string|IQuery)} query - The query to search against.
-     * @param {any} user - The user who requested the tracks.
+     * @param {any} requester - The user who requested the tracks.
      * @returns {Promise<SearchResult>} - The search result.
      */
-    public search(query: string | IQuery, user: any): Promise<SearchResult> {
+    public search(query: string | IQuery, requester: any): Promise<SearchResult> {
         return new Promise(async (resolve, reject) => {
             const node: Node = this.nodes.values().next().value;
 
@@ -126,26 +155,23 @@ export class Manager extends EventEmitter {
                 return reject(new Error("No data returned from query."));
             }
 
-            if (res.data.exception) {
-                return reject(res.data.exception.message);
-            }
-
-            const result: SearchResult = { loadType: res.data.loadType };
+            const result: SearchResult = {
+                loadType: res.data.loadType,
+                exception: res.data.exception,
+            };
 
             if ([LoadType.SEARCH_RESULT, LoadType.TRACK_LOADED].includes(LoadType[result.loadType])) {
-                result.tracks = res.data.tracks.map((track) => buildTrack(track, user));
+                result.tracks = res.data.tracks.map((track) => buildTrack(track, requester));
             } else if (result.loadType === LoadType.PLAYLIST_LOADED) {
                 result.playlist = {
-                    tracks: res.data.tracks.map((track) => buildTrack(track, user)),
+                    tracks: res.data.tracks.map((track) => buildTrack(track, requester)),
                     info: {
                         name: res.data.playlist.info.name,
-                        selectedTrack: buildTrack(res.data.playlist.info.selectedTrack, user),
+                        selectedTrack: buildTrack(res.data.playlist.info.selectedTrack, requester),
                     },
-                    get length(): number {
-                        return this.tracks
-                        .map((track: Track) => track.length)
-                        .reduce((acc: number, cur: number) => acc + cur, 0);
-                    },
+                    length: res.data.tracks
+                        .map((track: any) => track.info.length)
+                        .reduce((acc: number, cur: number) => acc + cur, 0),
                 };
             }
 
@@ -154,26 +180,12 @@ export class Manager extends EventEmitter {
     }
 
     /**
-     * Initiates the manager (with a client ID if none provided in ManagerOptions).
-     * @param {string} clientId The client ID to use.
-     */
-    public init(clientId?: string) {
-        if (clientId) this.options.clientId = clientId;
-        if (!this.options.clientId) {
-            throw new Error("\"clientId\" is not set. Pass it in Manager#init() or as a option in the constructor.");
-        }
-
-        this.nodes.forEach((node: Node) => node.connect());
-        Player.init(this);
-    }
-
-    /**
      * Sends voice data to the Lavalink server.
      * @param {*} data The data to send.
      */
     public updateVoiceState(data: any)  {
         if (!data || !["VOICE_SERVER_UPDATE", "VOICE_STATE_UPDATE"].includes(data.t || "")) return;
-        const player = this.players.get(data.d.guild_id);
+        const player = this.players.get(data.d.guild_id) as Player;
 
         if (!player) return;
         const state = this.voiceStates.get(data.d.guild_id) || {};
@@ -186,8 +198,7 @@ export class Manager extends EventEmitter {
             if (data.d.user_id !== this.options.clientId) return;
             state.sessionId = data.d.session_id;
             if (player.options.voiceChannel !== data.d.channel_id) {
-                this.emit("playerMove", player, player.options.voiceChannel, data.d.channel_id);
-                player.options.voiceChannel = data.d.channel_id;
+                this.emit("playerMove", player, player.voiceChannel, data.d.channel_id);
             }
         }
 

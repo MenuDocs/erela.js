@@ -10,8 +10,16 @@ You can find the documentation at <http://projects.warhammer.codes/erelajs> (*th
 
 ## Installation
 
+NPM:
+
 ```bash
 npm install erela.js
+```
+
+Yarn:
+
+```bash
+yarn add erela.js
 ```
 
 ## Prerequisites
@@ -21,7 +29,7 @@ Download & install the Java runtime and download the Lavalink.jar file.
 - [Java](https://www.java.com/en/download)
 - [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1)
 
-> Note: Java v11 or newer is required to run the Lavalink.jar.
+> Note: Java version 11 or newer is required to run the Lavalink.jar.
 
 ## Getting Started
 
@@ -31,100 +39,144 @@ Download & install the Java runtime and download the Lavalink.jar file.
 
 ## Example usage
 
-> Note: Discord.js is used in this example, but it does work with Eris with the same example.
+> Note: Discord.js is used in this example, but it does work with other libraries with the same example but with your library functions.
 
 ```javascript
-// To install Discord.js and Erela.js, run:
+// To install Discord.JS and Erela.JS, run:
 // npm install discord.js erela.js
 const { Client } = require("discord.js");
-const { ErelaClient } = require("erela.js");
+const { Manager, Player } = require("erela.js");
 
-// Initialize the Discord.js Client instance and an array of nodes for Erela.js.
+// Initialize the Discord.JS Client.
 const client = new Client();
-const nodes = [{
-    host: "localhost",
-    port: 2333,
-    password: "youshallnotpass",
-}]
 
-// Ready event fires when the Discord.js client is ready.
-// Use once so it only fires once.
+// Initiate the Manager with some options and listen to some events.
+client.manager = new Manager({
+    // Pass an array of node. Note: You do not need to pass any if you are using the default values.
+    nodes: [{
+        host: "localhost",
+        port: 2333,
+        password: "youshallnotpass",
+    }],
+    // A send method to send data to the Discord WebSocket using your library.
+    // Getting the shard for the guild and sending the data to the WebSocket.
+    send(id, payload) {
+        const guild = client.guilds.cache.get(id);
+        if (guild) guild.shard.send(payload);
+    }
+})
+.on("nodeConnect", node => console.log("New node connected"))
+.on("nodeError", (node, error) => console.log(`Node error: ${error.message}`))
+.on("trackStart", (player, track) => {
+    player.textChannel.send(`Now playing: ${track.title}`)
+})
+.on("queueEnd", player => {
+    player.textChannel.send("Queue has ended.");
+    player.destroy();
+})
+// You must handle moves by yourself, by default Erela.JS will not change the voice channel.
+.on("playerMove", (player, currentChannel, newChannel) => {
+    // Note: newChannel will always be a string, if you pass the channel object you will need to get the cached channel.
+    player.voiceChannel = client.channels.cache.get(newChannel);
+});
+
+// Ready event fires when the Discord.JS client is ready.
+// Use EventEmitter#once() so it only fires once.
 client.once("ready", () => {
     console.log("I am ready!")
-    // Initializes an Erela client with the Discord.js client and nodes.
-    client.music = new ErelaClient(client, nodes);
-    // Listens to events.
-    client.music.on("nodeConnect", node => console.log("New node connected"));
-    client.music.on("nodeError", (node, error) => console.log(`Node error: ${error.message}`));
-    client.music.on("trackStart", (player, track) => player.textChannel.send(`Now playing: ${track.title}`));
-    client.music.on("queueEnd", player => {
-        player.textChannel.send("Queue has ended.")
-        client.music.players.destroy(player.guild.id);
-    });
+    // Initiate the manager.
+    client.init(client.user.id);
 });
 
 client.on("message", async message => {
     if (message.content.startsWith("!play")) {
-        const {
-            voiceChannel
-        } = message.member;
-        // Note: for discord.js master you need to use
-        // const { channel } = message.member.voice;
+        // Retrieves tracks with your query and the requester of the track(s).
+        // Note: This retrieves tracks from youtube by default, to get from other sources you must enable them in application.yml and provide a link for the source.
+        // Note: If you want to "search" with you must provide an object with a "query" property being the query to use, and "source" being one of "youtube", "soundcloud".
+        // Returns a SearchResult.
+        const res = await client.music.search(message.content.slice(6), message.author);
 
-        // Spawns a player and joins the voice channel.
-        const player = client.music.players.spawn({
+        // Create a new player. This will return the player if it already exists.
+        const player = new Player({
             guild: message.guild,
-            voiceChannel: voiceChannel,
+            voiceChannel: message.member.voice.channel,
             textChannel: message.channel,
         });
 
-        // Searches Youtube with your query and the requester of the track(s).
-        // Returns a SearchResult with tracks property.
-        const res = await client.music.search(message.content.slice(6), message.author);
+        // Connect to the voice channel.
+        player.connect();
 
         // Adds the first track to the queue.
         player.queue.add(res.tracks[0]);
-        message.channel.send(`Enqueuing track ${res.tracks[0].title}.`)
+        message.channel.send(`Enqueuing track ${res.tracks[0].title}.`);
 
         // Plays the player (plays the first track in the queue).
         // The if statement is needed else it will play the current track again
-        if (!player.playing) player.play();
+        if (player.queue.size == 1 && !player.playing) player.play();
     }
 });
 
 client.login("your token");
 ```
 
-## Andesite-node
+## Extending
 
-Erela.js can work with [andesite-node](https://github.com/natanbc/andesite-node). For filters (other than equalizer) you have to extend Player and add methods for each filter.
+Erela.JS can expand on its functionality by extending its classes.
+Note: This should only used if you are adding *your own* functions.
 
 ```javascript
-const { Player } = require("erela.js");
+const { Queue } = require("erela.js");
 
-class CustomPlayer extends Player {
-    constructor(...args) {
-        super(...args);
+// Use the extend method to extend the class.
+Queue.extend(queue => class extends queue {
+    save() {
+        // Somehow save the queue.
+    }
+});
+
+// Usage.
+const player = // Get the player somehow.
+player.queue.save();
+```
+
+## Plugins
+
+Erela.JS can expand on its functionality with plugins.
+Note: This should only be used if you want to use others functions.
+
+```javascript
+const { Manager } = require("erela.js");
+const SaveQueue = require("erela.js-save-queue");
+
+const manager = new Manager({
+    plugins: [ new SaveQueue() ],
+})
+
+// Usage.
+const player = // Get the player somehow.
+player.queue.save();
+```
+
+> Creating your own plugins.
+
+```javascript
+const { Plugin, Queue } = require("erela.js");
+
+Queue.extend(queue => class extends queue {
+    save() {
+        // Somehow save the queue.
+    }
+});
+
+module.exports = class SaveQueue extends Plugin {
+    // Use the constructor to pass values to the plugin.
+    constructor(options) {
+        this.options = options;
     }
 
-    setTimescale(speed, pitch, rate) {
-        this.node.send({
-            op: "filters",
-            guildId: this.guild.id,
-            timescale: {
-                speed,
-                pitch,
-                rate
-            },
-        });
-    }
+    load(manager) {}
 }
 
-client.once("ready", () => {
-    client.music = new ErelaClient(client, nodes, {
-        player: CustomPlayer
-    });
-});
 ```
 
 ## Author
