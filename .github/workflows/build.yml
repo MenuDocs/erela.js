@@ -11,5 +11,7 @@ jobs:
         node-version: 12
     - name: npm install
       run: npm install
-    - name: Build types and dist
-      run: npm run all
+    - name: Build dist
+      run: npm run build
+    - name: Generate typings
+      run: npm run types

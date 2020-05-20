@@ -8,9 +8,9 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
-    "lint": "tslint --config tslint.json --project tsconfig.json",
-    "types": "dts-bundle --removeSource --name erela.js --main ./dist --out ./typings/index.d.ts --baseDir ./dist",
-    "all": "npm-run-all -s build types"
+    "lint": "eslint --ignore-path .gitignore --ext .js,.ts",
+    "lint:fix": "npm run lint -- --fix",
+    "types": "dts-bundle --removeSource --name erela.js --main ./dist --out ./typings/index.d.ts --baseDir ./dist"
   },
   "keywords": [
     "lavalink",
@@ -22,8 +22,10 @@
   "devDependencies": {
     "@types/node": "^14.0.1",
     "@types/ws": "^6.0.4",
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "@typescript-eslint/parser": "^2.34.0",
     "dts-bundle": "^0.7.3",
-    "npm-run-all": "^4.1.5",
+    "eslint": "^7.0.0",
     "tslint": "^5.20.1",
     "typedoc": "^0.15.8",
     "typescript": "^3.9.2"
@@ -32,5 +34,17 @@
     "@discordjs/collection": "^0.1.5",
     "axios": "^0.19.2",
     "ws": "^7.2.1"
+  },
+  "eslintConfig": {
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended"
+    ]
   }
 }
