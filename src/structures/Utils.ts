@@ -2,7 +2,7 @@
 import { Track, Player } from './Player';
 import { Manager } from './Manager';
 import { Queue } from './Queue';
-import { Node } from 'erela.js';
+import { Node } from './Node';
 
 const sizes = [
   '0',

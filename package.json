@@ -2,17 +2,14 @@
   "name": "erela.js",
   "version": "1.1.8",
   "description": "An easy-to-use Lavalink client for NodeJS.",
-  "main": "./dist/index.js",
-  "types": "./typings/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/WarHammer414/erela.js.git"
-  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": "github:WarHammer414/erela.js",
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
     "lint": "tslint --config tslint.json --project tsconfig.json",
-    "types": "dts-bundle --removeSource --name erela.js --main .\\dist --out ..\\typings\\index.d.ts --baseDir .\\dist",
+    "types": "dts-bundle --removeSource --name erela.js --main ./dist --out ./dist/index.d.ts --baseDir ./dist",
     "all": "npm-run-all -s build types"
   },
   "keywords": [
@@ -20,24 +17,20 @@
     "lavalink client",
     "music"
   ],
-  "author": "WarHammer414",
-  "license": "ISC",
+  "author": "WarHammer414 (https://github.com/WarHammer414)",
+  "license": "Apache-2.0",
   "devDependencies": {
-    "@types/events": "^3.0.0",
     "@types/node": "^14.0.1",
     "@types/ws": "^6.0.4",
     "dts-bundle": "^0.7.3",
     "npm-run-all": "^4.1.5",
     "tslint": "^5.20.1",
     "typedoc": "^0.15.8",
-    "typedoc-plugin-no-inherit": "^1.1.10",
     "typescript": "^3.9.2"
   },
   "dependencies": {
     "@discordjs/collection": "^0.1.5",
     "axios": "^0.19.2",
-    "events": "^3.1.0",
-    "util": "^0.12.1",
     "ws": "^7.2.1"
   }
 }
