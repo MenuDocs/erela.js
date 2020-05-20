@@ -1,12 +1,7 @@
 name: Build
-
-on:
-  push:
-  pull_request:
-
+on: [push, pull_request]
 jobs:
-  tsc:
-    name: tsc
+  build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
@@ -16,9 +11,5 @@ jobs:
         node-version: 12
     - name: npm install
       run: npm install
-    - name: tsc
-      uses: icrawl/action-tsc@v1
-      env:
-        CI: true
-      with:
-        job-name: tsc
+    - name: Build types and dist
+      run: npm run all
