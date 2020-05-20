@@ -1,4 +1,4 @@
-// tslint:disable: member-ordering
+/* eslint-disable @typescript-eslint/no-explicit-any, no-case-declarations */
 import { Track, Player } from "./Player";
 import { Manager } from "./Manager";
 import WebSocket from "ws";
@@ -67,7 +67,7 @@ export class Node {
     public stats: NodeStats;
 
     private reconnectTimeout?: NodeJS.Timeout;
-    private reconnectAttempts: number = 0;
+    private reconnectAttempts = 0;
 
     /** Returns if connected to the Node. */
     public get connected(): boolean {
@@ -105,7 +105,7 @@ export class Node {
     }
 
     /** Connects to the Node. */
-    public connect() {
+    public connect(): void {
         if (this.connected) return;
 
         const headers = {
@@ -122,7 +122,7 @@ export class Node {
     }
 
     /** Reconnects to the Node. */
-    public reconnect() {
+    public reconnect(): void {
         this.reconnectTimeout = setTimeout(() => {
             if (this.reconnectAttempts >= (this.options.retryAmount || 5)) {
                 this.manager.emit("nodeError", this, new Error(`Unable to connect after ${this.options.retryAmount}`));
@@ -138,7 +138,7 @@ export class Node {
     }
 
     /** Destroys the Node. */
-    public destroy() {
+    public destroy(): void {
         if (!this.connected) return;
         this.socket.close(1000, "destroy");
         this.socket.removeAllListeners();
@@ -160,17 +160,17 @@ export class Node {
         });
     }
 
-    protected open() {
+    protected open(): void {
         if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
         this.manager.emit("nodeConnect", this);
     }
 
-    protected close(code: number, reason: string) {
+    protected close(code: number, reason: string): void {
         this.manager.emit("nodeDisconnect", this, { code, reason });
         if (code !== 1000 || reason !== "destroy") this.reconnect();
     }
 
-    protected message(d: Buffer|string) {
+    protected message(d: Buffer|string): void {
         if (Array.isArray(d)) d = Buffer.concat(d);
         else if (d instanceof ArrayBuffer) d = Buffer.from(d);
 
@@ -195,13 +195,13 @@ export class Node {
         }
     }
 
-    protected error(error: Error) {
+    protected error(error: Error): void {
         if (!error) return;
         this.manager.emit("nodeError", this, error);
         this.reconnect();
     }
 
-    protected handleEvent(payload: any) {
+    protected handleEvent(payload: any): void {
         if (!payload.guildId) { return; }
         const player = this.manager.players.get(payload.guildId);
         if (!player) return;
@@ -227,7 +227,7 @@ export class Node {
         }
     }
 
-    protected trackEnd(player: Player, track: Track, payload: any) {
+    protected trackEnd(player: Player, track: Track, payload: any): void {
         if (track && player.trackRepeat) {
             this.manager.emit("trackEnd", player, track);
             if (this.manager.options.autoPlay) player.play();
@@ -248,22 +248,22 @@ export class Node {
         }
     }
 
-    protected trackStart(player: Player, track: Track, payload: any) {
+    protected trackStart(player: Player, track: Track, payload: any): void {
         player.playing = true;
         this.manager.emit("trackStart", player, track, payload);
     }
 
-    protected trackStuck(player: Player, track: Track, payload: any) {
+    protected trackStuck(player: Player, track: Track, payload: any): void {
         player.queue.shift();
         this.manager.emit("trackStuck", player, track, payload);
     }
 
-    protected trackError(player: Player, track: Track, payload: any) {
+    protected trackError(player: Player, track: Track, payload: any): void {
         player.queue.shift();
         this.manager.emit("trackError", player, track, payload);
     }
 
-    protected socketClosed(player: Player, payload: any) {
+    protected socketClosed(player: Player, payload: any): void {
         this.manager.emit("socketClosed", player, payload);
     }
 }

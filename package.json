@@ -10,7 +10,7 @@
     "prepublishOnly": "npm run build",
     "lint": "eslint --ignore-path .gitignore --ext .js,.ts",
     "lint:fix": "npm run lint -- --fix",
-    "types": "dts-bundle --removeSource --name erela.js --main ./dist --out ./typings/index.d.ts --baseDir ./dist"
+    "types": "dts-bundle --removeSource --name erela.js --main ./dist --out ../typings/index.d.ts --baseDir ./dist"
   },
   "keywords": [
     "lavalink",

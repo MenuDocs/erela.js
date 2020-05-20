@@ -1,8 +1,16 @@
 import { Track } from "./Player";
 
 const template = [
-    "track", "title", "identifer", "author", "length",
-    "isSeekable", "isStream", "uri", "thumbnail", "user",
+    "track",
+    "title",
+    "identifer",
+    "author",
+    "length",
+    "isSeekable",
+    "isStream",
+    "uri",
+    "thumbnail",
+    "user",
 ];
 
 /** The Queue class. */
@@ -12,7 +20,7 @@ export class Queue extends Array<Track> {
      * @param {(Track|Track[])} track The track or tracks to add.
      * @param {number} [offset=0] The offset to add the track at.
      */
-    public add(track: Track | Track[], offset: number = null) {
+    public add(track: Track | Track[], offset: number = null): void {
         if (!(Array.isArray(track) || !template.every((v) => Object.keys(track).includes(v)))) {
             throw new RangeError("Queue#add() Track must be a \"Track\" or \"Track[]\".");
         }
@@ -36,8 +44,8 @@ export class Queue extends Array<Track> {
 
     /**
      * Removes a track to the queue. Defaults to the first track.
-     * @param {(Track|number)} [track=0] - The track to remove.
-     * @returns {(Track|null)} - The track that was removed, or null if the track does not exist.
+     * @param {(Track|number)} [track=0] The track to remove.
+     * @returns {(Track|null)} The track that was removed, or null if the track does not exist.
      */
     public removeFrom(start: number, end: number): Track[] | null {
         if (typeof start === "undefined") {
@@ -55,8 +63,8 @@ export class Queue extends Array<Track> {
 
     /**
      * Removes a track to the queue. Defaults to the first track.
-     * @param {(Track|number)} [track=0] - The track to remove.
-     * @returns {(Track|null)} - The track that was removed, or null if the track does not exist.
+     * @param {(Track|number)} [track=0] The track to remove.
+     * @returns {(Track|null)} The track that was removed, or null if the track does not exist.
      */
     public remove(track: Track|number = 0): Track | null {
         const position = typeof track === "number" ? track : this.indexOf(track as Track);
@@ -66,17 +74,13 @@ export class Queue extends Array<Track> {
         return this.splice(position, 1)[0];
     }
 
-    /**
-     * Clears the queue.
-     */
-    public clear() {
+    /** Clears the queue. */
+    public clear(): void {
         this.splice(1);
     }
 
-    /**
-     * Shuffles the queue.
-     */
-    public shuffle() {
+    /** Shuffles the queue. */
+    public shuffle(): void {
         const track = this.shift();
         for (let i = this.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));

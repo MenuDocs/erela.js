@@ -18,7 +18,6 @@ You can find the documentation at <http://projects.warhammer.codes/erelajs> (*th
 
 > Note: Java v11 or newer is required to run the Lavalink.jar.
 
-
 ```shell
 npm install erela.js
 ```
@@ -117,10 +116,10 @@ Erela.JS can expand on its functionality by extending its classes.
 Note: This should only used if you are adding *your own* functions.
 
 ```javascript
-const { Structures } = require("erela.js");
+const { Structure } = require("erela.js");
 
 // Use the extend method to extend the class.
-Structures.extend('Queue', Queue => class extends Queue {
+Structure.extend("Queue", Queue => class extends Queue {
     save() {
         somehowSaveQueue();
     }
@@ -137,25 +136,25 @@ Erela.JS can expand on its functionality with plugins.
 Note: This should only be used if you want to use others functions.
 
 ```javascript
+// Only for demonstration.
 const { Manager } = require("erela.js");
 const SaveQueue = require("erela.js-save-queue");
 
 const manager = new Manager({
-    plugins: [ new SaveQueue() ],
+    plugins: [ new SaveQueue({ max: 10 }) ],
 })
 
 // Usage.
-const player = // Get the player somehow.
+const player = somehowGetPlayer();
 player.queue.save();
 ```
 
 ### Creating your own plugin
 
 ```javascript
-const { Structures } = require('erela.js');
-const { Plugin, Queue } = require("erela.js");
+const { Structure, Plugin } = require('erela.js');
 
-Structures.extend('Queue', Queue => class extends Queue {
+Structure.extend("Queue", Queue => class extends Queue {
     save() {
         somehowSaveQueue();
     }
@@ -164,6 +163,7 @@ Structures.extend('Queue', Queue => class extends Queue {
 module.exports = class MyQueuePlugin extends Plugin {
     // Use the constructor to pass values to the plugin.
     constructor(options) {
+        // Able to use "max" as a option.
         this.options = options;
     }
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-async-promise-executor, @typescript-eslint/no-explicit-any */
 import { LoadType, buildTrack, Plugin, Structure } from "./Utils";
 import { Node, NodeOptions } from "./Node";
 import { EventEmitter } from "events";
@@ -26,7 +27,7 @@ export interface ManagerOptions {
 }
 
 /** The IQuery interface. */
-export interface IQuery {
+export interface Query {
     /** The source to search from. */
     source?: "youtube" | "soundcloud";
     /** The query to search for. */
@@ -72,7 +73,6 @@ export class Manager extends EventEmitter {
     public readonly nodes = new Collection<string, Node>();
     /** The options that were set. */
     public readonly options: ManagerOptions;
-
     protected readonly voiceStates: Map<string, any> = new Map();
 
     /**
@@ -108,7 +108,7 @@ export class Manager extends EventEmitter {
      * Initiates the manager (with a client ID if none provided in ManagerOptions).
      * @param {string} clientId The client ID to use.
      */
-    public init(clientId?: string) {
+    public init(clientId?: string): this {
         if (clientId) this.options.clientId = clientId;
         if (!this.options.clientId) {
             throw new Error("\"clientId\" is not set. Pass it in Manager#init() or as a option in the constructor.");
@@ -121,11 +121,11 @@ export class Manager extends EventEmitter {
 
     /**
      * Searches YouTube with the query.
-     * @param {(string|IQuery)} query - The query to search against.
-     * @param {any} requester - The user who requested the tracks.
-     * @returns {Promise<SearchResult>} - The search result.
+     * @param {(string|IQuery)} query The query to search against.
+     * @param {any} requester The user who requested the tracks.
+     * @returns {Promise<SearchResult>} The search result.
      */
-    public search(query: string | IQuery, requester: any): Promise<SearchResult> {
+    public search(query: string | Query, requester: any): Promise<SearchResult> {
         return new Promise(async (resolve, reject) => {
             const node: Node = this.nodes.values().next().value;
 
@@ -133,8 +133,8 @@ export class Manager extends EventEmitter {
                 throw new Error("Manager#search() No available nodes.");
             }
 
-            const source = { soundcloud: "sc" }[(query as IQuery).source] || "yt";
-            let search = (query as IQuery).query || query as string;
+            const source = { soundcloud: "sc" }[(query as Query).source] || "yt";
+            let search = (query as Query).query || query as string;
 
             if (!/^https?:\/\//.test(search)) {
                 search = `${source}search:${search}`;
@@ -183,7 +183,7 @@ export class Manager extends EventEmitter {
      * Sends voice data to the Lavalink server.
      * @param {*} data The data to send.
      */
-    public updateVoiceState(data: any)  {
+    public updateVoiceState(data: any): void {
         if (!data || !["VOICE_SERVER_UPDATE", "VOICE_STATE_UPDATE"].includes(data.t || "")) return;
         const player = this.players.get(data.d.guild_id) as Player;
 

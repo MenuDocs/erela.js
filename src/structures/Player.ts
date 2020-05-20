@@ -1,7 +1,6 @@
-// tslint:disable: member-ordering max-line-length
+/* eslint-disable @typescript-eslint/camelcase, @typescript-eslint/no-explicit-any */
 import { Structure, State } from "./Utils";
 import { Manager } from "./Manager";
-import { Queue } from "./Queue";
 import { Node } from "./Node";
 
 /** The PlayerOptions interface. */
@@ -45,7 +44,7 @@ export interface Track {
     /** The user that requested the track. */
     readonly requester: any;
     /** Displays the track thumbnail with a size in "0", "1", "2", "3", "default", "mqdefault", "hqdefault", "maxresdefault". Only for youtube as others require an API. */
-    displayThumbnail(size?: string): string;
+    displayThumbnail(size?: "0" | "1" | "2" | "3" | "default" | "mqdefault" | "hqdefault" | "maxresdefault"): string;
 }
 
 /** The PlayOptions interface */
@@ -65,7 +64,7 @@ export class Player {
     /** The Manager. */
     public static manager: Manager;
     /** The Queue for the Player. */
-    public readonly queue = new (Structure.get("Queue"))() as Queue;
+    public readonly queue = new (Structure.get("Queue"))();
     /** Whether the queue repeats the track. */
     public trackRepeat = false;
     /** Whether the queue repeats the queue. */
@@ -86,9 +85,10 @@ export class Player {
     public textChannel: any;
     /** The current state of the player. */
     public state = State.DISCONNECTED;
-    private player: any;
+    private player: typeof Player;
 
-    public static init(manager: Manager) {
+    /** Only for internal use. */
+    public static init(manager: Manager): void {
         this.manager = manager;
     }
 
@@ -118,7 +118,7 @@ export class Player {
     }
 
     /** Connect to the voice channel. */
-    public connect() {
+    public connect(): this {
         if (!this.voiceChannel) throw new RangeError("Player#connect() No voice channel has been set in PlayerOptions.");
         this.state = State.CONNECTING;
 
@@ -133,10 +133,11 @@ export class Player {
         });
 
         this.state = State.CONNECTED;
+        return this;
     }
 
     /** Disconnect from the voice channel. */
-    public disconnect() {
+    public disconnect(): this {
         if (!this.voiceChannel) return;
         this.state = State.DISCONNECTING;
 
@@ -158,10 +159,11 @@ export class Player {
         this.position = 0;
 
         this.state = State.DISCONNECTED;
+        return this;
     }
 
     /** Destroys the player. */
-    public destroy() {
+    public destroy(): void {
         this.state = State.DESTROYING;
         this.disconnect();
 
@@ -178,26 +180,28 @@ export class Player {
      * Sets the player voice channel.
      * @param {*} channel The channel to set.
      */
-    public setVoiceChannel(channel: any) {
+    public setVoiceChannel(channel: any): this {
         channel = this.voiceChannel.id ? channel : channel.id;
         this.voiceChannel = channel;
         this.connect();
+        return this;
     }
 
     /**
      * Sets the player text channel.
      * @param {*} channel The channel to set.
      */
-    public setTextChannel(channel: any) {
+    public setTextChannel(channel: any): this {
         channel = this.textChannel.id ? channel : channel.id;
         this.textChannel = channel;
+        return this;
     }
 
     /**
      * Plays the next track or a specified track in the PlayOptions.
      * @param {PlayOptions} [options={}] The options to use.
      */
-    public play(options: PlayOptions = {}) {
+    public play(options: PlayOptions = {}): this {
         if (!this.queue[0]) throw new RangeError("Player#play() No tracks in the queue.");
 
         const finalOptions = {
@@ -212,13 +216,14 @@ export class Player {
         }
 
         this.node.send(finalOptions);
+        return this;
     }
 
     /**
      * Sets the player volume.
-     * @param {number} volume - The volume to set.
+     * @param {number} volume The volume to set.
      */
-    public setVolume(volume: number) {
+    public setVolume(volume: number): this {
         if (isNaN(volume)) throw new RangeError("Player#setVolume() Volume must be a number.");
 
         this.volume = volume;
@@ -227,13 +232,14 @@ export class Player {
             guildId: this.guild.id || this.guild,
             volume,
         });
+        return this;
     }
 
     /**
      * Sets the track repeat.
-     * @param {boolean} repeat - If track repeat should be enabled.
+     * @param {boolean} repeat If track repeat should be enabled.
      */
-    public setTrackRepeat(repeat: boolean) {
+    public setTrackRepeat(repeat: boolean): this {
         if (typeof repeat !== "boolean") throw new RangeError("Player#setTrackRepeat() Repeat can only be \"true\" or \"false\".");
         if (repeat) {
             this.trackRepeat = true;
@@ -242,13 +248,14 @@ export class Player {
             this.trackRepeat = false;
             this.queueRepeat = false;
         }
+        return this;
     }
 
     /**
      * Sets the queue repeat.
-     * @param {boolean} repeat - If queue repeat should be enabled.
+     * @param {boolean} repeat If queue repeat should be enabled.
      */
-    public setQueueRepeat(repeat: boolean) {
+    public setQueueRepeat(repeat: boolean): this {
         if (typeof repeat !== "boolean") throw new RangeError("Player#setQueueRepeat() Repeat can only be \"true\" or \"false\".");
         if (repeat) {
             this.trackRepeat = false;
@@ -257,21 +264,23 @@ export class Player {
             this.trackRepeat = false;
             this.queueRepeat = false;
         }
+        return this;
     }
 
     /** Stops the current track. */
-    public stop() {
+    public stop(): this {
         this.node.send({
             op: "stop",
             guildId: this.guild.id || this.guild,
         });
+        return this;
     }
 
     /**
      * Pauses the current track.
-     * @param {boolean} pause - Whether to pause the current track.
+     * @param {boolean} pause Whether to pause the current track.
      */
-    public pause(pause: boolean) {
+    public pause(pause: boolean): this {
         if (typeof pause !== "boolean") throw new RangeError("Player#pause() Pause can only be \"true\" or \"false\".");
         this.playing = !pause;
         this.node.send({
@@ -279,13 +288,14 @@ export class Player {
             guildId: this.guild.id || this.guild,
             pause,
         });
+        return this;
     }
 
     /**
      * Seeks to the position in the current track.
-     * @param {boolean} pause - Whether to pause the current track.
+     * @param {boolean} pause Whether to pause the current track.
      */
-    public seek(position: number) {
+    public seek(position: number): this {
         if (!this.queue[0]) { throw new RangeError("Player#seek() Can only seek when theres a track in the queue."); }
         if (isNaN(position)) { throw new RangeError("Player#seek() Position must be a number."); }
         if (position < 0 || position > this.queue[0].length) {
@@ -297,5 +307,6 @@ export class Player {
             guildId: this.guild.id || this.guild,
             position,
         });
+        return this;
     }
 }
