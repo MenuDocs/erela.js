@@ -3,13 +3,13 @@
   "version": "1.1.8",
   "description": "An easy-to-use Lavalink client for NodeJS.",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "typings/index.d.ts",
   "repository": "github:WarHammer414/erela.js",
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
     "lint": "tslint --config tslint.json --project tsconfig.json",
-    "types": "dts-bundle --removeSource --name erela.js --main ./dist --out ./dist/index.d.ts --baseDir ./dist",
+    "types": "dts-bundle --removeSource --name erela.js --main ./dist --out ./typings/index.d.ts --baseDir ./dist",
     "all": "npm-run-all -s build types"
   },
   "keywords": [

@@ -117,17 +117,17 @@ Erela.JS can expand on its functionality by extending its classes.
 Note: This should only used if you are adding *your own* functions.
 
 ```javascript
-const { Queue } = require("erela.js");
+const { Structures } = require("erela.js");
 
 // Use the extend method to extend the class.
-Queue.extend(queue => class extends queue {
+Structures.extend('Queue', Queue => class extends Queue {
     save() {
-        // Somehow save the queue.
+        somehowSaveQueue();
     }
 });
 
-// Usage.
-const player = // Get the player somehow.
+// Usage:
+const player = somehowGetPlayer();
 player.queue.save();
 ```
 
@@ -149,18 +149,19 @@ const player = // Get the player somehow.
 player.queue.save();
 ```
 
-> Creating your own plugins.
+### Creating your own plugin
 
 ```javascript
+const { Structures } = require('erela.js');
 const { Plugin, Queue } = require("erela.js");
 
-Queue.extend(queue => class extends queue {
+Structures.extend('Queue', Queue => class extends Queue {
     save() {
-        // Somehow save the queue.
+        somehowSaveQueue();
     }
 });
 
-module.exports = class SaveQueue extends Plugin {
+module.exports = class MyQueuePlugin extends Plugin {
     // Use the constructor to pass values to the plugin.
     constructor(options) {
         this.options = options;
@@ -168,7 +169,6 @@ module.exports = class SaveQueue extends Plugin {
 
     load(manager) {}
 }
-
 ```
 
 ## Author
