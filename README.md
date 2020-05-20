@@ -10,26 +10,18 @@ You can find the documentation at <http://projects.warhammer.codes/erelajs> (*th
 
 ## Installation
 
-NPM:
-
-```bash
-npm install erela.js
-```
-
-Yarn:
-
-```bash
-yarn add erela.js
-```
-
-## Prerequisites
-
-Download & install the Java runtime and download the Lavalink.jar file.
+### Prerequisites
 
 - [Java](https://www.java.com/en/download)
+
 - [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1)
 
-> Note: Java version 11 or newer is required to run the Lavalink.jar.
+> Note: Java v11 or newer is required to run the Lavalink.jar.
+
+
+```shell
+npm install erela.js
+```
 
 ## Getting Started
 
