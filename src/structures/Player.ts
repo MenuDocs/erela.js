@@ -59,9 +59,17 @@ export interface PlayOptions {
     readonly noReplace?: boolean;
 }
 
+/** The EqualizerBand interface. */
+export interface EqualizerBand {
+    /** The gain for the band. */
+    gain: number;
+    /** The band. */
+    band: number;
+}
+
 /** The Player class. */
 export class Player {
-    /** The Manager. */
+    /** The Manager instance. */
     public static manager: Manager;
     /** The Queue for the Player. */
     public readonly queue = new (Structure.get("Queue"))();
@@ -85,6 +93,8 @@ export class Player {
     public textChannel: any;
     /** The current state of the player. */
     public state = State.DISCONNECTED;
+    /** The equalizer bands array. */
+    public bands = new Array<EqualizerBand>();
     private player: typeof Player;
 
     /** Only for internal use. */
@@ -115,6 +125,28 @@ export class Player {
         this.node =  node || this.player.manager.nodes.values().next().value;
 
         this.player.manager.players.set(options.guild.id || options.guild, this);
+    }
+
+    /**
+     * Sets the players equalizer band.
+     * @param {EqualizerBand[]} [bands=[]] The bands to set.
+     */
+    public setEQ(bands: EqualizerBand[] = []): this {
+        if (!bands.length) {
+            this.bands = Array(14).map((_, i) => ({ band: i, gain: 0.0 }))
+        }
+
+        // idk figure out how to overwrite bands while adding new ones 
+        // const newBands = this.bands.concat(bands);
+        // this.bands = newBands.filter((v, i) => newBands.findIndex((b) => b.band == v.band) == i);
+
+        this.node.send({
+            op: "equalizer",
+            guildId: this.guild.id || this.guild,
+            bands: this.bands,
+        });
+
+        return this;
     }
 
     /** Connect to the voice channel. */
@@ -232,6 +264,7 @@ export class Player {
             guildId: this.guild.id || this.guild,
             volume,
         });
+
         return this;
     }
 
@@ -241,6 +274,7 @@ export class Player {
      */
     public setTrackRepeat(repeat: boolean): this {
         if (typeof repeat !== "boolean") throw new RangeError("Player#setTrackRepeat() Repeat can only be \"true\" or \"false\".");
+
         if (repeat) {
             this.trackRepeat = true;
             this.queueRepeat = false;
@@ -248,6 +282,7 @@ export class Player {
             this.trackRepeat = false;
             this.queueRepeat = false;
         }
+
         return this;
     }
 
@@ -257,6 +292,7 @@ export class Player {
      */
     public setQueueRepeat(repeat: boolean): this {
         if (typeof repeat !== "boolean") throw new RangeError("Player#setQueueRepeat() Repeat can only be \"true\" or \"false\".");
+        
         if (repeat) {
             this.trackRepeat = false;
             this.queueRepeat = true;
@@ -264,6 +300,7 @@ export class Player {
             this.trackRepeat = false;
             this.queueRepeat = false;
         }
+
         return this;
     }
 
@@ -273,6 +310,7 @@ export class Player {
             op: "stop",
             guildId: this.guild.id || this.guild,
         });
+
         return this;
     }
 
@@ -282,12 +320,14 @@ export class Player {
      */
     public pause(pause: boolean): this {
         if (typeof pause !== "boolean") throw new RangeError("Player#pause() Pause can only be \"true\" or \"false\".");
+
         this.playing = !pause;
         this.node.send({
             op: "pause",
             guildId: this.guild.id || this.guild,
             pause,
         });
+
         return this;
     }
 
@@ -301,12 +341,14 @@ export class Player {
         if (position < 0 || position > this.queue[0].length) {
             throw new RangeError(`Player#seek() Position can not be smaller than 0 or bigger than ${this.queue[0].length}.`);
         }
+
         this.position = position;
         this.node.send({
             op: "seek",
             guildId: this.guild.id || this.guild,
             position,
         });
+
         return this;
     }
 }

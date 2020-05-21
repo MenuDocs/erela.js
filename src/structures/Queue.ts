@@ -43,11 +43,11 @@ export class Queue extends Array<Track> {
     }
 
     /**
-     * Removes a track to the queue. Defaults to the first track.
-     * @param {(Track|number)} [track=0] The track to remove.
-     * @returns {(Track|null)} The track that was removed, or null if the track does not exist.
+     * Removes an amount of tracks using a start and end index.
+     * @param {number} start The start to remove from.
+     * @param {number} end The end to remove to.
      */
-    public removeFrom(start: number, end: number): Track[] | null {
+    public removeFrom(start: number, end: number): Track[] {
         if (typeof start === "undefined") {
             throw new RangeError(`Queue#removeFrom() Missing "start" parameter.`);
         } else if (typeof end === "undefined") {

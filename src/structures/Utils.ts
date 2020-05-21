@@ -16,17 +16,17 @@ const template = [
 
 const sizes = [
 	"0",
-    "1",
-    "2",
-    "3",
+	"1",
+	"2",
+	"3",
 	"default",
 	"mqdefault",
-    "hqdefault",
-    "maxresdefault",
+	"hqdefault",
+	"maxresdefault",
 ];
 
 export function buildTrack(data: any, requester: any): Track {
-    try {
+	try {
 		return {
 			track: data.track,
 			title: data.info.title,
@@ -51,7 +51,7 @@ export function buildTrack(data: any, requester: any): Track {
 }
 
 export function mix(derivedCtor: any, ...baseCtors: any[]): void {
-    baseCtors.forEach((baseCtor) => {
+	baseCtors.forEach((baseCtor) => {
 		Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
 			Object.defineProperty(
 				derivedCtor.prototype,
@@ -59,7 +59,7 @@ export function mix(derivedCtor: any, ...baseCtors: any[]): void {
 				Object.getOwnPropertyDescriptor(baseCtor.prototype, name)
 			);
 		});
-    });
+	});
 }
 
 /**
@@ -69,17 +69,17 @@ export function mix(derivedCtor: any, ...baseCtors: any[]): void {
  * @returns {string} The formatted duration.
  */
 export function formatTime(milliseconds: number, minimal = false): string {
-    if (typeof milliseconds === "undefined" || isNaN(milliseconds)) {
+	if (typeof milliseconds === "undefined" || isNaN(milliseconds)) {
 		throw new RangeError("Utils#formatTime() Milliseconds must be a number");
-    }
+	}
 
-    if (typeof minimal !== "boolean") {
+	if (typeof minimal !== "boolean") {
 		throw new RangeError("Utils#formatTime() Minimal must be a boolean");
-    }
+	}
 
-    if (milliseconds === 0) return minimal ? "00:00" : "N/A";
+	if (milliseconds === 0) return minimal ? "00:00" : "N/A";
 
-    const times = {
+	const times = {
 		years: 0,
 		months: 0,
 		weeks: 0,
@@ -87,9 +87,9 @@ export function formatTime(milliseconds: number, minimal = false): string {
 		hours: 0,
 		minutes: 0,
 		seconds: 0,
-    };
+	};
 
-    while (milliseconds > 0) {
+	while (milliseconds > 0) {
 		if (milliseconds - 31557600000 >= 0) {
 			milliseconds -= 31557600000;
 			times.years++;
@@ -112,12 +112,12 @@ export function formatTime(milliseconds: number, minimal = false): string {
 			times.seconds = Math.round(milliseconds / 1000);
 			milliseconds = 0;
 		}
-    }
+	}
 
-    const finalTime: string[] = [];
-    let first = false;
+	const finalTime: string[] = [];
+	let first = false;
 
-    for (const [k, v] of Object.entries(times)) {
+	for (const [k, v] of Object.entries(times)) {
 		if (minimal) {
 			if (v === 0 && !first) continue;
 			finalTime.push(v < 10 ? `0${v}` : `${v}`);
@@ -125,18 +125,18 @@ export function formatTime(milliseconds: number, minimal = false): string {
 			continue;
 		}
 		if (v > 0) finalTime.push(`${v} ${v > 1 ? k : k.slice(0, -1)}`);
-    }
+	}
 
-    if (minimal && finalTime.length === 1) finalTime.unshift("00");
+	if (minimal && finalTime.length === 1) finalTime.unshift("00");
 
-    let time = finalTime.join(minimal ? ":" : ", ");
+	let time = finalTime.join(minimal ? ":" : ", ");
 
-    if (time.includes(",")) {
+	if (time.includes(",")) {
 		const pos = time.lastIndexOf(",");
 		time = `${time.slice(0, pos)} and ${time.slice(pos + 1)}`;
-    }
+	}
 
-    return time;
+	return time;
 }
 
 /**
@@ -145,14 +145,14 @@ export function formatTime(milliseconds: number, minimal = false): string {
  * @returns {number} The formatted duration.
  */
 export function parseTime(time: string): number | null {
-    if (time.includes(":")) time = time.split(":").reverse().map((v, i) => v + template[i]).join("")
+	if (time.includes(":")) time = time.split(":").reverse().map((v, i) => v + template[i]).join("")
 	if (time.includes(" ")) time = time.split(/\s+/).join("");
 	
-    const regex = /\d+\.*\d*\D+/g;
-    let res;
-    let duration = 0;
+	const regex = /\d+\.*\d*\D+/g;
+	let res;
+	let duration = 0;
 
-    while ((res = regex.exec(time)) !== null) {
+	while ((res = regex.exec(time)) !== null) {
 		if (res.index === regex.lastIndex) regex.lastIndex++;
 		const local: string = res[0].toLowerCase();
 		
@@ -202,63 +202,63 @@ export function parseTime(time: string): number | null {
 			duration +=
 			parseInt((local.match(/\d+\.*\d*/) as string[])[0], 10) * 31557600000;
 		}
-    }
+	}
 
-    if (duration === 0) return null;
-    return duration;
+	if (duration === 0) return null;
+	return duration;
 }
 
 /** The Structure class. */
 export class Structure {
-    /**
-     * Extends a class.
-     * @param extender
+	/**
+	 * Extends a class.
+	 * @param extender
 	 */
 	public static extend<K extends keyof Extendable, T extends Extendable[K]>(
 		name: K,
 		extender: (klass: Extendable[K]) => T
-    ): T {
+	): T {
 		if (!structures[name]) throw new TypeError(`"${name} is not a valid structure`);
 		const extended = extender(structures[name]);
 		structures[name] = extended;
 		return extended;
-    }
+	}
 
-    /**
-     * Returns the structure.
-     * @param structure
-     */
+	/**
+	 * Returns the structure.
+	 * @param structure
+	 */
 	public static get<K extends keyof Extendable>(structure: K): Extendable[K] {
 		const struct = structures[structure];
 		if (!struct) throw new TypeError("\"structure\" must be provided.");
 		return struct;
-    }
+	}
 }
 
 export class Plugin {
-    public load(manager: Manager): void {}
+	public load(manager: Manager): void {}
 }
 
 export enum LoadType {
-    TRACK_LOADED = "TRACK_LOADED",
-    PLAYLIST_LOADED = "PLAYLIST_LOADED",
-    SEARCH_RESULT = "SEARCH_RESULT",
-    LOAD_FAILED = "LOAD_FAILED",
+	TRACK_LOADED = "TRACK_LOADED",
+	PLAYLIST_LOADED = "PLAYLIST_LOADED",
+	SEARCH_RESULT = "SEARCH_RESULT",
+	LOAD_FAILED = "LOAD_FAILED",
 	NO_MATCHES = "NO_MATCHES",
 }
 
 export enum State {
 	CONNECTED = "CONNECTED",
-    CONNECTING = "CONNECTING",
-    DISCONNECTED = "DISCONNECTED",
-    DISCONNECTING = "DISCONNECTING",
-    DESTROYING = "DESTROYING",
+	CONNECTING = "CONNECTING",
+	DISCONNECTED = "DISCONNECTED",
+	DISCONNECTING = "DISCONNECTING",
+	DESTROYING = "DESTROYING",
 }
 
 export const structures = {
-    Player: require("./Player").Player,
-    Queue: require("./Queue").Queue,
-    Node: require("./Node").Node,
+	Player: require("./Player").Player,
+	Queue: require("./Queue").Queue,
+	Node: require("./Node").Node,
 };
 
 export interface Extendable {

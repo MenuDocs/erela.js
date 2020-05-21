@@ -121,7 +121,7 @@ export class Manager extends EventEmitter {
 
     /**
      * Searches YouTube with the query.
-     * @param {(string|IQuery)} query The query to search against.
+     * @param {(string|Query)} query The query to search against.
      * @param {any} requester The user who requested the tracks.
      * @returns {Promise<SearchResult>} The search result.
      */
