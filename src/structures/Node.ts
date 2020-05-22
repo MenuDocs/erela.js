@@ -65,7 +65,6 @@ export class Node {
     public calls = 0;
     /** The stats for the node. */
     public stats: NodeStats;
-
     private reconnectTimeout?: NodeJS.Timeout;
     private reconnectAttempts = 0;
 

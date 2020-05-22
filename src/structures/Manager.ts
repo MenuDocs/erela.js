@@ -65,7 +65,10 @@ export interface SearchResult {
 
 const template = JSON.stringify(["event", "guildId", "op", "sessionId"]);
 
-/** The Manager class. */
+/**
+ * The Manager class.
+ * @noInheritDoc
+ */
 export class Manager extends EventEmitter {
     /** The map of players. */
     public readonly players: Collection<string, Player> = new Collection<string, Player>();
@@ -77,9 +80,9 @@ export class Manager extends EventEmitter {
 
     /**
      * Creates the Manager class.
-     * @param {ManagerOptions} [options] The options to use.
+     * @param {ManagerOptions} options The options to use.
      */
-    constructor(options?: ManagerOptions) {
+    constructor(options: ManagerOptions) {
         super();
 
         if (!options.send) throw new RangeError("Missing send method in ManageOptions.");

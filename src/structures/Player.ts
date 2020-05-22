@@ -2,6 +2,7 @@
 import { Structure, State } from "./Utils";
 import { Manager } from "./Manager";
 import { Node } from "./Node";
+import { Queue } from "./Queue";
 
 /** The PlayerOptions interface. */
 export interface PlayerOptions {
@@ -72,7 +73,7 @@ export class Player {
     /** The Manager instance. */
     public static manager: Manager;
     /** The Queue for the Player. */
-    public readonly queue = new (Structure.get("Queue"))();
+    public readonly queue = new (Structure.get("Queue"))() as Queue;
     /** Whether the queue repeats the track. */
     public trackRepeat = false;
     /** Whether the queue repeats the queue. */

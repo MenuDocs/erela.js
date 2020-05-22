@@ -134,7 +134,9 @@ declare module 'erela.js/structures/Manager' {
                     severity: string;
             };
     }
-    /** The Manager class. */
+    /**
+        * The Manager class.
+        */
     export class Manager extends EventEmitter {
             /** The map of players. */
             readonly players: Collection<string, Player>;
@@ -155,7 +157,7 @@ declare module 'erela.js/structures/Manager' {
             init(clientId?: string): this;
             /**
                 * Searches YouTube with the query.
-                * @param {(string|IQuery)} query The query to search against.
+                * @param {(string|Query)} query The query to search against.
                 * @param {any} requester The user who requested the tracks.
                 * @returns {Promise<SearchResult>} The search result.
                 */
@@ -172,6 +174,7 @@ declare module 'erela.js/structures/Player' {
     import { State } from "erela.js/structures/Utils";
     import { Manager } from "erela.js/structures/Manager";
     import { Node } from "erela.js/structures/Node";
+    import { Queue } from "erela.js/structures/Queue";
     /** The PlayerOptions interface. */
     export interface PlayerOptions {
             /** The guild the Player belongs to. */
@@ -225,13 +228,20 @@ declare module 'erela.js/structures/Player' {
             /** Whether to not replace the track if a play payload is sent. */
             readonly noReplace?: boolean;
     }
+    /** The EqualizerBand interface. */
+    export interface EqualizerBand {
+            /** The gain for the band. */
+            gain: number;
+            /** The band. */
+            band: number;
+    }
     /** The Player class. */
     export class Player {
             options: PlayerOptions;
-            /** The Manager. */
+            /** The Manager instance. */
             static manager: Manager;
             /** The Queue for the Player. */
-            readonly queue: import("./Queue").Queue;
+            readonly queue: Queue;
             /** Whether the queue repeats the track. */
             trackRepeat: boolean;
             /** Whether the queue repeats the queue. */
@@ -252,6 +262,8 @@ declare module 'erela.js/structures/Player' {
             textChannel: any;
             /** The current state of the player. */
             state: State;
+            /** The equalizer bands array. */
+            bands: EqualizerBand[];
             /** Only for internal use. */
             static init(manager: Manager): void;
             /**
@@ -259,6 +271,11 @@ declare module 'erela.js/structures/Player' {
                 * @param {PlayerOptions} options The options to pass.
                 */
             constructor(options: PlayerOptions);
+            /**
+                * Sets the players equalizer band.
+                * @param {EqualizerBand[]} [bands=[]] The bands to set.
+                */
+            setEQ(bands?: EqualizerBand[]): this;
             /** Connect to the voice channel. */
             connect(): this;
             /** Disconnect from the voice channel. */
@@ -312,7 +329,10 @@ declare module 'erela.js/structures/Player' {
 
 declare module 'erela.js/structures/Queue' {
     import { Track } from "erela.js/structures/Player";
-    /** The Queue class. */
+    /**
+        * The Queue class.
+        * @noInheritDoc
+        */
     export class Queue extends Array<Track> {
             /**
                 * Adds a track to the queue.
@@ -321,11 +341,11 @@ declare module 'erela.js/structures/Queue' {
                 */
             add(track: Track | Track[], offset?: number): void;
             /**
-                * Removes a track to the queue. Defaults to the first track.
-                * @param {(Track|number)} [track=0] The track to remove.
-                * @returns {(Track|null)} The track that was removed, or null if the track does not exist.
+                * Removes an amount of tracks using a start and end index.
+                * @param {number} start The start to remove from.
+                * @param {number} end The end to remove to.
                 */
-            removeFrom(start: number, end: number): Track[] | null;
+            removeFrom(start: number, end: number): Track[];
             /**
                 * Removes a track to the queue. Defaults to the first track.
                 * @param {(Track|number)} [track=0] The track to remove.

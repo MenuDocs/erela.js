@@ -10,7 +10,8 @@
     "prepublishOnly": "npm run build",
     "lint": "eslint --ignore-path .gitignore --ext .js,.ts",
     "lint:fix": "npm run lint -- --fix",
-    "types": "dts-bundle --removeSource --name erela.js --main ./dist --out ../typings/index.d.ts --baseDir ./dist"
+    "types": "dts-bundle --removeSource --name erela.js --main ./dist --out ../typings/index.d.ts --baseDir ./dist",
+    "docs": "typedoc --out ./docs --hideBreadcrumbs --theme vuepress --mode file --excludeProtected --excludePrivate src/structures"
   },
   "keywords": [
     "lavalink",
@@ -28,6 +29,8 @@
     "eslint": "^7.0.0",
     "tslint": "^5.20.1",
     "typedoc": "^0.15.8",
+    "typedoc-plugin-markdown": "^2.2.17",
+    "typedoc-plugin-no-inherit": "^1.1.10",
     "typescript": "^3.9.2"
   },
   "dependencies": {

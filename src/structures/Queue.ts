@@ -13,7 +13,10 @@ const template = [
     "user",
 ];
 
-/** The Queue class. */
+/**
+ * The Queue class.
+ * @noInheritDoc
+ */
 export class Queue extends Array<Track> {
     /**
      * Adds a track to the queue.
