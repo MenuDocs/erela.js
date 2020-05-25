@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/camelcase, @typescript-eslint/no-explicit-any */
 import { Structure, State } from "./Utils";
 import { Manager } from "./Manager";
-import { Node } from "./Node";
 import { Queue } from "./Queue";
+import { Node } from "./Node";
 
 /** The PlayerOptions interface. */
 export interface PlayerOptions {
@@ -82,6 +82,8 @@ export class Player {
     public position = 0;
     /** Whether the player is playing. */
     public playing = false;
+    /** Whether the player is paused. */
+    public paused = false;
     /** Whether the player is playing. */
     public volume: number;
     /** The Node for the Player. */
@@ -95,7 +97,7 @@ export class Player {
     /** The current state of the player. */
     public state = State.DISCONNECTED;
     /** The equalizer bands array. */
-    public bands = new Array<EqualizerBand>();
+    public bands = new Array<number>(15).fill(0.0);
     private player: typeof Player;
 
     /** Only for internal use. */
@@ -129,17 +131,11 @@ export class Player {
     }
 
     /**
-     * Sets the players equalizer band.
-     * @param {EqualizerBand[]} [bands=[]] The bands to set.
+     * Sets the players equalizer band. Passing nothing will clear it.
+     * @param {EqualizerBand[]} bands The bands to set.
      */
-    public setEQ(bands: EqualizerBand[] = []): this {
-        if (!bands.length) {
-            this.bands = Array(14).map((_, i) => ({ band: i, gain: 0.0 }))
-        }
-
-        // idk figure out how to overwrite bands while adding new ones 
-        // const newBands = this.bands.concat(bands);
-        // this.bands = newBands.filter((v, i) => newBands.findIndex((b) => b.band == v.band) == i);
+    public setEQ(...bands: EqualizerBand[]): this {
+        bands.forEach(({ band, gain }) => this.bands[band] = gain)
 
         this.node.send({
             op: "equalizer",
@@ -148,6 +144,11 @@ export class Player {
         });
 
         return this;
+    }
+
+    /** Clears the equalizer. */
+    public clearEQ(): this {
+        return this.setEQ(...new Array(15).map((_, i) => ({ band: i, gain: 0.0 })))
     }
 
     /** Connect to the voice channel. */
@@ -258,12 +259,12 @@ export class Player {
      */
     public setVolume(volume: number): this {
         if (isNaN(volume)) throw new RangeError("Player#setVolume() Volume must be a number.");
+        this.volume = Math.max(Math.min(volume, 1000), 0);
 
-        this.volume = volume;
         this.node.send({
             op: "volume",
             guildId: this.guild.id || this.guild,
-            volume,
+            volume: this.volume,
         });
 
         return this;
@@ -323,6 +324,7 @@ export class Player {
         if (typeof pause !== "boolean") throw new RangeError("Player#pause() Pause can only be \"true\" or \"false\".");
 
         this.playing = !pause;
+        this.paused = pause;
         this.node.send({
             op: "pause",
             guildId: this.guild.id || this.guild,
@@ -337,11 +339,9 @@ export class Player {
      * @param {boolean} pause Whether to pause the current track.
      */
     public seek(position: number): this {
-        if (!this.queue[0]) { throw new RangeError("Player#seek() Can only seek when theres a track in the queue."); }
+        if (!this.queue[0]) return;
         if (isNaN(position)) { throw new RangeError("Player#seek() Position must be a number."); }
-        if (position < 0 || position > this.queue[0].length) {
-            throw new RangeError(`Player#seek() Position can not be smaller than 0 or bigger than ${this.queue[0].length}.`);
-        }
+        if (position < 0 || position > this.queue[0].length) position = Math.max(Math.min(position, this.queue[0].length), 0);
 
         this.position = position;
         this.node.send({

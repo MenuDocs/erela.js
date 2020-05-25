@@ -1,8 +1,8 @@
 /* eslint-disable no-async-promise-executor, @typescript-eslint/no-explicit-any */
 import { LoadType, buildTrack, Plugin, Structure } from "./Utils";
 import { Node, NodeOptions } from "./Node";
-import { EventEmitter } from "events";
 import { Player, Track } from "./Player";
+import { EventEmitter } from "events";
 import Collection from "@discordjs/collection";
 import Axios from "axios";
 

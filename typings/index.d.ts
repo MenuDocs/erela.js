@@ -5,7 +5,7 @@
 //   ../ws
 
 declare module 'erela.js' {
-    export { Structure, Plugin, LoadType, State, formatTime, parseTime } from "erela.js/structures/Utils";
+    export { Structure, Plugin, LoadType, State, Utils } from "erela.js/structures/Utils";
     export { Manager } from "erela.js/structures/Manager";
     export { Player } from "erela.js/structures/Player";
     export { Queue } from "erela.js/structures/Queue";
@@ -17,21 +17,23 @@ declare module 'erela.js/structures/Utils' {
     import { Manager } from "erela.js/structures/Manager";
     import { Queue } from "erela.js/structures/Queue";
     import { Node } from "erela.js/structures/Node";
+    /** @hidden */
     export function buildTrack(data: any, requester: any): Track;
-    export function mix(derivedCtor: any, ...baseCtors: any[]): void;
-    /**
-        * Formats the given duration into human readable format.
-        * @param {number} milliseconds The duration to format.
-        * @param {boolean?} [minimal=false] Whether to use a minimal format.
-        * @returns {string} The formatted duration.
-        */
-    export function formatTime(milliseconds: number, minimal?: boolean): string;
-    /**
-        * Parses the given duration into milliseconds.
-        * @param {string} time The duration to parse.
-        * @returns {number} The formatted duration.
-        */
-    export function parseTime(time: string): number | null;
+    export class Utils {
+            /**
+                * Formats the given duration into human readable format.
+                * @param {number} milliseconds The duration to format.
+                * @param {boolean?} [minimal=false] Whether to use a minimal format.
+                * @returns {string} The formatted duration.
+                */
+            static formatTime(milliseconds: number, minimal?: boolean): string;
+            /**
+                * Parses the given duration into milliseconds.
+                * @param {string} time The duration to parse.
+                * @returns {number} The formatted duration.
+                */
+            static parseTime(time: string): number | null;
+    }
     /** The Structure class. */
     export class Structure {
             /**
@@ -62,6 +64,7 @@ declare module 'erela.js/structures/Utils' {
             DISCONNECTING = "DISCONNECTING",
             DESTROYING = "DESTROYING"
     }
+    /** @hidden */
     export const structures: {
             Player: any;
             Queue: any;
@@ -77,8 +80,8 @@ declare module 'erela.js/structures/Utils' {
 declare module 'erela.js/structures/Manager' {
     import { LoadType, Plugin } from "erela.js/structures/Utils";
     import { Node, NodeOptions } from "erela.js/structures/Node";
-    import { EventEmitter } from "events";
     import { Player, Track } from "erela.js/structures/Player";
+    import { EventEmitter } from "events";
     import Collection from "@discordjs/collection";
     /** The ManagerOptions interface. */
     export interface ManagerOptions {
@@ -136,6 +139,7 @@ declare module 'erela.js/structures/Manager' {
     }
     /**
         * The Manager class.
+        * @noInheritDoc
         */
     export class Manager extends EventEmitter {
             /** The map of players. */
@@ -147,9 +151,9 @@ declare module 'erela.js/structures/Manager' {
             protected readonly voiceStates: Map<string, any>;
             /**
                 * Creates the Manager class.
-                * @param {ManagerOptions} [options] The options to use.
+                * @param {ManagerOptions} options The options to use.
                 */
-            constructor(options?: ManagerOptions);
+            constructor(options: ManagerOptions);
             /**
                 * Initiates the manager (with a client ID if none provided in ManagerOptions).
                 * @param {string} clientId The client ID to use.
@@ -173,8 +177,8 @@ declare module 'erela.js/structures/Manager' {
 declare module 'erela.js/structures/Player' {
     import { State } from "erela.js/structures/Utils";
     import { Manager } from "erela.js/structures/Manager";
-    import { Node } from "erela.js/structures/Node";
     import { Queue } from "erela.js/structures/Queue";
+    import { Node } from "erela.js/structures/Node";
     /** The PlayerOptions interface. */
     export interface PlayerOptions {
             /** The guild the Player belongs to. */
@@ -250,6 +254,8 @@ declare module 'erela.js/structures/Player' {
             position: number;
             /** Whether the player is playing. */
             playing: boolean;
+            /** Whether the player is paused. */
+            paused: boolean;
             /** Whether the player is playing. */
             volume: number;
             /** The Node for the Player. */
@@ -263,7 +269,7 @@ declare module 'erela.js/structures/Player' {
             /** The current state of the player. */
             state: State;
             /** The equalizer bands array. */
-            bands: EqualizerBand[];
+            bands: number[];
             /** Only for internal use. */
             static init(manager: Manager): void;
             /**
@@ -272,10 +278,12 @@ declare module 'erela.js/structures/Player' {
                 */
             constructor(options: PlayerOptions);
             /**
-                * Sets the players equalizer band.
-                * @param {EqualizerBand[]} [bands=[]] The bands to set.
+                * Sets the players equalizer band. Passing nothing will clear it.
+                * @param {EqualizerBand[]} bands The bands to set.
                 */
-            setEQ(bands?: EqualizerBand[]): this;
+            setEQ(...bands: EqualizerBand[]): this;
+            /** Clears the equalizer. */
+            clearEQ(): this;
             /** Connect to the voice channel. */
             connect(): this;
             /** Disconnect from the voice channel. */

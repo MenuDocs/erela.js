@@ -43,12 +43,14 @@ const client = new Client();
 
 // Initiate the Manager with some options and listen to some events.
 client.manager = new Manager({
-    // Pass an array of node. Note: You do not need to pass any if you are using the default values.
+    // Pass an array of node. Note: You do not need to pass any if you are using the default values (ones shown below).
     nodes: [{
         host: "localhost",
         port: 2333,
         password: "youshallnotpass",
     }],
+    // Auto plays tracks after one ends, defaults to "false".
+    autoPlay: true,
     // A send method to send data to the Discord WebSocket using your library.
     // Getting the shard for the guild and sending the data to the WebSocket.
     send(id, payload) {
@@ -84,6 +86,7 @@ client.on("message", async message => {
         // Retrieves tracks with your query and the requester of the track(s).
         // Note: This retrieves tracks from youtube by default, to get from other sources you must enable them in application.yml and provide a link for the source.
         // Note: If you want to "search" with you must provide an object with a "query" property being the query to use, and "source" being one of "youtube", "soundcloud".
+        // Note: This example only works for searching tracks using a query, such as "Rick Astley - Never Gonna Give You Up".
         // Returns a SearchResult.
         const res = await client.music.search(message.content.slice(6), message.author);
 
@@ -103,7 +106,7 @@ client.on("message", async message => {
 
         // Plays the player (plays the first track in the queue).
         // The if statement is needed else it will play the current track again
-        if (player.queue.size == 1 && !player.playing) player.play();
+        if (!player.playing && !player.paused && player.queue.length === 1) player.play();
     }
 });
 
@@ -171,9 +174,20 @@ module.exports = class MyQueuePlugin extends Plugin {
 }
 ```
 
-## Author
+## Contributors
 
 👤 **WarHammer414**
 
+- Author
 - Website: <https://warhammer.codes/>
 - Github: [@WarHammer414](https://github.com/WarHammer414)
+
+👤 **Anish Shobith**
+
+- Contributor
+- Github: [@Anish-Shobith](https://github.com/Anish-Shobith)
+
+👤 **Chroventer**
+
+- Contributor
+- Github: [@chroventer](https://github.com/chroventer)

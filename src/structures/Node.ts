@@ -124,7 +124,7 @@ export class Node {
     public reconnect(): void {
         this.reconnectTimeout = setTimeout(() => {
             if (this.reconnectAttempts >= (this.options.retryAmount || 5)) {
-                this.manager.emit("nodeError", this, new Error(`Unable to connect after ${this.options.retryAmount}`));
+                this.manager.emit("nodeError", this, new Error(`Unable to connect after ${this.options.retryAmount || 5} attempts.`));
                 this.destroy();
                 return clearTimeout(this.reconnectTimeout);
             }
@@ -249,6 +249,7 @@ export class Node {
 
     protected trackStart(player: Player, track: Track, payload: any): void {
         player.playing = true;
+        player.paused = false;
         this.manager.emit("trackStart", player, track, payload);
     }
 

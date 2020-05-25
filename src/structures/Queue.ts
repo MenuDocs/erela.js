@@ -61,7 +61,7 @@ export class Queue extends Array<Track> {
             throw new RangeError(`Queue#removeFrom() Start can not be bigger than ${this.length}.`);
         }
 
-        return this.splice(start, end);
+        return this.splice(start, end - start);
     }
 
     /**
