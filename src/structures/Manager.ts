@@ -1,7 +1,7 @@
 /* eslint-disable no-async-promise-executor, @typescript-eslint/no-explicit-any */
 import { LoadType, buildTrack, Plugin, Structure } from "./Utils";
 import { Node, NodeOptions } from "./Node";
-import { Player, Track } from "./Player";
+import { Player, Track, PlayerOptions } from "./Player";
 import { EventEmitter } from "events";
 import Collection from "@discordjs/collection";
 import Axios from "axios";
@@ -180,6 +180,18 @@ export class Manager extends EventEmitter {
 
             return resolve(result);
         });
+    }
+
+    /**
+     * Create method for an easier option to creating players.
+     * @param {PlayerOptions} options The options to pass.
+     */
+    public create(options: PlayerOptions): Player {
+        if (this.players.has(options.guild.id || options.guild)) {
+            return this.players.get(options.guild.id || options.guild);
+        } else {
+            return new (Structure.get("Player"))(options)
+        }
     }
 
     /**

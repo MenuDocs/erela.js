@@ -66,7 +66,7 @@ export class Node {
     /** The stats for the node. */
     public stats: NodeStats;
     private reconnectTimeout?: NodeJS.Timeout;
-    private reconnectAttempts = 0;
+    private reconnectAttempts = 1;
 
     /** Returns if connected to the Node. */
     public get connected(): boolean {
@@ -125,8 +125,7 @@ export class Node {
         this.reconnectTimeout = setTimeout(() => {
             if (this.reconnectAttempts >= (this.options.retryAmount || 5)) {
                 this.manager.emit("nodeError", this, new Error(`Unable to connect after ${this.options.retryAmount || 5} attempts.`));
-                this.destroy();
-                return clearTimeout(this.reconnectTimeout);
+                return this.destroy();
             }
             this.socket.removeAllListeners();
             this.socket = null;
@@ -142,6 +141,8 @@ export class Node {
         this.socket.close(1000, "destroy");
         this.socket.removeAllListeners();
         this.socket = null;
+        this.reconnectAttempts = 1;
+        return clearTimeout(this.reconnectTimeout);
     }
 
     /**
@@ -169,6 +170,11 @@ export class Node {
         if (code !== 1000 || reason !== "destroy") this.reconnect();
     }
 
+    protected error(error: Error): void {
+        if (!error) return;
+        this.manager.emit("nodeError", this, error);
+    }
+
     protected message(d: Buffer|string): void {
         if (Array.isArray(d)) d = Buffer.concat(d);
         else if (d instanceof ArrayBuffer) d = Buffer.from(d);
@@ -192,12 +198,6 @@ export class Node {
                 this.manager.emit("nodeError", this, new Error(`Unexpected op "${payload.op}" with data ${payload}`));
                 return;
         }
-    }
-
-    protected error(error: Error): void {
-        if (!error) return;
-        this.manager.emit("nodeError", this, error);
-        this.reconnect();
     }
 
     protected handleEvent(payload: any): void {

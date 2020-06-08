@@ -80,7 +80,7 @@ declare module 'erela.js/structures/Utils' {
 declare module 'erela.js/structures/Manager' {
     import { LoadType, Plugin } from "erela.js/structures/Utils";
     import { Node, NodeOptions } from "erela.js/structures/Node";
-    import { Player, Track } from "erela.js/structures/Player";
+    import { Player, Track, PlayerOptions } from "erela.js/structures/Player";
     import { EventEmitter } from "events";
     import Collection from "@discordjs/collection";
     /** The ManagerOptions interface. */
@@ -167,6 +167,11 @@ declare module 'erela.js/structures/Manager' {
                 */
             search(query: string | Query, requester: any): Promise<SearchResult>;
             /**
+                * Create method for an easier option to creating players.
+                * @param {PlayerOptions} options The options to pass.
+                */
+            create(options: PlayerOptions): Player;
+            /**
                 * Sends voice data to the Lavalink server.
                 * @param {*} data The data to send.
                 */
@@ -176,7 +181,7 @@ declare module 'erela.js/structures/Manager' {
 
 declare module 'erela.js/structures/Player' {
     import { State } from "erela.js/structures/Utils";
-    import { Manager } from "erela.js/structures/Manager";
+    import { Manager, Query, SearchResult } from "erela.js/structures/Manager";
     import { Queue } from "erela.js/structures/Queue";
     import { Node } from "erela.js/structures/Node";
     /** The PlayerOptions interface. */
@@ -234,10 +239,10 @@ declare module 'erela.js/structures/Player' {
     }
     /** The EqualizerBand interface. */
     export interface EqualizerBand {
-            /** The gain for the band. */
-            gain: number;
-            /** The band. */
+            /** The band number being 0 to 14. */
             band: number;
+            /** The gain amount being -0.25 to 1.00, 0.25 being double. */
+            gain: number;
     }
     /** The Player class. */
     export class Player {
@@ -277,6 +282,13 @@ declare module 'erela.js/structures/Player' {
                 * @param {PlayerOptions} options The options to pass.
                 */
             constructor(options: PlayerOptions);
+            /**
+                * Same as Manager#search() but a shortcut on the player itself.
+                * @param {(string|Query)} query The query to search against.
+                * @param {any} requester The user who requested the tracks.
+                * @returns {Promise<SearchResult>} The search result.
+                */
+            search(query: string | Query, requester: any): Promise<SearchResult>;
             /**
                 * Sets the players equalizer band. Passing nothing will clear it.
                 * @param {EqualizerBand[]} bands The bands to set.
@@ -355,11 +367,11 @@ declare module 'erela.js/structures/Queue' {
                 */
             removeFrom(start: number, end: number): Track[];
             /**
-                * Removes a track to the queue. Defaults to the first track.
-                * @param {(Track|number)} [track=0] The track to remove.
+                * Removes a track from the queue. Defaults to the first track.
+                * @param {number} [position=1] The track index to remove.
                 * @returns {(Track|null)} The track that was removed, or null if the track does not exist.
                 */
-            remove(track?: Track | number): Track | null;
+            remove(position?: number): Track | null;
             /** Clears the queue. */
             clear(): void;
             /** Shuffles the queue. */
@@ -455,8 +467,8 @@ declare module 'erela.js/structures/Node' {
             send(data: any): Promise<boolean>;
             protected open(): void;
             protected close(code: number, reason: string): void;
-            protected message(d: Buffer | string): void;
             protected error(error: Error): void;
+            protected message(d: Buffer | string): void;
             protected handleEvent(payload: any): void;
             protected trackEnd(player: Player, track: Track, payload: any): void;
             protected trackStart(player: Player, track: Track, payload: any): void;

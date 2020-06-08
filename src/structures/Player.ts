@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/camelcase, @typescript-eslint/no-explicit-any */
 import { Structure, State } from "./Utils";
-import { Manager } from "./Manager";
+import { Manager, Query, SearchResult } from "./Manager";
 import { Queue } from "./Queue";
 import { Node } from "./Node";
 
@@ -62,10 +62,10 @@ export interface PlayOptions {
 
 /** The EqualizerBand interface. */
 export interface EqualizerBand {
-    /** The gain for the band. */
-    gain: number;
-    /** The band. */
+    /** The band number being 0 to 14. */
     band: number;
+    /** The gain amount being -0.25 to 1.00, 0.25 being double. */
+    gain: number;
 }
 
 /** The Player class. */
@@ -110,10 +110,8 @@ export class Player {
      * @param {PlayerOptions} options The options to pass.
      */
     constructor(public options: PlayerOptions) {
-        this.player = Structure.get("Player");
-        if (this.player.manager == null) {
-            throw new RangeError("Manager has not been initiated.");
-        }
+        if (!this.player) this.player = Structure.get("Player");
+        if (!this.player.manager) throw new RangeError("Manager has not been initiated.");
 
         if (this.player.manager.players.has(options.guild.id || options.guild)) {
             return this.player.manager.players.get(options.guild.id || options.guild);
@@ -131,6 +129,16 @@ export class Player {
     }
 
     /**
+     * Same as Manager#search() but a shortcut on the player itself.
+     * @param {(string|Query)} query The query to search against.
+     * @param {any} requester The user who requested the tracks.
+     * @returns {Promise<SearchResult>} The search result.
+     */
+    public search(query: string | Query, requester: any): Promise<SearchResult> {
+        return this.player.manager.search(query, requester);
+    }
+
+    /**
      * Sets the players equalizer band. Passing nothing will clear it.
      * @param {EqualizerBand[]} bands The bands to set.
      */
@@ -140,7 +148,7 @@ export class Player {
         this.node.send({
             op: "equalizer",
             guildId: this.guild.id || this.guild,
-            bands: this.bands,
+            bands: this.bands.map(( gain, band) => ({ band, gain })),
         });
 
         return this;
@@ -148,7 +156,7 @@ export class Player {
 
     /** Clears the equalizer. */
     public clearEQ(): this {
-        return this.setEQ(...new Array(15).map((_, i) => ({ band: i, gain: 0.0 })))
+        return this.setEQ(...new Array(15).fill(0).map((_, i) => ({ band: i, gain: 0.0 })))
     }
 
     /** Connect to the voice channel. */
@@ -175,6 +183,7 @@ export class Player {
         if (!this.voiceChannel) return;
         this.state = State.DISCONNECTING;
 
+        this.pause(true);
         this.player.manager.options.send(this.guild.id || this.guild, {
             op: 4,
             d: {
@@ -186,12 +195,6 @@ export class Player {
         });
 
         this.voiceChannel = null;
-        this.textChannel = null;
-        this.trackRepeat = false;
-        this.queueRepeat = false;
-        this.playing = false;
-        this.position = 0;
-
         this.state = State.DISCONNECTED;
         return this;
     }
@@ -215,7 +218,7 @@ export class Player {
      * @param {*} channel The channel to set.
      */
     public setVoiceChannel(channel: any): this {
-        channel = this.voiceChannel.id ? channel : channel.id;
+        channel = this.options.voiceChannel.id ? channel : channel.id;
         this.voiceChannel = channel;
         this.connect();
         return this;

@@ -30,7 +30,7 @@ const sizes = [
 /** @hidden */
 export function buildTrack(data: any, requester: any): Track {
     try {
-        return {
+        const track = {
             track: data.track,
             title: data.info.title,
             identifier: data.info.identifier,
@@ -48,6 +48,10 @@ export function buildTrack(data: any, requester: any): Track {
             },
             requester,
         };
+
+        track.displayThumbnail = track.displayThumbnail.bind(track)
+
+        return track;
     } catch {
         return null
     }

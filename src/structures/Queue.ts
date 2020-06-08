@@ -55,9 +55,9 @@ export class Queue extends Array<Track> {
             throw new RangeError(`Queue#removeFrom() Missing "start" parameter.`);
         } else if (typeof end === "undefined") {
             throw new RangeError(`Queue#removeFrom() Missing "end" parameter.`);
-        } else if (start >= end) {
+        } else if (start + 1 >= end) {
             throw new RangeError(`Queue#removeFrom() Start can not be bigger than end.`);
-        } else if (start >= this.length) {
+        } else if (start + 1 >= this.length) {
             throw new RangeError(`Queue#removeFrom() Start can not be bigger than ${this.length}.`);
         }
 
@@ -65,15 +65,12 @@ export class Queue extends Array<Track> {
     }
 
     /**
-     * Removes a track to the queue. Defaults to the first track.
-     * @param {(Track|number)} [track=0] The track to remove.
+     * Removes a track from the queue. Defaults to the first track.
+     * @param {number} [position=1] The track index to remove.
      * @returns {(Track|null)} The track that was removed, or null if the track does not exist.
      */
-    public remove(track: Track|number = 0): Track | null {
-        const position = typeof track === "number" ? track : this.indexOf(track as Track);
-        if (position === -1) {
-            return null;
-        }
+    public remove(position = 1): Track | null {
+        if (position === 0) throw new RangeError("Queue#remove() Cannot remove the current track, use Player#stop() to skip it.");
         return this.splice(position, 1)[0];
     }
 
