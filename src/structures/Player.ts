@@ -73,7 +73,9 @@ export class Player {
     /** The Manager instance. */
     public static manager: Manager;
     /** The Queue for the Player. */
-    public readonly queue = new (Structure.get("Queue"))() as Queue;
+    public readonly queue = new (Structure.get("Queue"))(this) as Queue;
+    /** The current track for the Player. */
+    public current?: Track;
     /** Whether the queue repeats the track. */
     public trackRepeat = false;
     /** Whether the queue repeats the queue. */
@@ -239,12 +241,12 @@ export class Player {
      * @param {PlayOptions} [options={}] The options to use.
      */
     public play(options: PlayOptions = {}): this {
-        if (!this.queue[0]) throw new RangeError("Player#play() No tracks in the queue.");
+        if (!this.current) throw new RangeError("Player#play() No current track.");
 
         const finalOptions = {
             op: "play",
             guildId: this.guild.id || this.guild,
-            track: this.queue[0].track,
+            track: this.current.track,
             ...options,
         };
 
@@ -342,9 +344,9 @@ export class Player {
      * @param {boolean} pause Whether to pause the current track.
      */
     public seek(position: number): this {
-        if (!this.queue[0]) return;
+        if (!this.current) return;
         if (isNaN(position)) { throw new RangeError("Player#seek() Position must be a number."); }
-        if (position < 0 || position > this.queue[0].length) position = Math.max(Math.min(position, this.queue[0].length), 0);
+        if (position < 0 || position > this.current.length) position = Math.max(Math.min(position, this.current.length), 0);
 
         this.position = position;
         this.node.send({

@@ -224,3 +224,76 @@ export class Manager extends EventEmitter {
         }
     }
 }
+
+export interface Manager {
+    /**
+     * Emitted when a Node connects.
+     * @event Manager#nodeConnect
+     */
+    on(event: "nodeConnect", listener: (node: Node) => void): this;
+    /**
+     * Emitted when a Node reconnects.
+     * @event Manager#nodeReconnect
+     */
+    on(event: "nodeReconnect", listener: (node: Node) => void): this;
+    /**
+     * Emitted when a Node disconnects.
+     * @event Manager#nodeDisconnect
+     */
+    on(event: "nodeDisconnect", listener: (node: Node, reason: { code: number; reason: string }) => void): this;
+    /**
+     * Emitted when a Node has an error.
+     * @event Manager#nodeError
+     */
+    on(event: "nodeError", listener: (node: Node, error: Error) => void): this;
+    /**
+     * Emitted whenever any Lavalink event is received.
+     * @event Manager#nodeRaw
+     */
+    on(event: "nodeRaw", listener: (payload: any) => void): this;
+    /**
+     * Emitted when a player is created.
+     * @event Manager#playerCreate
+     */
+    on(event: "playerCreate", listener: (player: Player) => void): this;
+    /**
+     * Emitted when a player is destroyed.
+     * @event Manager#playerDestroy
+     */
+    on(event: "playerDestroy", listener: (player: Player) => void): this;
+    /**
+     * Emitted when a player queue ends.
+     * @event Manager#queueEnd
+     */
+    on(event: "queueEnd", listener: (player: Player) => void): this;
+    /**
+     * Emitted when a player is moved to a new voice channel.
+     * @event Manager#playerMove
+     */
+    on(event: "playerMove", listener: (player: Player, oldChannel: any, newChannel: string) => void): this;
+    /**
+     * Emitted when a track starts.
+     * @event Manager#trackStart
+     */
+    on(event: "trackStart", listener: (player: Player, track: Track, payload: any) => void): this;
+    /**
+     * Emitted when a track ends.
+     * @event Manager#trackEnd
+     */
+    on(event: "trackEnd", listener: (player: Player, track: Track, payload: any) => void): this;
+    /**
+     * Emitted when a track gets stuck during playback.
+     * @event Manager#trackStuck
+     */
+    on(event: "trackStuck", listener: (player: Player, track: Track, payload: any) => void): this;
+    /**
+     * Emitted when a track has an error during playback.
+     * @event Manager#trackError
+     */
+    on(event: "trackError", listener: (player: Player, track: Track, payload: any) => void): this;
+    /**
+     * Emitted when a voice connect is closed.
+     * @event Manager#socketClosed
+     */
+    on(event: "socketClosed", listener: (player: Player, payload: any) => void): this;
+}

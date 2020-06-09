@@ -1,4 +1,4 @@
-import { Track } from "./Player";
+import { Track, Player } from "./Player";
 
 const template = [
     "track",
@@ -18,14 +18,27 @@ const template = [
  * @noInheritDoc
  */
 export class Queue extends Array<Track> {
+    public constructor(private player: Player) {
+        super();
+    }
+
     /**
      * Adds a track to the queue.
      * @param {(Track|Track[])} track The track or tracks to add.
-     * @param {number} [offset=0] The offset to add the track at.
+     * @param {number} [offset=null] The offset to add the track at.
      */
     public add(track: Track | Track[], offset: number = null): void {
         if (!(Array.isArray(track) || !template.every((v) => Object.keys(track).includes(v)))) {
             throw new RangeError("Queue#add() Track must be a \"Track\" or \"Track[]\".");
+        }
+
+        if (!this.player.current) {
+            if (!Array.isArray(track)) {
+                this.player.current = track;
+                return;
+            } else {
+                this.player.current = track.shift();
+            }
         }
 
         if (offset !== null) {
@@ -51,13 +64,13 @@ export class Queue extends Array<Track> {
      * @param {number} end The end to remove to.
      */
     public removeFrom(start: number, end: number): Track[] {
-        if (typeof start === "undefined") {
+        if (isNaN(start)) {
             throw new RangeError(`Queue#removeFrom() Missing "start" parameter.`);
-        } else if (typeof end === "undefined") {
+        } else if (isNaN(end)) {
             throw new RangeError(`Queue#removeFrom() Missing "end" parameter.`);
-        } else if (start + 1 >= end) {
+        } else if (start >= end) {
             throw new RangeError(`Queue#removeFrom() Start can not be bigger than end.`);
-        } else if (start + 1 >= this.length) {
+        } else if (start >= this.length) {
             throw new RangeError(`Queue#removeFrom() Start can not be bigger than ${this.length}.`);
         }
 
@@ -66,26 +79,23 @@ export class Queue extends Array<Track> {
 
     /**
      * Removes a track from the queue. Defaults to the first track.
-     * @param {number} [position=1] The track index to remove.
+     * @param {number} [position=0] The track index to remove.
      * @returns {(Track|null)} The track that was removed, or null if the track does not exist.
      */
-    public remove(position = 1): Track | null {
-        if (position === 0) throw new RangeError("Queue#remove() Cannot remove the current track, use Player#stop() to skip it.");
+    public remove(position = 0): Track | null {
         return this.splice(position, 1)[0];
     }
 
     /** Clears the queue. */
     public clear(): void {
-        this.splice(1);
+        this.splice(0);
     }
 
     /** Shuffles the queue. */
     public shuffle(): void {
-        const track = this.shift();
         for (let i = this.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [this[i], this[j]] = [this[j], this[i]];
         }
-        this.unshift(track);
     }
 }

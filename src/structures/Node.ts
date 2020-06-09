@@ -181,7 +181,8 @@ export class Node {
 
         const payload = JSON.parse(d.toString());
         if (!payload.op) return;
-
+        this.manager.emit("raw", payload)
+        
         switch (payload.op) {
             case "stats":
                 delete payload.op;
@@ -204,7 +205,7 @@ export class Node {
         if (!payload.guildId) { return; }
         const player = this.manager.players.get(payload.guildId);
         if (!player) return;
-        const track = player.queue[0];
+        const track = player.current;
         switch (payload.type) {
             case "TrackStartEvent":
                 this.trackStart(player, track, payload);
@@ -228,21 +229,22 @@ export class Node {
 
     protected trackEnd(player: Player, track: Track, payload: any): void {
         if (track && player.trackRepeat) {
-            this.manager.emit("trackEnd", player, track);
+            this.manager.emit("trackEnd", player, track, payload);
             if (this.manager.options.autoPlay) player.play();
         } else if (track && player.queueRepeat) {
-            player.queue.add(player.queue.shift());
-            this.manager.emit("trackEnd", player, track);
+            player.current = player.queue.shift()
+            player.queue.add(track);
+            this.manager.emit("trackEnd", player, track, payload);
             if (this.manager.options.autoPlay) player.play();
-        } else if (player.queue.length === 1) {
-            player.queue.shift();
+        } else if (!player.queue.length) {
+            player.current = null;
             player.playing = false;
             if (["REPLACED", "FINISHED", "STOPPED"].includes(payload.reason)) {
                 this.manager.emit("queueEnd", player);
             }
-        } else if (player.queue.length > 0) {
-            player.queue.shift();
-            this.manager.emit("trackEnd", player, track);
+        } else if (player.queue.length) {
+            player.current = player.queue.shift();
+            this.manager.emit("trackEnd", player, track, payload);
             if (this.manager.options.autoPlay) player.play();
         }
     }

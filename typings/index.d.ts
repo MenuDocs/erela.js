@@ -177,6 +177,81 @@ declare module 'erela.js/structures/Manager' {
                 */
             updateVoiceState(data: any): void;
     }
+    export interface Manager {
+            /**
+                * Emitted when a Node connects.
+                * @event Manager#nodeConnect
+                */
+            on(event: "nodeConnect", listener: (node: Node) => void): this;
+            /**
+                * Emitted when a Node reconnects.
+                * @event Manager#nodeReconnect
+                */
+            on(event: "nodeReconnect", listener: (node: Node) => void): this;
+            /**
+                * Emitted when a Node disconnects.
+                * @event Manager#nodeDisconnect
+                */
+            on(event: "nodeDisconnect", listener: (node: Node, reason: {
+                    code: number;
+                    reason: string;
+            }) => void): this;
+            /**
+                * Emitted when a Node has an error.
+                * @event Manager#nodeError
+                */
+            on(event: "nodeError", listener: (node: Node, error: Error) => void): this;
+            /**
+                * Emitted whenever any Lavalink event is received.
+                * @event Manager#nodeRaw
+                */
+            on(event: "nodeRaw", listener: (payload: any) => void): this;
+            /**
+                * Emitted when a player is created.
+                * @event Manager#playerCreate
+                */
+            on(event: "playerCreate", listener: (player: Player) => void): this;
+            /**
+                * Emitted when a player is destroyed.
+                * @event Manager#playerDestroy
+                */
+            on(event: "playerDestroy", listener: (player: Player) => void): this;
+            /**
+                * Emitted when a player queue ends.
+                * @event Manager#queueEnd
+                */
+            on(event: "queueEnd", listener: (player: Player) => void): this;
+            /**
+                * Emitted when a player is moved to a new voice channel.
+                * @event Manager#playerMove
+                */
+            on(event: "playerMove", listener: (player: Player, oldChannel: any, newChannel: string) => void): this;
+            /**
+                * Emitted when a track starts.
+                * @event Manager#trackStart
+                */
+            on(event: "trackStart", listener: (player: Player, track: Track, payload: any) => void): this;
+            /**
+                * Emitted when a track ends.
+                * @event Manager#trackEnd
+                */
+            on(event: "trackEnd", listener: (player: Player, track: Track, payload: any) => void): this;
+            /**
+                * Emitted when a track gets stuck during playback.
+                * @event Manager#trackStuck
+                */
+            on(event: "trackStuck", listener: (player: Player, track: Track, payload: any) => void): this;
+            /**
+                * Emitted when a track has an error during playback.
+                * @event Manager#trackError
+                */
+            on(event: "trackError", listener: (player: Player, track: Track, payload: any) => void): this;
+            /**
+                * Emitted when a voice connect is closed.
+                * @event Manager#socketClosed
+                */
+            on(event: "socketClosed", listener: (player: Player, payload: any) => void): this;
+    }
 }
 
 declare module 'erela.js/structures/Player' {
@@ -251,6 +326,8 @@ declare module 'erela.js/structures/Player' {
             static manager: Manager;
             /** The Queue for the Player. */
             readonly queue: Queue;
+            /** The current track for the Player. */
+            current?: Track;
             /** Whether the queue repeats the track. */
             trackRepeat: boolean;
             /** Whether the queue repeats the queue. */
@@ -348,16 +425,17 @@ declare module 'erela.js/structures/Player' {
 }
 
 declare module 'erela.js/structures/Queue' {
-    import { Track } from "erela.js/structures/Player";
+    import { Track, Player } from "erela.js/structures/Player";
     /**
         * The Queue class.
         * @noInheritDoc
         */
     export class Queue extends Array<Track> {
+            constructor(player: Player);
             /**
                 * Adds a track to the queue.
                 * @param {(Track|Track[])} track The track or tracks to add.
-                * @param {number} [offset=0] The offset to add the track at.
+                * @param {number} [offset=null] The offset to add the track at.
                 */
             add(track: Track | Track[], offset?: number): void;
             /**
@@ -368,7 +446,7 @@ declare module 'erela.js/structures/Queue' {
             removeFrom(start: number, end: number): Track[];
             /**
                 * Removes a track from the queue. Defaults to the first track.
-                * @param {number} [position=1] The track index to remove.
+                * @param {number} [position=0] The track index to remove.
                 * @returns {(Track|null)} The track that was removed, or null if the track does not exist.
                 */
             remove(position?: number): Track | null;
