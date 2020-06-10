@@ -208,9 +208,7 @@ export class Manager extends EventEmitter {
                 .sort((a, b) => b.calls - a.calls)
                 .first();
 
-            if (!node) {
-                throw new Error("Manager#search() No available nodes.");
-            }
+            if (!node) throw new Error("Manager#search() No available nodes.");
 
             const source = { soundcloud: "sc" }[(query as Query).source] || "yt";
             let search = (query as Query).query || query as string;
