@@ -145,7 +145,7 @@ export class Player {
      * @param {EqualizerBand[]} bands The bands to set.
      */
     public setEQ(...bands: EqualizerBand[]): this {
-        bands.forEach(({ band, gain }) => this.bands[band] = gain)
+        for (const { band, gain } of bands) this.bands[band] = gain;
 
         this.node.send({
             op: "equalizer",
@@ -158,7 +158,8 @@ export class Player {
 
     /** Clears the equalizer. */
     public clearEQ(): this {
-        return this.setEQ(...new Array(15).fill(0).map((_, i) => ({ band: i, gain: 0.0 })))
+        this.bands = new Array(15).fill(0.0);
+        return this.setEQ()
     }
 
     /** Connect to the voice channel. */

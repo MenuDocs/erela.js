@@ -172,12 +172,12 @@ export class Manager extends EventEmitter {
             ...options,
         };
 
-        this.options.plugins.forEach((plugin) => plugin.load(this));
+        for (const plugin of this.options.plugins) plugin.load(this);
 
-        this.options.nodes.forEach((node: NodeOptions) => {
-            const identifier = node.identifier || node.host;
+        for (const node of this.options.nodes) {
+            const identifier = node.identifier || `${node.host}:${node.port}`;
             this.nodes.set(identifier, new (Structure.get("Node"))(this, node));
-        });
+        }
     }
 
     /**
@@ -190,7 +190,7 @@ export class Manager extends EventEmitter {
             throw new Error("\"clientId\" is not set. Pass it in Manager#init() or as a option in the constructor.");
         }
 
-        this.nodes.forEach((node: Node) => node.connect());
+        for (const node of this.nodes.values()) node.connect();
         Structure.get("Player").init(this);
         return this;
     }
