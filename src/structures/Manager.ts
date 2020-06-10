@@ -203,7 +203,10 @@ export class Manager extends EventEmitter {
      */
     public search(query: string | Query, requester: any): Promise<SearchResult> {
         return new Promise(async (resolve, reject) => {
-            const node: Node = this.nodes.values().next().value;
+            const node: Node = this.nodes
+                .filter((node) => node.connected)
+                .sort((a, b) => b.calls - a.calls)
+                .first();
 
             if (!node) {
                 throw new Error("Manager#search() No available nodes.");
