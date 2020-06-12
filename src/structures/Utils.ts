@@ -30,12 +30,12 @@ const sizes = [
 /** @hidden */
 export function buildTrack(data: any, requester: any): Track {
     try {
-        const track = {
+        const track: Track = {
             track: data.track,
             title: data.info.title,
             identifier: data.info.identifier,
             author: data.info.author,
-            length: data.info.length,
+            duration: data.info.length,
             isSeekable: data.info.isSeekable,
             isStream: data.info.isStream,
             uri: data.info.uri,

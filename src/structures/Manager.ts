@@ -52,7 +52,7 @@ export interface SearchResult {
         /** The tracks in the playlist. */
         tracks: Track[];
         /** The duration of the playlist. */
-        length: number;
+        duration: number;
     };
     /** The exception when searching if one. */
     exception?: {
@@ -256,7 +256,7 @@ export class Manager extends EventEmitter {
                         name: res.data.playlist.info.name,
                         selectedTrack: buildTrack(res.data.playlist.info.selectedTrack, requester),
                     },
-                    length: res.data.tracks
+                    duration: res.data.tracks
                         .map((track: any) => track.info.length)
                         .reduce((acc: number, cur: number) => acc + cur, 0),
                 };

@@ -32,8 +32,8 @@ export interface Track {
     readonly identifier: string;
     /** The author of the track. */
     readonly author: string;
-    /** The length of the track. */
-    readonly length: number;
+    /** The duration of the track. */
+    readonly duration: number;
     /** If the track is seekable. */
     readonly isSeekable: boolean;
     /** If the track is a stream.. */
@@ -357,7 +357,7 @@ export class Player {
     public seek(position: number): this {
         if (!this.current) return;
         if (isNaN(position)) { throw new RangeError("Player#seek() Position must be a number."); }
-        if (position < 0 || position > this.current.length) position = Math.max(Math.min(position, this.current.length), 0);
+        if (position < 0 || position > this.current.duration) position = Math.max(Math.min(position, this.current.duration), 0);
 
         this.position = position;
         this.node.send({

@@ -5,7 +5,7 @@ const template = [
     "title",
     "identifer",
     "author",
-    "length",
+    "duration",
     "isSeekable",
     "isStream",
     "uri",
@@ -18,6 +18,14 @@ const template = [
  * @noInheritDoc
  */
 export class Queue extends Array<Track> {
+    /**
+     * Returns the total duration of the queue.
+     * @returns {number} - The duration of the queue.
+     */
+    public get duration(): number {
+        return this.map((track: Track) => track.duration).reduce((acc: number, cur: number) => acc + cur, 0);
+    }
+
     public constructor(private player: Player) {
         super();
     }

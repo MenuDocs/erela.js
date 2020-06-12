@@ -127,7 +127,7 @@ declare module 'erela.js/structures/Manager' {
                     /** The tracks in the playlist. */
                     tracks: Track[];
                     /** The duration of the playlist. */
-                    length: number;
+                    duration: number;
             };
             /** The exception when searching if one. */
             exception?: {
@@ -296,8 +296,8 @@ declare module 'erela.js/structures/Player' {
             readonly identifier: string;
             /** The author of the track. */
             readonly author: string;
-            /** The length of the track. */
-            readonly length: number;
+            /** The duration of the track. */
+            readonly duration: number;
             /** If the track is seekable. */
             readonly isSeekable: boolean;
             /** If the track is a stream.. */
@@ -441,6 +441,11 @@ declare module 'erela.js/structures/Queue' {
         * @noInheritDoc
         */
     export class Queue extends Array<Track> {
+            /**
+                * Returns the total duration of the queue.
+                * @returns {number} - The duration of the queue.
+                */
+            get duration(): number;
             constructor(player: Player);
             /**
                 * Adds a track to the queue.
