@@ -137,6 +137,7 @@ export class Player {
         if (!this.node) throw new RangeError("Player() No available nodes.")
 
         this.player.manager.players.set(options.guild.id || options.guild, this);
+        this.player.manager.emit("playerCreate", this);
     }
 
     /**

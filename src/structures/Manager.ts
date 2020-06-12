@@ -67,6 +67,16 @@ const template = JSON.stringify(["event", "guildId", "op", "sessionId"]);
 
 export interface Manager {
     /**
+     * Emitted when a Node is created.
+     * @event Manager#nodeCreate
+     */
+    on(event: "nodeCreate", listener: (node: Node) => void): this;
+    /**
+     * Emitted when a Node is destroyed.
+     * @event Manager#nodeDestroy
+     */
+    on(event: "nodeDestroy", listener: (node: Node) => void): this;
+    /**
      * Emitted when a Node connects.
      * @event Manager#nodeConnect
      */

@@ -101,6 +101,8 @@ export class Node {
                 deficit: 0,
             },
         };
+
+        this.manager.emit("nodeCreate", this);
     }
 
     /** Connects to the Node. */
@@ -142,6 +144,7 @@ export class Node {
         this.socket.removeAllListeners();
         this.socket = null;
         this.reconnectAttempts = 1;
+        this.manager.emit("nodeDestroy", this);
         return clearTimeout(this.reconnectTimeout);
     }
 

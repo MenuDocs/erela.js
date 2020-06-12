@@ -81,6 +81,9 @@ client.once("ready", () => {
     client.init(client.user.id);
 });
 
+// Here we send voice data to lavalink whenever the bot joins a voice channel to play audio in the channel.
+client.on("raw", d => client.music.updateVoiceState(d));
+
 client.on("message", async message => {
     if (message.content.startsWith("!play")) {
         // Retrieves tracks with your query and the requester of the track(s).
@@ -91,7 +94,7 @@ client.on("message", async message => {
         const res = await client.music.search(message.content.slice(6), message.author);
 
         // Create a new player. This will return the player if it already exists.
-        const player = new Player({
+        const player = client.music.create({
             guild: message.guild,
             voiceChannel: message.member.voice.channel,
             textChannel: message.channel,
@@ -106,7 +109,7 @@ client.on("message", async message => {
 
         // Plays the player (plays the first track in the queue).
         // The if statement is needed else it will play the current track again
-        if (!player.playing && !player.paused && player.queue.length === 1) player.play();
+        if (!player.playing && !player.paused && !player.queue.length) player.play();
     }
 });
 
