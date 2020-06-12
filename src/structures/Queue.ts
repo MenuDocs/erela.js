@@ -18,12 +18,10 @@ const template = [
  * @noInheritDoc
  */
 export class Queue extends Array<Track> {
-    /**
-     * Returns the total duration of the queue.
-     * @returns {number} - The duration of the queue.
-     */
+    /** Returns the total duration of the queue including the current track. */
     public get duration(): number {
-        return this.map((track: Track) => track.duration).reduce((acc: number, cur: number) => acc + cur, 0);
+        const current = (this.player.current || {}).duration || 0;
+        return this.map((track: Track) => track.duration).reduce((acc: number, cur: number) => acc + cur, current);
     }
 
     public constructor(private player: Player) {
