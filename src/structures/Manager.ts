@@ -31,8 +31,8 @@ export interface ManagerOptions {
   autoPlay?: boolean;
   /**
    * Function to send data to the websocket.
-   * @param {string} id The ID of the guild.
-   * @param {*} payload The payload to send.
+   * @param id The ID of the guild.
+   * @param payload The payload to send.
    */
   send(id: string, payload: Payload): void;
 }
