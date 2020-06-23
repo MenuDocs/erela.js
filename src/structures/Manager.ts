@@ -299,9 +299,9 @@ export class Manager extends EventEmitter {
         result.playlist = {
           tracks: res.data.tracks.map((track) => buildTrack(track, requester)),
           info: {
-            name: res.data.playlist.info.name,
+            name: res.data.playlistInfo.name,
             selectedTrack: buildTrack(
-              res.data.playlist.info.selectedTrack,
+                res.data.tracks[res.data.playlistInfo.selectedTrack],
               requester
             ),
           },
