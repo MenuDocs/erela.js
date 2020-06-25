@@ -242,6 +242,7 @@ export class Node {
         } else if (!player.queue.length) {
             player.current = null;
             player.playing = false;
+            this.manager.emit("trackEnd", player, track, payload);
             if (["REPLACED", "FINISHED", "STOPPED"].includes(payload.reason)) {
                 this.manager.emit("queueEnd", player);
             }
@@ -259,12 +260,12 @@ export class Node {
     }
 
     protected trackStuck(player: Player, track: Track, payload: any): void {
-        player.queue.shift();
+        player.stop();
         this.manager.emit("trackStuck", player, track, payload);
     }
 
     protected trackError(player: Player, track: Track, payload: any): void {
-        player.queue.shift();
+        player.stop();
         this.manager.emit("trackError", player, track, payload);
     }
 
