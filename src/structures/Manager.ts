@@ -1,10 +1,10 @@
 /* eslint-disable no-async-promise-executor, @typescript-eslint/no-explicit-any */
-import { LoadType, buildTrack, Plugin, Structure } from './Utils';
-import { Node, NodeOptions } from './Node';
-import { Player, Track, PlayerOptions } from './Player';
-import { EventEmitter } from 'events';
-import Collection from '@discordjs/collection';
-import Axios from 'axios';
+import Collection from "@discordjs/collection";
+import Axios from "axios";
+import { EventEmitter } from "events";
+import { Node, NodeOptions } from "./Node";
+import { Player, PlayerOptions, Track } from "./Player";
+import { buildTrack, LoadType, Plugin, Structure } from "./Utils";
 
 export interface Payload {
   /** The OP code */
@@ -40,7 +40,7 @@ export interface ManagerOptions {
 /** The IQuery interface. */
 export interface Query {
   /** The source to search from. */
-  source?: 'youtube' | 'soundcloud';
+  source?: "youtube" | "soundcloud";
   /** The query to search for. */
   query: string;
 }
@@ -74,68 +74,68 @@ export interface SearchResult {
   };
 }
 
-const template = JSON.stringify(['event', 'guildId', 'op', 'sessionId']);
+const template = JSON.stringify(["event", "guildId", "op", "sessionId"]);
 
 export interface Manager {
   /**
    * Emitted when a Node is created.
    * @event Manager#nodeCreate
    */
-  on(event: 'nodeCreate', listener: (node: Node) => void): this;
+  on(event: "nodeCreate", listener: (node: Node) => void): this;
   /**
    * Emitted when a Node is destroyed.
    * @event Manager#nodeDestroy
    */
-  on(event: 'nodeDestroy', listener: (node: Node) => void): this;
+  on(event: "nodeDestroy", listener: (node: Node) => void): this;
   /**
    * Emitted when a Node connects.
    * @event Manager#nodeConnect
    */
-  on(event: 'nodeConnect', listener: (node: Node) => void): this;
+  on(event: "nodeConnect", listener: (node: Node) => void): this;
   /**
    * Emitted when a Node reconnects.
    * @event Manager#nodeReconnect
    */
-  on(event: 'nodeReconnect', listener: (node: Node) => void): this;
+  on(event: "nodeReconnect", listener: (node: Node) => void): this;
   /**
    * Emitted when a Node disconnects.
    * @event Manager#nodeDisconnect
    */
   on(
-    event: 'nodeDisconnect',
+    event: "nodeDisconnect",
     listener: (node: Node, reason: { code: number; reason: string }) => void
   ): this;
   /**
    * Emitted when a Node has an error.
    * @event Manager#nodeError
    */
-  on(event: 'nodeError', listener: (node: Node, error: Error) => void): this;
+  on(event: "nodeError", listener: (node: Node, error: Error) => void): this;
   /**
    * Emitted whenever any Lavalink event is received.
    * @event Manager#nodeRaw
    */
-  on(event: 'nodeRaw', listener: (payload: any) => void): this;
+  on(event: "nodeRaw", listener: (payload: any) => void): this;
   /**
    * Emitted when a player is created.
    * @event Manager#playerCreate
    */
-  on(event: 'playerCreate', listener: (player: Player) => void): this;
+  on(event: "playerCreate", listener: (player: Player) => void): this;
   /**
    * Emitted when a player is destroyed.
    * @event Manager#playerDestroy
    */
-  on(event: 'playerDestroy', listener: (player: Player) => void): this;
+  on(event: "playerDestroy", listener: (player: Player) => void): this;
   /**
    * Emitted when a player queue ends.
    * @event Manager#queueEnd
    */
-  on(event: 'queueEnd', listener: (player: Player) => void): this;
+  on(event: "queueEnd", listener: (player: Player) => void): this;
   /**
    * Emitted when a player is moved to a new voice channel.
    * @event Manager#playerMove
    */
   on(
-    event: 'playerMove',
+    event: "playerMove",
     listener: (player: Player, oldChannel: any, newChannel: string) => void
   ): this;
   /**
@@ -143,7 +143,7 @@ export interface Manager {
    * @event Manager#trackStart
    */
   on(
-    event: 'trackStart',
+    event: "trackStart",
     listener: (player: Player, track: Track, payload: any) => void
   ): this;
   /**
@@ -151,7 +151,7 @@ export interface Manager {
    * @event Manager#trackEnd
    */
   on(
-    event: 'trackEnd',
+    event: "trackEnd",
     listener: (player: Player, track: Track, payload: any) => void
   ): this;
   /**
@@ -159,7 +159,7 @@ export interface Manager {
    * @event Manager#trackStuck
    */
   on(
-    event: 'trackStuck',
+    event: "trackStuck",
     listener: (player: Player, track: Track, payload: any) => void
   ): this;
   /**
@@ -167,7 +167,7 @@ export interface Manager {
    * @event Manager#trackError
    */
   on(
-    event: 'trackError',
+    event: "trackError",
     listener: (player: Player, track: Track, payload: any) => void
   ): this;
   /**
@@ -175,7 +175,7 @@ export interface Manager {
    * @event Manager#socketClosed
    */
   on(
-    event: 'socketClosed',
+    event: "socketClosed",
     listener: (player: Player, payload: any) => void
   ): this;
 }
@@ -204,15 +204,15 @@ export class Manager extends EventEmitter {
     super();
 
     if (!options.send)
-      throw new RangeError('Missing send method in ManageOptions.');
+      throw new RangeError("Missing send method in ManageOptions.");
 
     this.options = {
       plugins: [],
       nodes: [
         {
-          host: 'localhost',
+          host: "localhost",
           port: 2333,
-          password: 'youshallnotpass',
+          password: "youshallnotpass",
         },
       ],
       shards: 1,
@@ -224,7 +224,7 @@ export class Manager extends EventEmitter {
 
     for (const node of this.options.nodes) {
       const identifier = node.identifier || `${node.host}:${node.port}`;
-      this.nodes.set(identifier, new (Structure.get('Node'))(this, node));
+      this.nodes.set(identifier, new (Structure.get("Node"))(this, node));
     }
   }
 
@@ -241,7 +241,7 @@ export class Manager extends EventEmitter {
     }
 
     for (const node of this.nodes.values()) node.connect();
-    Structure.get('Player').init(this);
+    Structure.get("Player").init(this);
     return this;
   }
 
@@ -258,9 +258,9 @@ export class Manager extends EventEmitter {
         .sort((a, b) => b.calls - a.calls)
         .first();
 
-      if (!node) throw new Error('Manager#search() No available nodes.');
+      if (!node) throw new Error("Manager#search() No available nodes.");
 
-      const source = { soundcloud: 'sc' }[(query as Query).source] || 'yt';
+      const source = { soundcloud: "sc" }[(query as Query).source] || "yt";
       let search = (query as Query).query || (query as string);
 
       if (!/^https?:\/\//.test(search)) {
@@ -279,7 +279,7 @@ export class Manager extends EventEmitter {
       node.calls++;
 
       if (!res || !res.data) {
-        return reject(new Error('No data returned from query.'));
+        return reject(new Error("No data returned from query."));
       }
 
       const result: SearchResult = {
@@ -301,7 +301,7 @@ export class Manager extends EventEmitter {
           info: {
             name: res.data.playlistInfo.name,
             selectedTrack: buildTrack(
-                res.data.tracks[res.data.playlistInfo.selectedTrack],
+              res.data.tracks[res.data.playlistInfo.selectedTrack],
               requester
             ),
           },
@@ -323,7 +323,7 @@ export class Manager extends EventEmitter {
     if (this.players.has(options.guild.id || options.guild)) {
       return this.players.get(options.guild.id || options.guild);
     } else {
-      return new (Structure.get('Player'))(options);
+      return new (Structure.get("Player"))(options);
     }
   }
 
@@ -334,7 +334,7 @@ export class Manager extends EventEmitter {
   public updateVoiceState(data: any): void {
     if (
       !data ||
-      !['VOICE_SERVER_UPDATE', 'VOICE_STATE_UPDATE'].includes(data.t || '')
+      !["VOICE_SERVER_UPDATE", "VOICE_STATE_UPDATE"].includes(data.t || "")
     )
       return;
     const player = this.players.get(data.d.guild_id) as Player;
@@ -342,15 +342,15 @@ export class Manager extends EventEmitter {
     if (!player) return;
     const state = this.voiceStates.get(data.d.guild_id) || {};
 
-    if (data.t === 'VOICE_SERVER_UPDATE') {
-      state.op = 'voiceUpdate';
+    if (data.t === "VOICE_SERVER_UPDATE") {
+      state.op = "voiceUpdate";
       state.guildId = data.d.guild_id;
       state.event = data.d;
     } else {
       if (data.d.user_id !== this.options.clientId) return;
       state.sessionId = data.d.session_id;
       if (player.options.voiceChannel !== data.d.channel_id) {
-        this.emit('playerMove', player, player.voiceChannel, data.d.channel_id);
+        this.emit("playerMove", player, player.voiceChannel, data.d.channel_id);
       }
     }
 
