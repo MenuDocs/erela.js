@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
-    "lint": "eslint ./src --ext .ts",
+    "lint": "eslint --ext .ts ./src",
     "types": "dts-bundle --removeSource --name erela.js --main ./dist --out ../typings/index.d.ts --baseDir ./dist",
     "docs": "typedoc --out ./docs --hideBreadcrumbs --theme vuepress --mode file --excludeProtected --excludePrivate src/structures",
     "publish": "npm run types && npm publish --access=public"
@@ -27,15 +27,15 @@
     "@types/axios": "^0.14.0",
     "@types/node": "^14.0.11",
     "@types/ws": "^6.0.4",
-    "@typescript-eslint/eslint-plugin": "^2.34.0",
-    "@typescript-eslint/parser": "^2.34.0",
+    "@typescript-eslint/eslint-plugin": "^3.5.0",
+    "@typescript-eslint/parser": "^3.5.0",
     "dts-bundle": "^0.7.3",
-    "eslint": "^7.0.0",
+    "eslint": "^7.4.0",
     "tslint": "^5.20.1",
     "typedoc": "^0.15.8",
     "typedoc-plugin-markdown": "^2.2.17",
     "typedoc-plugin-no-inherit": "^1.1.10",
-    "typescript": "^3.9.2"
+    "typescript": "^3.9.6"
   },
   "dependencies": {
     "@discordjs/collection": "^0.1.5",
@@ -50,7 +50,6 @@
     ],
     "extends": [
       "eslint:recommended",
-      "plugin:@typescript-eslint/eslint-recommended",
       "plugin:@typescript-eslint/recommended"
     ]
   }
