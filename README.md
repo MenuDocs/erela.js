@@ -78,11 +78,11 @@ client.manager = new Manager({
 client.once("ready", () => {
     console.log("I am ready!")
     // Initiate the manager.
-    client.init(client.user.id);
+    client.manager.init(client.user.id);
 });
 
 // Here we send voice data to lavalink whenever the bot joins a voice channel to play audio in the channel.
-client.on("raw", d => client.music.updateVoiceState(d));
+client.on("raw", d => client.manager.updateVoiceState(d));
 
 client.on("message", async message => {
     if (message.content.startsWith("!play")) {
@@ -91,10 +91,10 @@ client.on("message", async message => {
         // Note: If you want to "search" with you must provide an object with a "query" property being the query to use, and "source" being one of "youtube", "soundcloud".
         // Note: This example only works for searching tracks using a query, such as "Rick Astley - Never Gonna Give You Up".
         // Returns a SearchResult.
-        const res = await client.music.search(message.content.slice(6), message.author);
+        const res = await client.manager.search(message.content.slice(6), message.author);
 
         // Create a new player. This will return the player if it already exists.
-        const player = client.music.create({
+        const player = client.manager.create({
             guild: message.guild,
             voiceChannel: message.member.voice.channel,
             textChannel: message.channel,
