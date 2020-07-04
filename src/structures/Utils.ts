@@ -65,9 +65,9 @@ export function buildTrack(data: TrackData, requester: any): Track | null {
 export class Utils {
   /**
    * Formats the given duration into human readable format.
-   * @param {number} milliseconds The duration to format.
-   * @param {boolean?} [minimal=false] Whether to use a minimal format.
-   * @returns {string} The formatted duration.
+   * @param milliseconds The duration to format.
+   * @param [minimal=false] Whether to use a minimal format.
+   * @returns The formatted duration.
    */
   public static formatTime(milliseconds: number, minimal = false): string {
     if (typeof milliseconds === "undefined" || isNaN(milliseconds)) {
@@ -142,8 +142,8 @@ export class Utils {
 
   /**
    * Parses the given duration into milliseconds.
-   * @param {string} time The duration to parse.
-   * @returns {number} The formatted duration.
+   * @param time The duration to parse.
+   * @returns The formatted duration.
    */
   public static parseTime(time: string): number | null {
     if (time.includes(":"))

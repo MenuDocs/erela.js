@@ -76,8 +76,8 @@ export class Node {
 
   /**
    * Creates an instance of Node.
-   * @param {Manager} manager The Manager.
-   * @param {NodeOptions} options The NodeOptions to pass.
+   * @param manager The Manager.
+   * @param options The NodeOptions to pass.
    */
   constructor(public manager: Manager, public options: NodeOptions) {
     this.stats = {
@@ -159,7 +159,7 @@ export class Node {
 
   /**
    * Sends data to the Node.
-   * @param {any} data The data to send.
+   * @param data The data to send.
    */
   public send(data: any): Promise<boolean> {
     return new Promise((resolve, reject) => {
