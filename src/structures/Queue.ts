@@ -33,8 +33,8 @@ export class Queue extends Array<Track> {
 
   /**
    * Adds a track to the queue.
-   * @param {(Track|Track[])} track The track or tracks to add.
-   * @param {number} [offset=null] The offset to add the track at.
+   * @param track The track or tracks to add.
+   * @param [offset=null] The offset to add the track at.
    */
   public add(track: Track | Track[], offset?: number): void {
     if (
@@ -78,8 +78,8 @@ export class Queue extends Array<Track> {
 
   /**
    * Removes an amount of tracks using a start and end index.
-   * @param {number} start The start to remove from.
-   * @param {number} end The end to remove to.
+   * @param start The start to remove from.
+   * @param end The end to remove to.
    */
   public removeFrom(start: number, end: number): Track[] {
     if (isNaN(start)) {
@@ -101,8 +101,8 @@ export class Queue extends Array<Track> {
 
   /**
    * Removes a track from the queue. Defaults to the first track.
-   * @param {number} [position=0] The track index to remove.
-   * @returns {(Track|null)} The track that was removed, or null if the track does not exist.
+   * @param [position=0] The track index to remove.
+   * @returns The track that was removed, or null if the track does not exist.
    */
   public remove(position = 0): Track | null {
     return this.splice(position, 1)[0];

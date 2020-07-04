@@ -119,7 +119,7 @@ export class Player {
 
   /**
    * Creates a new player, returns one if it already exists.
-   * @param {PlayerOptions} options The options to pass.
+   * @param options The options to pass.
    */
   constructor(public options: PlayerOptions) {
     if (!this.player) this.player = Structure.get("Player");
@@ -159,9 +159,9 @@ export class Player {
 
   /**
    * Same as Manager#search() but a shortcut on the player itself.
-   * @param {(string|Query)} query The query to search against.
-   * @param {any} requester The user who requested the tracks.
-   * @returns {Promise<SearchResult>} The search result.
+   * @param query The query to search against.
+   * @param requester The user who requested the tracks.
+   * @returns The search result.
    */
   public search(query: string | Query, requester: any): Promise<SearchResult> {
     return this.player.manager.search(query, requester);
@@ -169,7 +169,7 @@ export class Player {
 
   /**
    * Sets the players equalizer band. Passing nothing will clear it.
-   * @param {EqualizerBand[]} bands The bands to set.
+   * @param bands The bands to set.
    */
   public setEQ(...bands: EqualizerBand[]): this {
     for (const { band, gain } of bands) this.bands[band] = gain;
@@ -248,7 +248,7 @@ export class Player {
 
   /**
    * Sets the player voice channel.
-   * @param {*} channel The channel to set.
+   * @param channel The channel to set.
    */
   public setVoiceChannel(channel: any): this {
     channel = this.options.voiceChannel.id ? channel : channel.id;
@@ -259,7 +259,7 @@ export class Player {
 
   /**
    * Sets the player text channel.
-   * @param {*} channel The channel to set.
+   * @param channel The channel to set.
    */
   public setTextChannel(channel: any): this {
     channel = this.textChannel.id ? channel : channel.id;
@@ -269,7 +269,7 @@ export class Player {
 
   /**
    * Plays the next track or a specified track in the PlayOptions.
-   * @param {PlayOptions} [options={}] The options to use.
+   * @param [options={}] The options to use.
    */
   public play(options: PlayOptions = {}): this {
     if (!this.current) throw new RangeError("Player#play() No current track.");
@@ -291,7 +291,7 @@ export class Player {
 
   /**
    * Sets the player volume.
-   * @param {number} volume The volume to set.
+   * @param volume The volume to set.
    */
   public setVolume(volume: number): this {
     if (isNaN(volume))
@@ -309,7 +309,7 @@ export class Player {
 
   /**
    * Sets the track repeat.
-   * @param {boolean} repeat If track repeat should be enabled.
+   * @param repeat If track repeat should be enabled.
    */
   public setTrackRepeat(repeat: boolean): this {
     if (typeof repeat !== "boolean")
@@ -330,7 +330,7 @@ export class Player {
 
   /**
    * Sets the queue repeat.
-   * @param {boolean} repeat If queue repeat should be enabled.
+   * @param repeat If queue repeat should be enabled.
    */
   public setQueueRepeat(repeat: boolean): this {
     if (typeof repeat !== "boolean")
@@ -361,7 +361,7 @@ export class Player {
 
   /**
    * Pauses the current track.
-   * @param {boolean} pause Whether to pause the current track.
+   * @param pause Whether to pause the current track.
    */
   public pause(pause: boolean): this {
     if (typeof pause !== "boolean")
@@ -382,7 +382,7 @@ export class Player {
 
   /**
    * Seeks to the position in the current track.
-   * @param {boolean} pause Whether to pause the current track.
+   * @param pause Whether to pause the current track.
    */
   public seek(position: number): this | void {
     if (!this.current) return undefined;

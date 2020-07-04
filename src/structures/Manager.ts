@@ -198,7 +198,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Creates the Manager class.
-   * @param {ManagerOptions} options The options to use.
+   * @param options The options to use.
    */
   constructor(options: ManagerOptions) {
     super();
@@ -230,7 +230,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Initiates the manager (with a client ID if none provided in ManagerOptions).
-   * @param {string} clientId The client ID to use.
+   * @param clientId The client ID to use.
    */
   public init(clientId?: string): this {
     if (clientId) this.options.clientId = clientId;
@@ -247,9 +247,9 @@ export class Manager extends EventEmitter {
 
   /**
    * Searches YouTube with the query.
-   * @param {(string|Query)} query The query to search against.
-   * @param {any} requester The user who requested the tracks.
-   * @returns {Promise<SearchResult>} The search result.
+   * @param query The query to search against.
+   * @param requester The user who requested the tracks.
+   * @returns The search result.
    */
   public search(query: string | Query, requester: any): Promise<SearchResult> {
     return new Promise(async (resolve, reject) => {
@@ -317,7 +317,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Create method for an easier option to creating players.
-   * @param {PlayerOptions} options The options to pass.
+   * @param options The options to pass.
    */
   public create(options: PlayerOptions): Player {
     if (this.players.has(options.guild.id || options.guild)) {
@@ -329,7 +329,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Sends voice data to the Lavalink server.
-   * @param {*} data The data to send.
+   * @param data The data to send.
    */
   public updateVoiceState(data: any): void {
     if (
