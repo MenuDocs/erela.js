@@ -1,7 +1,10 @@
+# folders
 node_modules
 dist
 tests
+.idea
+typings
 
-# Lock files
+# files
 package-lock.json
 yarn.lock

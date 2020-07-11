@@ -136,20 +136,7 @@ export class Player {
     this.textChannel = options.textChannel;
 
     const node = this.player.manager.nodes.get(options.node);
-    this.node =
-      node ||
-      this.player.manager.nodes
-        .filter((node) => node.connected)
-        .sort((a, b) => {
-          const aload = a.stats.cpu
-            ? (a.stats.cpu.systemLoad / a.stats.cpu.cores) * 100
-            : 0;
-          const bload = b.stats.cpu
-            ? (b.stats.cpu.systemLoad / b.stats.cpu.cores) * 100
-            : 0;
-          return aload - bload;
-        })
-        .first();
+    this.node = node || this.player.manager.leastLoadNodes.first();
 
     if (!this.node) throw new RangeError("Player() No available nodes.");
 

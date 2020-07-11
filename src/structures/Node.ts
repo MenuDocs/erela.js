@@ -256,8 +256,8 @@ export class Node {
       this.manager.emit("trackEnd", player, track, payload);
       if (this.manager.options.autoPlay) player.play();
     } else if (track && player.queueRepeat) {
-      player.current = player.queue.shift();
       player.queue.add(track);
+      player.current = player.queue.shift();
       this.manager.emit("trackEnd", player, track, payload);
       if (this.manager.options.autoPlay) player.play();
     } else if (!player.queue.length) {

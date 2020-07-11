@@ -1,16 +1,16 @@
 {
   "name": "erela.js",
-  "version": "1.1.8",
+  "version": "2.0.0-beta.2",
   "description": "An easy-to-use Lavalink client for NodeJS.",
   "main": "dist/index.js",
   "types": "typings/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "prepublishOnly": "npm run build",
     "lint": "eslint --ext .ts ./src",
     "types": "dts-bundle --removeSource --name erela.js --main ./dist --out ../typings/index.d.ts --baseDir ./dist",
     "docs": "typedoc --out ./docs --hideBreadcrumbs --theme vuepress --mode file --excludeProtected --excludePrivate src/structures",
-    "publish": "npm run types && npm publish --access=public"
+    "publish": "npm run build && npm run types && npm publish --access=public",
+    "publish:beta": "npm run build && npm run types && npm publish --tag beta --access=public"
   },
   "keywords": [
     "lavalink",
@@ -52,5 +52,6 @@
       "eslint:recommended",
       "plugin:@typescript-eslint/recommended"
     ]
-  }
+  },
+  "homepage": "https://github.com/WarHammer414/erela.js#readme"
 }

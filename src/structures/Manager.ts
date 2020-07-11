@@ -1,10 +1,10 @@
-/* eslint-disable no-async-promise-executor, @typescript-eslint/no-explicit-any */
+/* eslint-disable no-async-promise-executor, @typescript-eslint/no-explicit-any, no-undef */
 import Collection from "@discordjs/collection";
 import Axios from "axios";
 import { EventEmitter } from "events";
 import { Node, NodeOptions } from "./Node";
 import { Player, PlayerOptions, Track } from "./Player";
-import { buildTrack, LoadType, Plugin, Structure } from "./Utils";
+import { buildTrack, LoadType, Plugin, Structure, TrackData} from "./Utils";
 
 export interface Payload {
   /** The OP code */
@@ -196,6 +196,28 @@ export class Manager extends EventEmitter {
   public readonly options: ManagerOptions;
   protected readonly voiceStates: Map<string, any> = new Map();
 
+  /** Returns the least used Nodes. */
+  public get leastUsedNodes(): Collection<string, Node> {
+    return this.nodes
+        .filter((node) => node.connected)
+        .sort((a, b) => b.calls - a.calls);
+  }
+
+  /** Returns the least system load Nodes. */
+  public get leastLoadNodes(): Collection<string, Node> {
+    return this.nodes
+        .filter((node) => node.connected)
+        .sort((a, b) => {
+          const aload = a.stats.cpu
+              ? (a.stats.cpu.systemLoad / a.stats.cpu.cores) * 100
+              : 0;
+          const bload = b.stats.cpu
+              ? (b.stats.cpu.systemLoad / b.stats.cpu.cores) * 100
+              : 0;
+          return aload - bload;
+        })
+  }
+
   /**
    * Creates the Manager class.
    * @param options The options to use.
@@ -253,11 +275,7 @@ export class Manager extends EventEmitter {
    */
   public search(query: string | Query, requester: any): Promise<SearchResult> {
     return new Promise(async (resolve, reject) => {
-      const node: Node = this.nodes
-        .filter((node) => node.connected)
-        .sort((a, b) => b.calls - a.calls)
-        .first();
-
+      const node: Node = this.leastUsedNodes.first()
       if (!node) throw new Error("Manager#search() No available nodes.");
 
       const source = { soundcloud: "sc" }[(query as Query).source] || "yt";
@@ -313,6 +331,30 @@ export class Manager extends EventEmitter {
 
       return resolve(result);
     });
+  }
+
+  /** Decodes the base64 encoded track and returns a Track. */
+  public decodeTrack(track: string): Promise<TrackData> {
+    return new Promise(async (resolve, reject) => {
+      const node: Node = this.leastUsedNodes.first()
+      if (!node) throw new Error("Manager#search() No available nodes.");
+      const url = `http://${node.options.host}:${node.options.port}/decodetrack`;
+
+      const res = await Axios.get(url, {
+        headers: { Authorization: node.options.password },
+        params: { track: track },
+      }).catch((err) => {
+        return reject(err);
+      });
+
+      node.calls++;
+
+      if (!res || !res.data) {
+        return reject(new Error("No data returned from query."));
+      }
+
+      return resolve({ track, info: res.data})
+    })
   }
 
   /**
