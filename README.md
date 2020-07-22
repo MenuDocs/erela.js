@@ -4,9 +4,7 @@
 
 ## Documentation
 
-> Note: Some links do not work, I'll fix them when I can. The sidebar menu has the links that are broken.
-
-You can find the documentation at <http://projects.warhammer.codes/erelajs> (*this* link does work)
+You can find the documentation at <http://projects.warhammer.codes/erelajs-rewrite>
 
 ## Installation
 
