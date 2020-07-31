@@ -20,16 +20,15 @@ const template = [
 export class Queue extends Array<Track> {
   /** Returns the total duration of the queue including the current track. */
   public get duration(): number {
-    const current = (this.player.current || {}).duration || 0;
+    const current = (this.current || {}).duration || 0;
     return this.map((track: Track) => track.duration).reduce(
       (acc: number, cur: number) => acc + cur,
       current
     );
   }
 
-  public constructor(private player: Player) {
-    super();
-  }
+  /** The current track */
+  public current: Track = null
 
   /**
    * Adds a track to the queue.
@@ -46,12 +45,12 @@ export class Queue extends Array<Track> {
       throw new RangeError('Queue#add() Track must be a "Track" or "Track[]".');
     }
 
-    if (!this.player.current) {
+    if (!this.current) {
       if (!Array.isArray(track)) {
-        this.player.current = track;
+        this.current = track;
         return;
       } else {
-        this.player.current = track.shift();
+        this.current = track.shift();
       }
     }
 

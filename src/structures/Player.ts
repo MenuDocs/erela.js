@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/camelcase, @typescript-eslint/no-explicit-any */
+/* eslint-disable */
 import { Manager, Query, SearchResult } from "./Manager";
 import { Node } from "./Node";
 import { Queue } from "./Queue";
@@ -7,11 +7,11 @@ import { State, Structure } from "./Utils";
 /** The PlayerOptions interface. */
 export interface PlayerOptions {
   /** The guild the Player belongs to. */
-  guild: any;
+  guild: string;
   /** The text channel the Player belongs to. */
-  textChannel: any;
+  textChannel: string;
   /** The voice channel the Player belongs to. */
-  voiceChannel?: any;
+  voiceChannel?: string;
   /** The node the Player uses. */
   node?: string;
   /** The initial volume the Player will use. */
@@ -43,7 +43,7 @@ export interface Track {
   /** The thumbnail of the track. */
   readonly thumbnail: string;
   /** The user that requested the track. */
-  readonly requester: any;
+  readonly requester: unknown | null
   /** Displays the track thumbnail with a size in "0", "1", "2", "3", "default", "mqdefault", "hqdefault", "maxresdefault". Only for youtube as others require an API. */
   displayThumbnail(
     size?:
@@ -83,9 +83,7 @@ export class Player {
   /** The Manager instance. */
   public static manager: Manager;
   /** The Queue for the Player. */
-  public readonly queue = new (Structure.get("Queue"))(this) as Queue;
-  /** The current track for the Player. */
-  public current?: Track;
+  public readonly queue = new (Structure.get("Queue")) as Queue;
   /** Whether the queue repeats the track. */
   public trackRepeat = false;
   /** Whether the queue repeats the queue. */
@@ -101,16 +99,16 @@ export class Player {
   /** The Node for the Player. */
   public node: Node;
   /** The guild the player. */
-  public guild: any;
+  public guild: string;
   /** The voice channel for the player. */
-  public voiceChannel: any;
+  public voiceChannel: string;
   /** The text channel for the player. */
-  public textChannel: any;
+  public textChannel: string;
   /** The current state of the player. */
   public state = State.DISCONNECTED;
   /** The equalizer bands array. */
   public bands = new Array<number>(15).fill(0.0);
-  private player: typeof Player;
+  private readonly player: typeof Player;
 
   /** Only for internal use. */
   public static init(manager: Manager): void {
@@ -126,8 +124,8 @@ export class Player {
     if (!this.player.manager)
       throw new RangeError("Manager has not been initiated.");
 
-    if (this.player.manager.players.has(options.guild.id || options.guild)) {
-      return this.player.manager.players.get(options.guild.id || options.guild);
+    if (this.player.manager.players.has(options.guild)) {
+      return this.player.manager.players.get(options.guild);
     }
 
     this.volume = options.volume || 100;
@@ -140,7 +138,7 @@ export class Player {
 
     if (!this.node) throw new RangeError("Player() No available nodes.");
 
-    this.player.manager.players.set(options.guild.id || options.guild, this);
+    this.player.manager.players.set(options.guild, this);
     this.player.manager.emit("playerCreate", this);
   }
 
@@ -150,7 +148,7 @@ export class Player {
    * @param requester The user who requested the tracks.
    * @returns The search result.
    */
-  public search(query: string | Query, requester: any): Promise<SearchResult> {
+  public search(query: string | Query, requester?: unknown): Promise<SearchResult> {
     return this.player.manager.search(query, requester);
   }
 
@@ -163,7 +161,7 @@ export class Player {
 
     this.node.send({
       op: "equalizer",
-      guildId: this.guild.id || this.guild,
+      guildId: this.guild,
       bands: this.bands.map((gain, band) => ({ band, gain })),
     });
 
@@ -184,11 +182,11 @@ export class Player {
       );
     this.state = State.CONNECTING;
 
-    this.player.manager.options.send(this.guild.id || this.guild, {
+    this.player.manager.options.send(this.guild, {
       op: 4,
       d: {
-        guild_id: this.guild.id || this.guild,
-        channel_id: this.voiceChannel.id || this.voiceChannel,
+        guild_id: this.guild,
+        channel_id: this.voiceChannel,
         self_mute: this.options.selfMute || false,
         self_deaf: this.options.selfDeafen || false,
       },
@@ -204,10 +202,10 @@ export class Player {
     this.state = State.DISCONNECTING;
 
     this.pause(true);
-    this.player.manager.options.send(this.guild.id || this.guild, {
+    this.player.manager.options.send(this.guild, {
       op: 4,
       d: {
-        guild_id: this.guild.id || this.guild,
+        guild_id: this.guild,
         channel_id: null,
         self_mute: false,
         self_deaf: false,
@@ -226,19 +224,18 @@ export class Player {
 
     this.node.send({
       op: "destroy",
-      guildId: this.guild.id || this.guild,
+      guildId: this.guild,
     });
 
     this.player.manager.emit("playerDestroy", this);
-    this.player.manager.players.delete(this.guild.id || this.guild);
+    this.player.manager.players.delete(this.guild);
   }
 
   /**
    * Sets the player voice channel.
    * @param channel The channel to set.
    */
-  public setVoiceChannel(channel: any): this {
-    channel = this.options.voiceChannel.id ? channel : channel.id;
+  public setVoiceChannel(channel: string): this {
     this.voiceChannel = channel;
     this.connect();
     return this;
@@ -248,8 +245,7 @@ export class Player {
    * Sets the player text channel.
    * @param channel The channel to set.
    */
-  public setTextChannel(channel: any): this {
-    channel = this.textChannel.id ? channel : channel.id;
+  public setTextChannel(channel: string): this {
     this.textChannel = channel;
     return this;
   }
@@ -259,12 +255,12 @@ export class Player {
    * @param [options={}] The options to use.
    */
   public play(options: PlayOptions = {}): this {
-    if (!this.current) throw new RangeError("Player#play() No current track.");
+    if (!this.queue.current) throw new RangeError("Player#play() No current track.");
 
     const finalOptions = {
       op: "play",
-      guildId: this.guild.id || this.guild,
-      track: this.current.track,
+      guildId: this.guild,
+      track: this.queue.current.track,
       ...options,
     };
 
@@ -287,7 +283,7 @@ export class Player {
 
     this.node.send({
       op: "volume",
-      guildId: this.guild.id || this.guild,
+      guildId: this.guild,
       volume: this.volume,
     });
 
@@ -340,7 +336,7 @@ export class Player {
   public stop(): this {
     this.node.send({
       op: "stop",
-      guildId: this.guild.id || this.guild,
+      guildId: this.guild,
     });
 
     return this;
@@ -360,7 +356,7 @@ export class Player {
     this.paused = pause;
     this.node.send({
       op: "pause",
-      guildId: this.guild.id || this.guild,
+      guildId: this.guild,
       pause,
     });
 
@@ -369,20 +365,20 @@ export class Player {
 
   /**
    * Seeks to the position in the current track.
-   * @param pause Whether to pause the current track.
+   * @param position The position to seek to.
    */
   public seek(position: number): this | void {
-    if (!this.current) return undefined;
+    if (!this.queue.current) return undefined;
     if (isNaN(position)) {
       throw new RangeError("Player#seek() Position must be a number.");
     }
-    if (position < 0 || position > this.current.duration)
-      position = Math.max(Math.min(position, this.current.duration), 0);
+    if (position < 0 || position > this.queue.current.duration)
+      position = Math.max(Math.min(position, this.queue.current.duration), 0);
 
     this.position = position;
     this.node.send({
       op: "seek",
-      guildId: this.guild.id || this.guild,
+      guildId: this.guild,
       position,
     });
 

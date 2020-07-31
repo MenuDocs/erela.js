@@ -4,7 +4,21 @@ import Axios from "axios";
 import { EventEmitter } from "events";
 import { Node, NodeOptions } from "./Node";
 import { Player, PlayerOptions, Track } from "./Player";
-import { buildTrack, LoadType, Plugin, Structure, TrackData} from "./Utils";
+import {
+  buildTrack,
+  LoadType,
+  Plugin,
+  Structure,
+  TrackData,
+  VoiceState,
+  VoicePacket,
+  VoiceEvent,
+  WebSocketClosedEvent,
+  TrackExceptionEvent,
+  TrackStuckEvent,
+  TrackEndEvent,
+  TrackStartEvent
+} from "./Utils";
 
 export interface Payload {
   /** The OP code */
@@ -136,7 +150,7 @@ export interface Manager {
    */
   on(
     event: "playerMove",
-    listener: (player: Player, oldChannel: any, newChannel: string) => void
+    listener: (player: Player, oldChannel: string, newChannel: string) => void
   ): this;
   /**
    * Emitted when a track starts.
@@ -144,7 +158,7 @@ export interface Manager {
    */
   on(
     event: "trackStart",
-    listener: (player: Player, track: Track, payload: any) => void
+    listener: (player: Player, track: Track, payload: TrackStartEvent) => void
   ): this;
   /**
    * Emitted when a track ends.
@@ -152,7 +166,7 @@ export interface Manager {
    */
   on(
     event: "trackEnd",
-    listener: (player: Player, track: Track, payload: any) => void
+    listener: (player: Player, track: Track, payload: TrackEndEvent) => void
   ): this;
   /**
    * Emitted when a track gets stuck during playback.
@@ -160,7 +174,7 @@ export interface Manager {
    */
   on(
     event: "trackStuck",
-    listener: (player: Player, track: Track, payload: any) => void
+    listener: (player: Player, track: Track, payload: TrackStuckEvent) => void
   ): this;
   /**
    * Emitted when a track has an error during playback.
@@ -168,7 +182,7 @@ export interface Manager {
    */
   on(
     event: "trackError",
-    listener: (player: Player, track: Track, payload: any) => void
+    listener: (player: Player, track: Track, payload: TrackExceptionEvent) => void
   ): this;
   /**
    * Emitted when a voice connect is closed.
@@ -176,7 +190,7 @@ export interface Manager {
    */
   on(
     event: "socketClosed",
-    listener: (player: Player, payload: any) => void
+    listener: (player: Player, payload: WebSocketClosedEvent) => void
   ): this;
 }
 
@@ -194,7 +208,7 @@ export class Manager extends EventEmitter {
   public readonly nodes = new Collection<string, Node>();
   /** The options that were set. */
   public readonly options: ManagerOptions;
-  protected readonly voiceStates: Map<string, any> = new Map();
+  protected readonly voiceStates: Map<string, VoiceState> = new Map();
 
   /** Returns the least used Nodes. */
   public get leastUsedNodes(): Collection<string, Node> {
@@ -235,6 +249,7 @@ export class Manager extends EventEmitter {
           host: "localhost",
           port: 2333,
           password: "youshallnotpass",
+          secure: false
         },
       ],
       shards: 1,
@@ -245,6 +260,10 @@ export class Manager extends EventEmitter {
     for (const plugin of this.options.plugins) plugin.load(this);
 
     for (const node of this.options.nodes) {
+      if (!node.password) node.password = "youshallnotpass"
+      if (!node.port) node.port = 2333
+      if (!node.secure) node.secure = false
+
       const identifier = node.identifier || `${node.host}:${node.port}`;
       this.nodes.set(identifier, new (Structure.get("Node"))(this, node));
     }
@@ -273,7 +292,7 @@ export class Manager extends EventEmitter {
    * @param requester The user who requested the tracks.
    * @returns The search result.
    */
-  public search(query: string | Query, requester: any): Promise<SearchResult> {
+  public search(query: string | Query, requester?: unknown): Promise<SearchResult> {
     return new Promise(async (resolve, reject) => {
       const node: Node = this.leastUsedNodes.first()
       if (!node) throw new Error("Manager#search() No available nodes.");
@@ -285,7 +304,7 @@ export class Manager extends EventEmitter {
         search = `${source}search:${search}`;
       }
 
-      const url = `http://${node.options.host}:${node.options.port}/loadtracks`;
+      const url = `http${node.options.secure ? "s" : ""}://${node.options.host}:${node.options.port}/loadtracks`;
 
       const res = await Axios.get(url, {
         headers: { Authorization: node.options.password },
@@ -324,7 +343,7 @@ export class Manager extends EventEmitter {
             ),
           },
           duration: res.data.tracks
-            .map((track: any) => track.info.length)
+            .map((track: TrackData) => track.info.length)
             .reduce((acc: number, cur: number) => acc + cur, 0),
         };
       }
@@ -333,12 +352,15 @@ export class Manager extends EventEmitter {
     });
   }
 
-  /** Decodes the base64 encoded track and returns a Track. */
+  /**
+   * Decodes the base64 encoded track and returns a TrackData.
+   * @param track
+   */
   public decodeTrack(track: string): Promise<TrackData> {
     return new Promise(async (resolve, reject) => {
       const node: Node = this.leastUsedNodes.first()
       if (!node) throw new Error("Manager#search() No available nodes.");
-      const url = `http://${node.options.host}:${node.options.port}/decodetrack`;
+      const url = `http${node.options.secure ? "s" : ""}://${node.options.host}:${node.options.port}/decodetrack`;
 
       const res = await Axios.get(url, {
         headers: { Authorization: node.options.password },
@@ -362,8 +384,8 @@ export class Manager extends EventEmitter {
    * @param options The options to pass.
    */
   public create(options: PlayerOptions): Player {
-    if (this.players.has(options.guild.id || options.guild)) {
-      return this.players.get(options.guild.id || options.guild);
+    if (this.players.has(options.guild)) {
+      return this.players.get(options.guild);
     } else {
       return new (Structure.get("Player"))(options);
     }
@@ -373,7 +395,7 @@ export class Manager extends EventEmitter {
    * Sends voice data to the Lavalink server.
    * @param data The data to send.
    */
-  public updateVoiceState(data: any): void {
+  public updateVoiceState(data: VoicePacket): void {
     if (
       !data ||
       !["VOICE_SERVER_UPDATE", "VOICE_STATE_UPDATE"].includes(data.t || "")
@@ -382,7 +404,7 @@ export class Manager extends EventEmitter {
     const player = this.players.get(data.d.guild_id) as Player;
 
     if (!player) return;
-    const state = this.voiceStates.get(data.d.guild_id) || {};
+    const state = (this.voiceStates.get(data.d.guild_id) || {} as VoiceState);
 
     if (data.t === "VOICE_SERVER_UPDATE") {
       state.op = "voiceUpdate";

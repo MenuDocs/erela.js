@@ -2,21 +2,31 @@
 import WebSocket from "ws";
 import { Manager } from "./Manager";
 import { Player, Track } from "./Player";
+import {
+  PlayerEvent, PlayerEvents,
+  TrackEndEvent,
+  TrackExceptionEvent,
+  TrackStartEvent,
+  TrackStuckEvent,
+  WebSocketClosedEvent
+} from "./Utils";
 
 /** The NodeOptions interface. */
 export interface NodeOptions {
   /** The host for the node. */
-  readonly host: string;
+  host: string;
   /** The port for the node. */
-  readonly port: number;
+  port?: number;
   /** The password for the node. */
-  readonly password: string;
+  password?: string;
+  /** Whether the host uses SSL. */
+  secure?: boolean;
   /** The identifier for the node. */
-  readonly identifier?: string;
+  identifier?: string;
   /** The retryAmount for the node. */
-  readonly retryAmount?: number;
+  retryAmount?: number;
   /** The retryDelay for the node. */
-  readonly retryDelay?: number;
+  retryDelay?: number;
 }
 /** The NodeOptions interface. */
 export interface NodeStats {
@@ -116,7 +126,7 @@ export class Node {
     };
 
     this.socket = new WebSocket(
-      `ws://${this.options.host}:${this.options.port}/`,
+      `ws${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}/`,
       { headers }
     );
     this.socket.on("open", this.open.bind(this));
@@ -161,13 +171,13 @@ export class Node {
    * Sends data to the Node.
    * @param data The data to send.
    */
-  public send(data: any): Promise<boolean> {
+  public send(data: unknown): Promise<boolean> {
     return new Promise((resolve, reject) => {
       if (!this.connected) return resolve(false);
       if (!data || !JSON.stringify(data).startsWith("{")) {
         return reject(false);
       }
-      this.socket.send(JSON.stringify(data), (error: any) => {
+      this.socket.send(JSON.stringify(data), (error: Error) => {
         if (error) reject(error);
         else resolve(true);
       });
@@ -194,13 +204,14 @@ export class Node {
     else if (d instanceof ArrayBuffer) d = Buffer.from(d);
 
     const payload = JSON.parse(d.toString());
+
     if (!payload.op) return;
-    this.manager.emit("raw", payload);
+    this.manager.emit("nodeRaw", payload);
 
     switch (payload.op) {
       case "stats":
         delete payload.op;
-        this.stats = { ...payload };
+        this.stats = { ...payload } as unknown as NodeStats;
         break;
       case "playerUpdate":
         const player = this.manager.players.get(payload.guildId);
@@ -219,78 +230,75 @@ export class Node {
     }
   }
 
-  protected handleEvent(payload: any): void {
+  protected handleEvent(payload: PlayerEvent & PlayerEvents): void {
     if (!payload.guildId) {
       return;
     }
     const player = this.manager.players.get(payload.guildId);
     if (!player) return;
-    const track = player.current;
-    switch (payload.type) {
-      case "TrackStartEvent":
-        this.trackStart(player, track, payload);
-        break;
-      case "TrackEndEvent":
-        this.trackEnd(player, track, payload);
-        break;
-      case "TrackStuckEvent":
-        this.trackStuck(player, track, payload);
-        break;
-      case "TrackExceptionEvent":
-        this.trackError(player, track, payload);
-        break;
-      case "WebSocketClosedEvent":
-        this.socketClosed(player, payload);
-        break;
-      default:
-        this.manager.emit(
+
+    const track = player.queue.current;
+    const type = payload.type
+
+    if (payload.type === "TrackStartEvent") {
+      this.trackStart(player, track, payload);
+    } else if (payload.type === "TrackEndEvent") {
+      this.trackEnd(player, track, payload);
+    } else if (payload.type === "TrackStuckEvent") {
+      this.trackStuck(player, track, payload);
+    } else if (payload.type === "TrackExceptionEvent") {
+      this.trackError(player, track, payload);
+    } else if (payload.type === "WebSocketClosedEvent") {
+      this.socketClosed(player, payload);
+    } else {
+      this.manager.emit(
           "nodeError",
           this,
-          new Error(`Node#event Unknown event '${payload.type}'.`)
-        );
+          new Error(`Node#event Unknown event '${type}'.`)
+      );
     }
   }
 
-  protected trackEnd(player: Player, track: Track, payload: any): void {
+  protected trackStart(player: Player, track: Track, payload: TrackStartEvent): void {
+    player.playing = true;
+    player.paused = false;
+    this.manager.emit("trackStart", player, track, payload);
+  }
+
+  protected trackEnd(player: Player, track: Track, payload: TrackEndEvent): void {
     if (track && player.trackRepeat) {
       this.manager.emit("trackEnd", player, track, payload);
       if (this.manager.options.autoPlay) player.play();
     } else if (track && player.queueRepeat) {
       player.queue.add(track);
-      player.current = player.queue.shift();
+      player.queue.current = player.queue.shift();
       this.manager.emit("trackEnd", player, track, payload);
       if (this.manager.options.autoPlay) player.play();
     } else if (!player.queue.length) {
-      player.current = null;
+      player.queue.current = null;
       player.playing = false;
       this.manager.emit("trackEnd", player, track, payload);
       if (["REPLACED", "FINISHED", "STOPPED"].includes(payload.reason)) {
         this.manager.emit("queueEnd", player);
       }
     } else if (player.queue.length) {
-      player.current = player.queue.shift();
+      player.queue.current = player.queue.shift();
       this.manager.emit("trackEnd", player, track, payload);
       if (this.manager.options.autoPlay) player.play();
     }
   }
 
-  protected trackStart(player: Player, track: Track, payload: any): void {
-    player.playing = true;
-    player.paused = false;
-    this.manager.emit("trackStart", player, track, payload);
-  }
-
-  protected trackStuck(player: Player, track: Track, payload: any): void {
+  protected trackStuck(player: Player, track: Track, payload: TrackStuckEvent): void {
     player.stop();
     this.manager.emit("trackStuck", player, track, payload);
   }
 
-  protected trackError(player: Player, track: Track, payload: any): void {
+  protected trackError(player: Player, track: Track, payload: TrackExceptionEvent): void {
     player.stop();
     this.manager.emit("trackError", player, track, payload);
   }
 
-  protected socketClosed(player: Player, payload: any): void {
+  protected socketClosed(player: Player, payload: WebSocketClosedEvent): void {
     this.manager.emit("socketClosed", player, payload);
   }
 }

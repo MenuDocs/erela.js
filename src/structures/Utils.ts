@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars, @typescript-eslint/no-use-before-define */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars, @typescript-eslint/no-use-before-define, @typescript-eslint/no-var-requires*/
 import { Manager } from "./Manager";
-import { Node } from "./Node";
+import {Node, NodeStats} from "./Node";
 import { Player, Track } from "./Player";
 import { Queue } from "./Queue";
 
@@ -33,7 +33,7 @@ export interface TrackData {
 }
 
 /** @hidden */
-export function buildTrack(data: TrackData, requester: any): Track | null {
+export function buildTrack(data: TrackData, requester?: unknown): Track | null {
   try {
     const track: Track = {
       track: data.track,
@@ -51,7 +51,7 @@ export function buildTrack(data: TrackData, requester: any): Track | null {
           ? `https://img.youtube.com/vi/${data.info.identifier}/${finalSize}.jpg`
           : "";
       },
-      requester,
+      requester: requester || null,
     };
 
     track.displayThumbnail = track.displayThumbnail.bind(track);
@@ -62,170 +62,169 @@ export function buildTrack(data: TrackData, requester: any): Track | null {
   }
 }
 
-export class Utils {
-  /**
-   * Formats the given duration into human readable format.
-   * @param milliseconds The duration to format.
-   * @param [minimal=false] Whether to use a minimal format.
-   * @returns The formatted duration.
-   */
-  public static formatTime(milliseconds: number, minimal = false): string {
-    if (typeof milliseconds === "undefined" || isNaN(milliseconds)) {
-      throw new RangeError("Utils#formatTime() Milliseconds must be a number");
-    }
-
-    if (typeof minimal !== "boolean") {
-      throw new RangeError("Utils#formatTime() Minimal must be a boolean");
-    }
-
-    if (milliseconds === 0) return minimal ? "00:00" : "N/A";
-
-    const times = {
-      years: 0,
-      months: 0,
-      weeks: 0,
-      days: 0,
-      hours: 0,
-      minutes: 0,
-      seconds: 0,
-    };
-
-    while (milliseconds > 0) {
-      if (milliseconds - 31557600000 >= 0) {
-        milliseconds -= 31557600000;
-        times.years++;
-      } else if (milliseconds - 2628000000 >= 0) {
-        milliseconds -= 2628000000;
-        times.months++;
-      } else if (milliseconds - 604800000 >= 0) {
-        milliseconds -= 604800000;
-        times.weeks += 7;
-      } else if (milliseconds - 86400000 >= 0) {
-        milliseconds -= 86400000;
-        times.days++;
-      } else if (milliseconds - 3600000 >= 0) {
-        milliseconds -= 3600000;
-        times.hours++;
-      } else if (milliseconds - 60000 >= 0) {
-        milliseconds -= 60000;
-        times.minutes++;
-      } else {
-        times.seconds = Math.round(milliseconds / 1000);
-        milliseconds = 0;
-      }
-    }
-
-    const finalTime: string[] = [];
-    let first = false;
-
-    for (const [k, v] of Object.entries(times)) {
-      if (minimal) {
-        if (v === 0 && !first) continue;
-        finalTime.push(v < 10 ? `0${v}` : `${v}`);
-        first = true;
-        continue;
-      }
-      if (v > 0) finalTime.push(`${v} ${v > 1 ? k : k.slice(0, -1)}`);
-    }
-
-    if (minimal && finalTime.length === 1) finalTime.unshift("00");
-
-    let time = finalTime.join(minimal ? ":" : ", ");
-
-    if (time.includes(",")) {
-      const pos = time.lastIndexOf(",");
-      time = `${time.slice(0, pos)} and ${time.slice(pos + 1)}`;
-    }
-
-    return time;
+/**
+ * Formats the given duration into human readable format.
+ * @param milliseconds The duration to format.
+ * @param [minimal=false] Whether to use a minimal format.
+ * @returns The formatted duration.
+ */
+export function formatTime(milliseconds: number, minimal = false): string {
+  if (typeof milliseconds === "undefined" || isNaN(milliseconds)) {
+    throw new RangeError("Utils#formatTime() Milliseconds must be a number");
   }
 
-  /**
-   * Parses the given duration into milliseconds.
-   * @param time The duration to parse.
-   * @returns The formatted duration.
-   */
-  public static parseTime(time: string): number | null {
-    if (time.includes(":"))
-      time = time
-        .split(":")
-        .reverse()
-        .map((v, i) => v + template[i])
-        .join("");
-    if (time.includes(" ")) time = time.split(/\s+/).join("");
-    if (time.match(/^\d+$/)) time = `${time}seconds`;
-
-    const regex = /\d+\.*\d*\D+/g;
-    let res;
-    let duration = 0;
-
-    while ((res = regex.exec(time)) !== null) {
-      if (res.index === regex.lastIndex) regex.lastIndex++;
-      const local: string = res[0].toLowerCase();
-
-      if (
-        local.endsWith("seconds") ||
-        local.endsWith("second") ||
-        (local.endsWith("s") &&
-          (local.match(/\D+/) as string[])[0].length === 1)
-      ) {
-        duration +=
-          parseInt((local.match(/\d+\.*\d*/) as string[])[0], 10) * 1000;
-      } else if (
-        local.endsWith("minutes") ||
-        local.endsWith("minute") ||
-        (local.endsWith("m") &&
-          (local.match(/\D+/) as string[])[0].length === 1)
-      ) {
-        duration +=
-          parseInt((local.match(/\d+\.*\d*/) as string[])[0], 10) * 60000;
-      } else if (
-        local.endsWith("hours") ||
-        local.endsWith("hour") ||
-        (local.endsWith("h") &&
-          (local.match(/\D+/) as string[])[0].length === 1)
-      ) {
-        duration +=
-          parseInt((local.match(/\d+\.*\d*/) as string[])[0], 10) * 3600000;
-      } else if (
-        local.endsWith("days") ||
-        local.endsWith("day") ||
-        (local.endsWith("d") &&
-          (local.match(/\D+/) as string[])[0].length === 1)
-      ) {
-        duration +=
-          parseInt((local.match(/\d+\.*\d*/) as string[])[0], 10) * 86400000;
-      } else if (
-        local.endsWith("weeks") ||
-        local.endsWith("week") ||
-        (local.endsWith("w") &&
-          (local.match(/\D+/) as string[])[0].length === 1)
-      ) {
-        duration +=
-          parseInt((local.match(/\d+\.*\d*/) as string[])[0], 10) * 604800000;
-      } else if (local.endsWith("months") || local.endsWith("month")) {
-        duration +=
-          parseInt((local.match(/\d+\.*\d*/) as string[])[0], 10) * 2628000000;
-      } else if (
-        local.endsWith("years") ||
-        local.endsWith("year") ||
-        (local.endsWith("y") &&
-          (local.match(/\D+/) as string[])[0].length === 1)
-      ) {
-        duration +=
-          parseInt((local.match(/\d+\.*\d*/) as string[])[0], 10) * 31557600000;
-      }
-    }
-
-    if (duration === 0) return null;
-    return duration;
+  if (typeof minimal !== "boolean") {
+    throw new RangeError("Utils#formatTime() Minimal must be a boolean");
   }
+
+  if (milliseconds === 0) return minimal ? "00:00" : "N/A";
+
+  const times = {
+    years: 0,
+    months: 0,
+    weeks: 0,
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  };
+
+  while (milliseconds > 0) {
+    if (milliseconds - 31557600000 >= 0) {
+      milliseconds -= 31557600000;
+      times.years++;
+    } else if (milliseconds - 2628000000 >= 0) {
+      milliseconds -= 2628000000;
+      times.months++;
+    } else if (milliseconds - 604800000 >= 0) {
+      milliseconds -= 604800000;
+      times.weeks += 7;
+    } else if (milliseconds - 86400000 >= 0) {
+      milliseconds -= 86400000;
+      times.days++;
+    } else if (milliseconds - 3600000 >= 0) {
+      milliseconds -= 3600000;
+      times.hours++;
+    } else if (milliseconds - 60000 >= 0) {
+      milliseconds -= 60000;
+      times.minutes++;
+    } else {
+      times.seconds = Math.round(milliseconds / 1000);
+      milliseconds = 0;
+    }
+  }
+
+  const finalTime: string[] = [];
+  let first = false;
+
+  for (const [k, v] of Object.entries(times)) {
+    if (minimal) {
+      if (v === 0 && !first) continue;
+      finalTime.push(v < 10 ? `0${v}` : `${v}`);
+      first = true;
+      continue;
+    }
+    if (v > 0) finalTime.push(`${v} ${v > 1 ? k : k.slice(0, -1)}`);
+  }
+
+  if (minimal && finalTime.length === 1) finalTime.unshift("00");
+
+  let time = finalTime.join(minimal ? ":" : ", ");
+
+  if (time.includes(",")) {
+    const pos = time.lastIndexOf(",");
+    time = `${time.slice(0, pos)} and ${time.slice(pos + 1)}`;
+  }
+
+  return time;
+}
+
+/**
+ * Parses the given duration into milliseconds.
+ * @param time The duration to parse.
+ * @returns The formatted duration.
+ */
+export function parseTime(time: string): number | null {
+  if (time.includes(":"))
+    time = time
+      .split(":")
+      .reverse()
+      .map((v, i) => v + template[i])
+      .join("");
+  if (time.includes(" ")) time = time.split(/\s+/).join("");
+  if (time.match(/^\d+$/)) time = `${time}seconds`;
+
+  const regex = /\d+\.*\d*\D+/g;
+  let res;
+  let duration = 0;
+
+  while ((res = regex.exec(time)) !== null) {
+    if (res.index === regex.lastIndex) regex.lastIndex++;
+    const local: string = res[0].toLowerCase();
+
+    if (
+      local.endsWith("seconds") ||
+      local.endsWith("second") ||
+      (local.endsWith("s") &&
+        (local.match(/\D+/) as string[])[0].length === 1)
+    ) {
+      duration +=
+        parseInt((local.match(/\d+\.*\d*/) as string[])[0], 10) * 1000;
+    } else if (
+      local.endsWith("minutes") ||
+      local.endsWith("minute") ||
+      (local.endsWith("m") &&
+        (local.match(/\D+/) as string[])[0].length === 1)
+    ) {
+      duration +=
+        parseInt((local.match(/\d+\.*\d*/) as string[])[0], 10) * 60000;
+    } else if (
+      local.endsWith("hours") ||
+      local.endsWith("hour") ||
+      (local.endsWith("h") &&
+        (local.match(/\D+/) as string[])[0].length === 1)
+    ) {
+      duration +=
+        parseInt((local.match(/\d+\.*\d*/) as string[])[0], 10) * 3600000;
+    } else if (
+      local.endsWith("days") ||
+      local.endsWith("day") ||
+      (local.endsWith("d") &&
+        (local.match(/\D+/) as string[])[0].length === 1)
+    ) {
+      duration +=
+        parseInt((local.match(/\d+\.*\d*/) as string[])[0], 10) * 86400000;
+    } else if (
+      local.endsWith("weeks") ||
+      local.endsWith("week") ||
+      (local.endsWith("w") &&
+        (local.match(/\D+/) as string[])[0].length === 1)
+    ) {
+      duration +=
+        parseInt((local.match(/\d+\.*\d*/) as string[])[0], 10) * 604800000;
+    } else if (local.endsWith("months") || local.endsWith("month")) {
+      duration +=
+        parseInt((local.match(/\d+\.*\d*/) as string[])[0], 10) * 2628000000;
+    } else if (
+      local.endsWith("years") ||
+      local.endsWith("year") ||
+      (local.endsWith("y") &&
+        (local.match(/\D+/) as string[])[0].length === 1)
+    ) {
+      duration +=
+        parseInt((local.match(/\d+\.*\d*/) as string[])[0], 10) * 31557600000;
+    }
+  }
+
+  if (duration === 0) return null;
+  return duration;
 }
 
 /** The Structure class. */
 export class Structure {
   /**
    * Extends a class.
+   * @param name
    * @param extender
    */
   public static extend<K extends keyof Extendable, T extends Extendable[K]>(
@@ -281,4 +280,121 @@ export interface Extendable {
   Player: typeof Player;
   Queue: typeof Queue;
   Node: typeof Node;
+}
+
+export interface VoiceState {
+  op: "voiceUpdate";
+  guildId: string;
+  event: VoiceEvent;
+  sessionId: string;
+}
+
+export interface VoiceEvent {
+  token: string;
+  guild_id: string
+  endpoint: string;
+}
+
+export interface VoicePacket {
+  t: string;
+  d: Partial<{
+    guild_id: string;
+    user_id: string;
+    session_id: string;
+    channel_id: string;
+  }> & VoiceEvent
+}
+
+
+
+
+export interface NodeMessage extends NodeStats {
+  type: PlayerEventType;
+  op: "stats" | "playerUpdate" | "event";
+  guildId: string;
+}
+
+export type PlayerEvents =
+    | TrackStartEvent
+    | TrackEndEvent
+    | TrackStuckEvent
+    | TrackExceptionEvent
+    | WebSocketClosedEvent;
+
+export type PlayerEventType =
+    | "TrackStartEvent"
+    | "TrackEndEvent"
+    | "TrackExceptionEvent"
+    | "TrackStuckEvent"
+    | "WebSocketClosedEvent";
+
+export type TrackEndReason =
+    | "FINISHED"
+    | "LOAD_FAILED"
+    | "STOPPED"
+    | "REPLACED"
+    | "CLEANUP";
+
+export interface PlayerEvent {
+  op: "event";
+  type: PlayerEventType;
+  guildId: string;
+}
+
+export interface Exception {
+  severity: {
+    /** The cause is known and expected, indicates that there is nothing wrong with the library itself. */
+    COMMON,
+    /**
+     * The cause might not be exactly known, but is possibly caused by outside factors. For example when an outside
+     * service responds in a format that we do not expect.
+     */
+    SUSPICIOUS,
+    /**
+     * If the probable cause is an issue with the library or when there is no way to tell what the cause might be.
+     * This is the default level and other levels are used in cases where the thrower has more in-depth knowledge
+     * about the error.
+     */
+    FAULT,
+  };
+  message: string;
+  cause: string;
+}
+
+export interface TrackStartEvent extends PlayerEvent {
+  type: "TrackStartEvent";
+  track: string;
+}
+
+export interface TrackEndEvent extends PlayerEvent {
+  type: "TrackEndEvent";
+  track: string;
+  reason: TrackEndReason;
+}
+
+export interface TrackExceptionEvent extends PlayerEvent {
+  type: "TrackExceptionEvent";
+  exception?: Exception;
+  error: string;
+}
+
+export interface TrackStuckEvent extends PlayerEvent {
+  type: "TrackStuckEvent";
+  thresholdMs: number;
+}
+
+export interface WebSocketClosedEvent extends PlayerEvent {
+  type: "WebSocketClosedEvent";
+  code: number;
+  byRemote: boolean;
+  reason: string;
+}
+
+export interface PlayerUpdate {
+  op: "playerUpdate"
+  state: {
+      position: number;
+      time: number;
+  };
+  guildId: string;
 }
