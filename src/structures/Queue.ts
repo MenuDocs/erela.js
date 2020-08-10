@@ -27,6 +27,7 @@ export class Queue extends Array<Track> {
     );
   }
 
+  /** Returns the amount of tracks in the queue including the current if it exists. */
   public get length(): number {
     return super.length + (this.current ? 1 : 0)
   }
