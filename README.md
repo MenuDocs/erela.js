@@ -104,6 +104,9 @@ client.on("message", async message => {
         // Plays the player (plays the first track in the queue).
         // The if statement is needed else it will play the current track again
         if (!player.playing && !player.paused && !player.queue.length) player.play();
+    
+        // For playlists you'll have to use slightly different if statement
+        if (!player.playing && !player.paused && player.queue.length === res.playlist.tracks.length) player.play()
     }
 });
 
