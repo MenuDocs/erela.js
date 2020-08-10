@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars, @typescript-eslint/no-use-before-define, @typescript-eslint/no-var-requires*/
 import { Manager } from "./Manager";
-import {Node, NodeStats} from "./Node";
+import { Node, NodeStats } from "./Node";
 import { Player, Track } from "./Player";
 import { Queue } from "./Queue";
 
@@ -250,7 +250,8 @@ export class Structure {
 }
 
 export class Plugin {
-  public load(manager: Manager): void {}
+  public load(manager: Manager): void {
+  }
 }
 
 export enum LoadType {
@@ -306,8 +307,6 @@ export interface VoicePacket {
 }
 
 
-
-
 export interface NodeMessage extends NodeStats {
   type: PlayerEventType;
   op: "stats" | "playerUpdate" | "event";
@@ -315,25 +314,25 @@ export interface NodeMessage extends NodeStats {
 }
 
 export type PlayerEvents =
-    | TrackStartEvent
-    | TrackEndEvent
-    | TrackStuckEvent
-    | TrackExceptionEvent
-    | WebSocketClosedEvent;
+  | TrackStartEvent
+  | TrackEndEvent
+  | TrackStuckEvent
+  | TrackExceptionEvent
+  | WebSocketClosedEvent;
 
 export type PlayerEventType =
-    | "TrackStartEvent"
-    | "TrackEndEvent"
-    | "TrackExceptionEvent"
-    | "TrackStuckEvent"
-    | "WebSocketClosedEvent";
+  | "TrackStartEvent"
+  | "TrackEndEvent"
+  | "TrackExceptionEvent"
+  | "TrackStuckEvent"
+  | "WebSocketClosedEvent";
 
 export type TrackEndReason =
-    | "FINISHED"
-    | "LOAD_FAILED"
-    | "STOPPED"
-    | "REPLACED"
-    | "CLEANUP";
+  | "FINISHED"
+  | "LOAD_FAILED"
+  | "STOPPED"
+  | "REPLACED"
+  | "CLEANUP";
 
 export interface PlayerEvent {
   op: "event";
@@ -393,8 +392,8 @@ export interface WebSocketClosedEvent extends PlayerEvent {
 export interface PlayerUpdate {
   op: "playerUpdate"
   state: {
-      position: number;
-      time: number;
+    position: number;
+    time: number;
   };
   guildId: string;
 }

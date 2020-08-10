@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, no-case-declarations */
+/* eslint-disable no-case-declarations */
 import WebSocket from "ws";
 import { Manager } from "./Manager";
 import { Player, Track } from "./Player";
@@ -28,6 +28,7 @@ export interface NodeOptions {
   /** The retryDelay for the node. */
   retryDelay?: number;
 }
+
 /** The NodeOptions interface. */
 export interface NodeStats {
   /** The amount of players on the node. */
@@ -252,9 +253,9 @@ export class Node {
       this.socketClosed(player, payload);
     } else {
       this.manager.emit(
-          "nodeError",
-          this,
-          new Error(`Node#event Unknown event '${type}'.`)
+        "nodeError",
+        this,
+        new Error(`Node#event Unknown event '${type}'.`)
       );
     }
   }

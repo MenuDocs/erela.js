@@ -4,7 +4,7 @@
 
 ## Documentation
 
-You can find the documentation at <http://projects.warhammer.codes/erelajs-rewrite>
+You can find the documentation at <http://projects.solaris.codes/erelajs-rewrite>
 
 ## Installation
 
@@ -34,7 +34,7 @@ npm install erela.js
 // To install Discord.JS and Erela.JS, run:
 // npm install discord.js erela.js
 const { Client } = require("discord.js");
-const { Manager, Player } = require("erela.js");
+const { Manager } = require("erela.js");
 
 // Initialize the Discord.JS Client.
 const client = new Client();
@@ -43,9 +43,10 @@ const client = new Client();
 client.manager = new Manager({
     // Pass an array of node. Note: You do not need to pass any if you are using the default values (ones shown below).
     nodes: [{
-        host: "localhost",
-        port: 2333,
-        password: "youshallnotpass",
+        host: "localhost", // Optional if Lavalink is local
+        port: 2333, // Optional if Lavalink is set to default
+        password: "youshallnotpass", // Optional if Lavalink is set to default
+        secure: false // Uses HTTPS and WSS if enabled
     }],
     // Auto plays tracks after one ends, defaults to "false".
     autoPlay: true,
@@ -59,16 +60,11 @@ client.manager = new Manager({
 .on("nodeConnect", node => console.log("New node connected"))
 .on("nodeError", (node, error) => console.log(`Node error: ${error.message}`))
 .on("trackStart", (player, track) => {
-    player.textChannel.send(`Now playing: ${track.title}`)
+    client.channels.cache.get(player.textChannel).send(`Now playing: ${track.title}`)
 })
 .on("queueEnd", player => {
-    player.textChannel.send("Queue has ended.");
+    client.channels.cache.get(player.textChannel).send("Queue has ended.");
     player.destroy();
-})
-// You must handle moves by yourself, by default Erela.JS will not change the voice channel.
-.on("playerMove", (player, currentChannel, newChannel) => {
-    // Note: newChannel will always be a string, if you pass the channel object you will need to get the cached channel.
-    player.voiceChannel = client.channels.cache.get(newChannel);
 });
 
 // Ready event fires when the Discord.JS client is ready.
@@ -93,9 +89,9 @@ client.on("message", async message => {
 
         // Create a new player. This will return the player if it already exists.
         const player = client.manager.create({
-            guild: message.guild,
-            voiceChannel: message.member.voice.channel,
-            textChannel: message.channel,
+            guild: message.guild.id,
+            voiceChannel: message.member.voice.channel.id,
+            textChannel: message.channel.id,
         });
 
         // Connect to the voice channel.
@@ -156,7 +152,7 @@ player.queue.save();
 ### Creating your own plugin
 
 ```javascript
-const { Structure, Plugin } = require('erela.js');
+const { Structure, Plugin } = require("erela.js");
 
 Structure.extend("Queue", Queue => class extends Queue {
     save() {
@@ -167,6 +163,7 @@ Structure.extend("Queue", Queue => class extends Queue {
 module.exports = class MyQueuePlugin extends Plugin {
     // Use the constructor to pass values to the plugin.
     constructor(options) {
+        super();
         // Able to use "max" as a option.
         this.options = options;
     }
@@ -177,11 +174,11 @@ module.exports = class MyQueuePlugin extends Plugin {
 
 ## Contributors
 
-👤 **WarHammer414**
+👤 **Solaris**
 
 - Author
-- Website: <https://warhammer.codes/>
-- Github: [@WarHammer414](https://github.com/WarHammer414)
+- Website: <https://solaris.codes/>
+- Github: [@Solaris9](https://github.com/Solaris9)
 
 👤 **Anish Shobith**
 

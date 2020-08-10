@@ -1,9 +1,9 @@
-import { Player, Track } from "./Player";
+import { Track } from "./Player";
 
 const template = [
   "track",
   "title",
-  "identifer",
+  "identifier",
   "author",
   "duration",
   "isSeekable",
@@ -25,6 +25,10 @@ export class Queue extends Array<Track> {
       (acc: number, cur: number) => acc + cur,
       current
     );
+  }
+
+  public get length(): number {
+    return super.length + (this.current ? 1 : 0)
   }
 
   /** The current track */
@@ -76,35 +80,37 @@ export class Queue extends Array<Track> {
   }
 
   /**
-   * Removes an amount of tracks using a start and end index.
-   * @param start The start to remove from.
-   * @param end The end to remove to.
-   */
-  public removeFrom(start: number, end: number): Track[] {
-    if (isNaN(start)) {
-      throw new RangeError(`Queue#removeFrom() Missing "start" parameter.`);
-    } else if (isNaN(end)) {
-      throw new RangeError(`Queue#removeFrom() Missing "end" parameter.`);
-    } else if (start >= end) {
-      throw new RangeError(
-        `Queue#removeFrom() Start can not be bigger than end.`
-      );
-    } else if (start >= this.length) {
-      throw new RangeError(
-        `Queue#removeFrom() Start can not be bigger than ${this.length}.`
-      );
-    }
-
-    return this.splice(start, end - start);
-  }
-
-  /**
    * Removes a track from the queue. Defaults to the first track.
    * @param [position=0] The track index to remove.
    * @returns The track that was removed, or null if the track does not exist.
    */
-  public remove(position = 0): Track | null {
-    return this.splice(position, 1)[0];
+  public remove(position: number): Track[] | null
+  /**
+   * Removes an amount of tracks using a start and end index.
+   * @param start The start to remove from.
+   * @param end The end to remove to.
+   */
+  public remove(start: number, end: number): Track[] | null
+  public remove(startOrPosition = 0, end?: number): Track[] | null {
+    if (typeof end !== "undefined") {
+      if (isNaN(startOrPosition)) {
+        throw new RangeError(`Queue#remove() Missing "start" parameter.`);
+      } else if (isNaN(end)) {
+        throw new RangeError(`Queue#remove() Missing "end" parameter.`);
+      } else if (startOrPosition >= end) {
+        throw new RangeError(
+          "Queue#remove() Start can not be bigger than end."
+        );
+      } else if (startOrPosition >= this.length) {
+        throw new RangeError(
+          `Queue#remove() Start can not be bigger than ${this.length}.`
+        );
+      }
+
+      return this.splice(startOrPosition, end - startOrPosition);
+    }
+
+    return this.splice(startOrPosition, 1);
   }
 
   /** Clears the queue. */

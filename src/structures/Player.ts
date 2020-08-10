@@ -1,8 +1,7 @@
-/* eslint-disable */
 import { Manager, Query, SearchResult } from "./Manager";
 import { Node } from "./Node";
 import { Queue } from "./Queue";
-import { State, Structure } from "./Utils";
+import { State, Structure, VoiceState } from "./Utils";
 
 /** The PlayerOptions interface. */
 export interface PlayerOptions {
@@ -18,8 +17,8 @@ export interface PlayerOptions {
   volume?: number;
   /** If the player should mute itself. */
   selfMute?: boolean;
-  /** If the player should deafen itself. */
-  selfDeafen?: boolean;
+  /** If the player should deaf itself. */
+  selfDeaf?: boolean;
 }
 
 /** The Track interface. */
@@ -44,6 +43,7 @@ export interface Track {
   readonly thumbnail: string;
   /** The user that requested the track. */
   readonly requester: unknown | null
+
   /** Displays the track thumbnail with a size in "0", "1", "2", "3", "default", "mqdefault", "hqdefault", "maxresdefault". Only for youtube as others require an API. */
   displayThumbnail(
     size?:
@@ -108,6 +108,8 @@ export class Player {
   public state = State.DISCONNECTED;
   /** The equalizer bands array. */
   public bands = new Array<number>(15).fill(0.0);
+  /** The voice state object from Discord. */
+  public voiceState: VoiceState = Object.assign({});
   private readonly player: typeof Player;
 
   /** Only for internal use. */
@@ -188,7 +190,7 @@ export class Player {
         guild_id: this.guild,
         channel_id: this.voiceChannel,
         self_mute: this.options.selfMute || false,
-        self_deaf: this.options.selfDeafen || false,
+        self_deaf: this.options.selfDeaf || false,
       },
     });
 

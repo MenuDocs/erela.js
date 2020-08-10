@@ -43,6 +43,7 @@ export interface ManagerOptions {
   plugins?: Plugin[];
   /** Whether players should automatically play the next song. */
   autoPlay?: boolean;
+
   /**
    * Function to send data to the websocket.
    * @param id The ID of the guild.
@@ -96,21 +97,25 @@ export interface Manager {
    * @event Manager#nodeCreate
    */
   on(event: "nodeCreate", listener: (node: Node) => void): this;
+
   /**
    * Emitted when a Node is destroyed.
    * @event Manager#nodeDestroy
    */
   on(event: "nodeDestroy", listener: (node: Node) => void): this;
+
   /**
    * Emitted when a Node connects.
    * @event Manager#nodeConnect
    */
   on(event: "nodeConnect", listener: (node: Node) => void): this;
+
   /**
    * Emitted when a Node reconnects.
    * @event Manager#nodeReconnect
    */
   on(event: "nodeReconnect", listener: (node: Node) => void): this;
+
   /**
    * Emitted when a Node disconnects.
    * @event Manager#nodeDisconnect
@@ -119,31 +124,37 @@ export interface Manager {
     event: "nodeDisconnect",
     listener: (node: Node, reason: { code: number; reason: string }) => void
   ): this;
+
   /**
    * Emitted when a Node has an error.
    * @event Manager#nodeError
    */
   on(event: "nodeError", listener: (node: Node, error: Error) => void): this;
+
   /**
    * Emitted whenever any Lavalink event is received.
    * @event Manager#nodeRaw
    */
-  on(event: "nodeRaw", listener: (payload: any) => void): this;
+  on(event: "nodeRaw", listener: (payload: unknown) => void): this;
+
   /**
    * Emitted when a player is created.
    * @event Manager#playerCreate
    */
   on(event: "playerCreate", listener: (player: Player) => void): this;
+
   /**
    * Emitted when a player is destroyed.
    * @event Manager#playerDestroy
    */
   on(event: "playerDestroy", listener: (player: Player) => void): this;
+
   /**
    * Emitted when a player queue ends.
    * @event Manager#queueEnd
    */
   on(event: "queueEnd", listener: (player: Player) => void): this;
+
   /**
    * Emitted when a player is moved to a new voice channel.
    * @event Manager#playerMove
@@ -152,6 +163,7 @@ export interface Manager {
     event: "playerMove",
     listener: (player: Player, oldChannel: string, newChannel: string) => void
   ): this;
+
   /**
    * Emitted when a track starts.
    * @event Manager#trackStart
@@ -160,6 +172,7 @@ export interface Manager {
     event: "trackStart",
     listener: (player: Player, track: Track, payload: TrackStartEvent) => void
   ): this;
+
   /**
    * Emitted when a track ends.
    * @event Manager#trackEnd
@@ -168,6 +181,7 @@ export interface Manager {
     event: "trackEnd",
     listener: (player: Player, track: Track, payload: TrackEndEvent) => void
   ): this;
+
   /**
    * Emitted when a track gets stuck during playback.
    * @event Manager#trackStuck
@@ -176,6 +190,7 @@ export interface Manager {
     event: "trackStuck",
     listener: (player: Player, track: Track, payload: TrackStuckEvent) => void
   ): this;
+
   /**
    * Emitted when a track has an error during playback.
    * @event Manager#trackError
@@ -184,6 +199,7 @@ export interface Manager {
     event: "trackError",
     listener: (player: Player, track: Track, payload: TrackExceptionEvent) => void
   ): this;
+
   /**
    * Emitted when a voice connect is closed.
    * @event Manager#socketClosed
@@ -200,36 +216,32 @@ export interface Manager {
  */
 export class Manager extends EventEmitter {
   /** The map of players. */
-  public readonly players: Collection<string, Player> = new Collection<
-    string,
-    Player
-  >();
+  public readonly players: Collection<string, Player> = new Collection<string, Player>();
   /** The map of nodes. */
   public readonly nodes = new Collection<string, Node>();
   /** The options that were set. */
   public readonly options: ManagerOptions;
-  protected readonly voiceStates: Map<string, VoiceState> = new Map();
 
   /** Returns the least used Nodes. */
   public get leastUsedNodes(): Collection<string, Node> {
     return this.nodes
-        .filter((node) => node.connected)
-        .sort((a, b) => b.calls - a.calls);
+      .filter((node) => node.connected)
+      .sort((a, b) => b.calls - a.calls);
   }
 
   /** Returns the least system load Nodes. */
   public get leastLoadNodes(): Collection<string, Node> {
     return this.nodes
-        .filter((node) => node.connected)
-        .sort((a, b) => {
-          const aload = a.stats.cpu
-              ? (a.stats.cpu.systemLoad / a.stats.cpu.cores) * 100
-              : 0;
-          const bload = b.stats.cpu
-              ? (b.stats.cpu.systemLoad / b.stats.cpu.cores) * 100
-              : 0;
-          return aload - bload;
-        })
+      .filter((node) => node.connected)
+      .sort((a, b) => {
+        const aload = a.stats.cpu
+          ? (a.stats.cpu.systemLoad / a.stats.cpu.cores) * 100
+          : 0;
+        const bload = b.stats.cpu
+          ? (b.stats.cpu.systemLoad / b.stats.cpu.cores) * 100
+          : 0;
+        return aload - bload;
+      })
   }
 
   /**
@@ -375,7 +387,7 @@ export class Manager extends EventEmitter {
         return reject(new Error("No data returned from query."));
       }
 
-      return resolve({ track, info: res.data})
+      return resolve({ track, info: res.data })
     })
   }
 
@@ -404,7 +416,7 @@ export class Manager extends EventEmitter {
     const player = this.players.get(data.d.guild_id) as Player;
 
     if (!player) return;
-    const state = (this.voiceStates.get(data.d.guild_id) || {} as VoiceState);
+    const state = player.voiceState;
 
     if (data.t === "VOICE_SERVER_UPDATE") {
       state.op = "voiceUpdate";
@@ -413,15 +425,13 @@ export class Manager extends EventEmitter {
     } else {
       if (data.d.user_id !== this.options.clientId) return;
       state.sessionId = data.d.session_id;
-      if (player.options.voiceChannel !== data.d.channel_id) {
+      if (player.voiceChannel !== data.d.channel_id) {
+        player.voiceChannel = data.d.channel_id
         this.emit("playerMove", player, player.voiceChannel, data.d.channel_id);
       }
     }
 
-    this.voiceStates.set(data.d.guild_id, state);
-    if (JSON.stringify(Object.keys(state).sort()) === template) {
-      player.node.send(state);
-      this.voiceStates.delete(data.d.guild_id);
-    }
+    player.voiceState = state;
+    if (JSON.stringify(Object.keys(state).sort()) === template) player.node.send(state);
   }
 }
