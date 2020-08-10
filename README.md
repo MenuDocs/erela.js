@@ -17,7 +17,7 @@ You can find the documentation at <http://projects.solaris.codes/erelajs-rewrite
 > Note: Java v11 or newer is required to run the Lavalink.jar. Java v13 is recommended.
 
 ```shell
-npm install erela.js
+npm install erela.js@beta
 ```
 
 ## Getting Started
