@@ -1,4 +1,4 @@
-# Erela.js &middot; [![Discord](https://discordapp.com/api/guilds/653436871858454538/embed.png)](https://discord.gg/D6FXw55) [![Downloads](https://badgen.net/npm/dt/erela.js)](https://www.npmjs.com/package/erela.js) [![Version](https://img.shields.io/npm/v/erela.js.svg?maxAge=3600)](https://www.npmjs.com/package/erela.js) [![GitHub Stars](https://badgen.net/github/stars/WarHammer414/erela.js)](https://github.com/WarHammer414/erela.js) [![License](https://badgen.net/github/license/WarHammer414/erela.js)](https://github.com/WarHammer414/erela.js/blob/master/LICENSE)
+# Erela.js &middot; [![Discord](https://discordapp.com/api/guilds/653436871858454538/embed.png)](https://discord.gg/D6FXw55) [![Downloads](https://badgen.net/npm/dt/erela.js)](https://www.npmjs.com/package/erela.js) [![Version](https://img.shields.io/npm/v/erela.js.svg?maxAge=3600)](https://www.npmjs.com/package/erela.js) [![GitHub Stars](https://badgen.net/github/stars/Solaris9/erela.js)](https://github.com/Solaris9/erela.js) [![License](https://badgen.net/github/license/Solaris9/erela.js)](https://github.com/Solaris9/erela.js/blob/master/LICENSE)
 
 > An easy-to-use Lavalink client for NodeJS.
 
@@ -14,7 +14,7 @@ You can find the documentation at <http://projects.solaris.codes/erelajs-rewrite
 
 - [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1)
 
-> Note: Java v11 or newer is required to run the Lavalink.jar.
+> Note: Java v11 or newer is required to run the Lavalink.jar. Java v13 is recommended.
 
 ```shell
 npm install erela.js
