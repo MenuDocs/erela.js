@@ -1,6 +1,6 @@
 # Erela.js
 
-An easy-to-use Lavalink client for NodeJS.
+> An easy-to-use Lavalink client for Node.js
 
 [![Discord](https://discordapp.com/api/guilds/653436871858454538/embed.png)](https://discord.gg/D6FXw55)
 [![Downloads](https://badgen.net/npm/dt/erela.js)](https://www.npmjs.com/package/erela.js)
@@ -10,9 +10,7 @@ An easy-to-use Lavalink client for NodeJS.
 
 ## Documentation
 
-> Note: Some links do not work, I'll fix them when I can. The sidebar menu has the links that are broken.
-
-You can find the documentation at <http://projects.warhammer.codes/erelajs> (*this* link does work)
+You can find the API documentation here: https://projects.solaris.codes/erelajs
 
 ## Installation
 
