@@ -13,10 +13,7 @@ const template = [
   "user",
 ];
 
-/**
- * The Queue class.
- * @noInheritDoc
- */
+/** @noInheritDoc */
 export class Queue extends Array<Track> {
   /** Returns the total duration of the queue including the current track. */
   public get duration(): number {
@@ -37,8 +34,8 @@ export class Queue extends Array<Track> {
 
   /**
    * Adds a track to the queue.
-   * @param track The track or tracks to add.
-   * @param [offset=null] The offset to add the track at.
+   * @param track
+   * @param [offset=null]
    */
   public add(track: Track | Track[], offset?: number): void {
     if (
@@ -82,14 +79,15 @@ export class Queue extends Array<Track> {
 
   /**
    * Removes a track from the queue. Defaults to the first track.
-   * @param [position=0] The track index to remove.
-   * @returns The track that was removed, or null if the track does not exist.
+   * @param [position=0]
+   * @returns The tracks that were removed, or null if the tracks do not exist.
    */
   public remove(position: number): Track[] | null
   /**
    * Removes an amount of tracks using a start and end index.
-   * @param start The start to remove from.
-   * @param end The end to remove to.
+   * @param start
+   * @param end
+   * @returns The tracks that were removed, or null if the tracks do not exist.
    */
   public remove(start: number, end: number): Track[] | null
   public remove(startOrPosition = 0, end?: number): Track[] | null {

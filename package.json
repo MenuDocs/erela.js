@@ -8,7 +8,7 @@
     "build": "tsc",
     "lint": "eslint --ext .ts ./src",
     "types": "dts-bundle --removeSource --name erela.js --main ./dist --out ../typings/index.d.ts --baseDir ./dist",
-    "docs": "typedoc --out ./docs --hideBreadcrumbs --theme vuepress --mode file --excludeProtected --excludePrivate src/structures",
+    "docs": "typedoc --json ./docs.json --mode file --excludeProtected --excludePrivate src/structures",
     "publish": "npm run build && npm run types && npm publish --access=public",
     "publish:beta": "npm run build && npm run types && npm publish --tag beta --access=public"
   },
@@ -19,7 +19,7 @@
     "bot",
     "discord.js"
   ],
-  "author": "WarHammer414 (https://github.com/Solaris9)",
+  "author": "Solaris (https://github.com/Solaris9)",
   "license": "Apache-2.0",
   "repository": "Solaris9/erela.js",
   "bugs": "https://github.com/Solaris9/erela.js",
@@ -33,7 +33,6 @@
     "eslint": "^7.4.0",
     "tslint": "^5.20.1",
     "typedoc": "^0.15.8",
-    "typedoc-plugin-markdown": "^2.2.17",
     "typedoc-plugin-no-inherit": "^1.1.10",
     "typescript": "^3.9.6"
   },

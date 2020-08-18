@@ -3,7 +3,8 @@ import WebSocket from "ws";
 import { Manager } from "./Manager";
 import { Player, Track } from "./Player";
 import {
-  PlayerEvent, PlayerEvents,
+  PlayerEvent,
+  PlayerEvents,
   TrackEndEvent,
   TrackExceptionEvent,
   TrackStartEvent,
@@ -11,7 +12,6 @@ import {
   WebSocketClosedEvent
 } from "./Utils";
 
-/** The NodeOptions interface. */
 export interface NodeOptions {
   /** The host for the node. */
   host: string;
@@ -29,7 +29,6 @@ export interface NodeOptions {
   retryDelay?: number;
 }
 
-/** The NodeOptions interface. */
 export interface NodeStats {
   /** The amount of players on the node. */
   players: number;
@@ -68,7 +67,6 @@ export interface NodeStats {
   };
 }
 
-/** The Node class. */
 export class Node {
   /** The socket for the node. */
   public socket: WebSocket | null;
@@ -87,8 +85,8 @@ export class Node {
 
   /**
    * Creates an instance of Node.
-   * @param manager The Manager.
-   * @param options The NodeOptions to pass.
+   * @param manager
+   * @param options
    */
   constructor(public manager: Manager, public options: NodeOptions) {
     this.stats = {
@@ -170,7 +168,7 @@ export class Node {
 
   /**
    * Sends data to the Node.
-   * @param data The data to send.
+   * @param data
    */
   public send(data: unknown): Promise<boolean> {
     return new Promise((resolve, reject) => {

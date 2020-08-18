@@ -3,7 +3,6 @@ import { Node } from "./Node";
 import { Queue } from "./Queue";
 import { State, Structure, VoiceState } from "./Utils";
 
-/** The PlayerOptions interface. */
 export interface PlayerOptions {
   /** The guild the Player belongs to. */
   guild: string;
@@ -21,7 +20,6 @@ export interface PlayerOptions {
   selfDeaf?: boolean;
 }
 
-/** The Track interface. */
 export interface Track {
   /** The base64 encoded track. */
   readonly track: string;
@@ -58,7 +56,6 @@ export interface Track {
   ): string;
 }
 
-/** The PlayOptions interface */
 export interface PlayOptions {
   /** The track to play. */
   readonly track?: Track;
@@ -70,7 +67,6 @@ export interface PlayOptions {
   readonly noReplace?: boolean;
 }
 
-/** The EqualizerBand interface. */
 export interface EqualizerBand {
   /** The band number being 0 to 14. */
   band: number;
@@ -78,10 +74,7 @@ export interface EqualizerBand {
   gain: number;
 }
 
-/** The Player class. */
 export class Player {
-  /** The Manager instance. */
-  public static manager: Manager;
   /** The Queue for the Player. */
   public readonly queue = new (Structure.get("Queue")) as Queue;
   /** Whether the queue repeats the track. */
@@ -105,21 +98,22 @@ export class Player {
   /** The text channel for the player. */
   public textChannel: string;
   /** The current state of the player. */
-  public state = State.DISCONNECTED;
+  public state: State = "DISCONNECTED";
   /** The equalizer bands array. */
   public bands = new Array<number>(15).fill(0.0);
   /** The voice state object from Discord. */
   public voiceState: VoiceState = Object.assign({});
   private readonly player: typeof Player;
+  private static manager: Manager;
 
-  /** Only for internal use. */
+  /** @hidden */
   public static init(manager: Manager): void {
     this.manager = manager;
   }
 
   /**
    * Creates a new player, returns one if it already exists.
-   * @param options The options to pass.
+   * @param options
    */
   constructor(public options: PlayerOptions) {
     if (!this.player) this.player = Structure.get("Player");
@@ -146,9 +140,8 @@ export class Player {
 
   /**
    * Same as Manager#search() but a shortcut on the player itself.
-   * @param query The query to search against.
-   * @param requester The user who requested the tracks.
-   * @returns The search result.
+   * @param query
+   * @param requester
    */
   public search(query: string | Query, requester?: unknown): Promise<SearchResult> {
     return this.player.manager.search(query, requester);
@@ -156,7 +149,7 @@ export class Player {
 
   /**
    * Sets the players equalizer band. Passing nothing will clear it.
-   * @param bands The bands to set.
+   * @param bands
    */
   public setEQ(...bands: EqualizerBand[]): this {
     for (const { band, gain } of bands) this.bands[band] = gain;
@@ -182,7 +175,7 @@ export class Player {
       throw new RangeError(
         "Player#connect() No voice channel has been set in PlayerOptions."
       );
-    this.state = State.CONNECTING;
+    this.state = "CONNECTING";
 
     this.player.manager.options.send(this.guild, {
       op: 4,
@@ -194,14 +187,14 @@ export class Player {
       },
     });
 
-    this.state = State.CONNECTED;
+    this.state = "CONNECTED";
     return this;
   }
 
   /** Disconnect from the voice channel. */
   public disconnect(): this | void {
     if (!this.voiceChannel) return undefined;
-    this.state = State.DISCONNECTING;
+    this.state = "DISCONNECTING";
 
     this.pause(true);
     this.player.manager.options.send(this.guild, {
@@ -215,13 +208,13 @@ export class Player {
     });
 
     this.voiceChannel = null;
-    this.state = State.DISCONNECTED;
+    this.state = "DISCONNECTED";
     return this;
   }
 
   /** Destroys the player. */
   public destroy(): void {
-    this.state = State.DESTROYING;
+    this.state = "DESTROYING";
     this.disconnect();
 
     this.node.send({
@@ -235,7 +228,7 @@ export class Player {
 
   /**
    * Sets the player voice channel.
-   * @param channel The channel to set.
+   * @param channel
    */
   public setVoiceChannel(channel: string): this {
     this.voiceChannel = channel;
@@ -245,7 +238,7 @@ export class Player {
 
   /**
    * Sets the player text channel.
-   * @param channel The channel to set.
+   * @param channel
    */
   public setTextChannel(channel: string): this {
     this.textChannel = channel;
@@ -254,7 +247,7 @@ export class Player {
 
   /**
    * Plays the next track or a specified track in the PlayOptions.
-   * @param [options={}] The options to use.
+   * @param [options={}]
    */
   public play(options: PlayOptions = {}): this {
     if (!this.queue.current) throw new RangeError("Player#play() No current track.");
@@ -276,7 +269,7 @@ export class Player {
 
   /**
    * Sets the player volume.
-   * @param volume The volume to set.
+   * @param volume
    */
   public setVolume(volume: number): this {
     if (isNaN(volume))
@@ -294,7 +287,7 @@ export class Player {
 
   /**
    * Sets the track repeat.
-   * @param repeat If track repeat should be enabled.
+   * @param repeat
    */
   public setTrackRepeat(repeat: boolean): this {
     if (typeof repeat !== "boolean")
@@ -315,7 +308,7 @@ export class Player {
 
   /**
    * Sets the queue repeat.
-   * @param repeat If queue repeat should be enabled.
+   * @param repeat
    */
   public setQueueRepeat(repeat: boolean): this {
     if (typeof repeat !== "boolean")
@@ -346,7 +339,7 @@ export class Player {
 
   /**
    * Pauses the current track.
-   * @param pause Whether to pause the current track.
+   * @param pause
    */
   public pause(pause: boolean): this {
     if (typeof pause !== "boolean")
@@ -367,7 +360,7 @@ export class Player {
 
   /**
    * Seeks to the position in the current track.
-   * @param position The position to seek to.
+   * @param position
    */
   public seek(position: number): this | void {
     if (!this.queue.current) return undefined;

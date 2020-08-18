@@ -5,14 +5,12 @@ import { EventEmitter } from "events";
 import { Node, NodeOptions } from "./Node";
 import { Player, PlayerOptions, Track } from "./Player";
 import {
-  buildTrack,
+  TrackUtils,
   LoadType,
   Plugin,
   Structure,
   TrackData,
-  VoiceState,
   VoicePacket,
-  VoiceEvent,
   WebSocketClosedEvent,
   TrackExceptionEvent,
   TrackStuckEvent,
@@ -36,7 +34,7 @@ export interface ManagerOptions {
   /** The array of nodes to connect to. */
   nodes?: NodeOptions[];
   /** The client ID to use. */
-  clientId?: string;
+  clientId: string;
   /** The shard count. */
   shards?: number;
   /** A array of plugins to use. */
@@ -46,13 +44,12 @@ export interface ManagerOptions {
 
   /**
    * Function to send data to the websocket.
-   * @param id The ID of the guild.
-   * @param payload The payload to send.
+   * @param id
+   * @param payload
    */
   send(id: string, payload: Payload): void;
 }
 
-/** The IQuery interface. */
 export interface Query {
   /** The source to search from. */
   source?: "youtube" | "soundcloud";
@@ -60,23 +57,17 @@ export interface Query {
   query: string;
 }
 
-/** The SearchResult interface. */
 export interface SearchResult {
   /** The load type of the result. */
   loadType: LoadType;
-  /** The array of tracks if the load type is SEARCH_RESULT or TRACK_LOADED. */
+  /** The array of tracks. */
   tracks?: Track[];
   /** The playlist object if the load type is PLAYLIST_LOADED. */
   playlist?: {
-    /** The playlist info object. */
-    info: {
-      /** The playlist name. */
-      name: string;
-      /** The playlist selected track. */
-      selectedTrack?: Track;
-    };
-    /** The tracks in the playlist. */
-    tracks: Track[];
+    /** The playlist name. */
+    name: string;
+    /** The playlist selected track. */
+    selectedTrack?: Track;
     /** The duration of the playlist. */
     duration: number;
   };
@@ -210,10 +201,7 @@ export interface Manager {
   ): this;
 }
 
-/**
- * The Manager class.
- * @noInheritDoc
- */
+/** @noInheritDoc */
 export class Manager extends EventEmitter {
   /** The map of players. */
   public readonly players: Collection<string, Player> = new Collection<string, Player>();
@@ -246,13 +234,19 @@ export class Manager extends EventEmitter {
 
   /**
    * Creates the Manager class.
-   * @param options The options to use.
+   * @param options
    */
   constructor(options: ManagerOptions) {
     super();
 
     if (!options.send)
       throw new RangeError("Missing send method in ManageOptions.");
+
+    if (!options.clientId) {
+      throw new Error(
+        '"clientId" is not set. Pass it in Manager#init() or as a option in the constructor.'
+      );
+    }
 
     this.options = {
       plugins: [],
@@ -271,37 +265,26 @@ export class Manager extends EventEmitter {
 
     for (const plugin of this.options.plugins) plugin.load(this);
 
-    for (const node of this.options.nodes) {
-      if (!node.password) node.password = "youshallnotpass"
-      if (!node.port) node.port = 2333
-      if (!node.secure) node.secure = false
+    for (const nodeOptions of this.options.nodes) {
+      if (!nodeOptions.password) nodeOptions.password = "youshallnotpass"
+      if (!nodeOptions.port) nodeOptions.port = 2333
+      if (!nodeOptions.secure) nodeOptions.secure = false
 
-      const identifier = node.identifier || `${node.host}:${node.port}`;
-      this.nodes.set(identifier, new (Structure.get("Node"))(this, node));
-    }
-  }
+      const identifier = nodeOptions.identifier || `${nodeOptions.host}:${nodeOptions.port}`;
+      const node = new (Structure.get("Node"))(this, nodeOptions)
 
-  /**
-   * Initiates the manager (with a client ID if none provided in ManagerOptions).
-   * @param clientId The client ID to use.
-   */
-  public init(clientId?: string): this {
-    if (clientId) this.options.clientId = clientId;
-    if (!this.options.clientId) {
-      throw new Error(
-        '"clientId" is not set. Pass it in Manager#init() or as a option in the constructor.'
-      );
+      this.nodes.set(identifier, node);
+      node.connect();
     }
 
-    for (const node of this.nodes.values()) node.connect();
+    for (const node of this.nodes.values())
     Structure.get("Player").init(this);
-    return this;
   }
 
   /**
    * Searches YouTube with the query.
-   * @param query The query to search against.
-   * @param requester The user who requested the tracks.
+   * @param query
+   * @param requester
    * @returns The search result.
    */
   public search(query: string | Query, requester?: unknown): Promise<SearchResult> {
@@ -334,26 +317,24 @@ export class Manager extends EventEmitter {
       const result: SearchResult = {
         loadType: res.data.loadType,
         exception: res.data.exception,
+        tracks: res.data.tracks.map((track) => TrackUtils.build(track, requester)),
       };
 
       if (
-        [LoadType.SEARCH_RESULT, LoadType.TRACK_LOADED].includes(
-          LoadType[result.loadType]
+        ["SEARCH_RESULT", "TRACK_LOADED"].includes(
+          result.loadType
         )
       ) {
         result.tracks = res.data.tracks.map((track) =>
-          buildTrack(track, requester)
+          TrackUtils.build(track, requester)
         );
-      } else if (result.loadType === LoadType.PLAYLIST_LOADED) {
+      } else if (result.loadType === "PLAYLIST_LOADED") {
         result.playlist = {
-          tracks: res.data.tracks.map((track) => buildTrack(track, requester)),
-          info: {
-            name: res.data.playlistInfo.name,
-            selectedTrack: buildTrack(
-              res.data.tracks[res.data.playlistInfo.selectedTrack],
-              requester
-            ),
-          },
+          name: res.data.playlistInfo.name,
+          selectedTrack: TrackUtils.build(
+            res.data.tracks[res.data.playlistInfo.selectedTrack],
+            requester
+          ),
           duration: res.data.tracks
             .map((track: TrackData) => track.info.length)
             .reduce((acc: number, cur: number) => acc + cur, 0),
@@ -393,7 +374,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Create method for an easier option to creating players.
-   * @param options The options to pass.
+   * @param options
    */
   public create(options: PlayerOptions): Player {
     if (this.players.has(options.guild)) {
@@ -405,7 +386,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Sends voice data to the Lavalink server.
-   * @param data The data to send.
+   * @param data
    */
   public updateVoiceState(data: VoicePacket): void {
     if (
@@ -426,8 +407,8 @@ export class Manager extends EventEmitter {
       if (data.d.user_id !== this.options.clientId) return;
       state.sessionId = data.d.session_id;
       if (player.voiceChannel !== data.d.channel_id) {
-        player.voiceChannel = data.d.channel_id
         this.emit("playerMove", player, player.voiceChannel, data.d.channel_id);
+        player.voiceChannel = data.d.channel_id
       }
     }
 
