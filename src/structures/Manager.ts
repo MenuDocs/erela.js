@@ -5,17 +5,17 @@ import { EventEmitter } from "events";
 import { Node, NodeOptions } from "./Node";
 import { Player, PlayerOptions, Track } from "./Player";
 import {
-  TrackUtils,
   LoadType,
   Plugin,
   Structure,
   TrackData,
-  VoicePacket,
-  WebSocketClosedEvent,
-  TrackExceptionEvent,
-  TrackStuckEvent,
   TrackEndEvent,
-  TrackStartEvent
+  TrackExceptionEvent,
+  TrackStartEvent,
+  TrackStuckEvent,
+  TrackUtils,
+  VoicePacket,
+  WebSocketClosedEvent
 } from "./Utils";
 
 export interface Payload {
