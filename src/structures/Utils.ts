@@ -214,8 +214,8 @@ export abstract class Structure {
   }
 
   /**
-   * Returns the structure.
-   * @param structure
+   * Get a structure from available structures by name.
+   * @param structure The name of the structure
    */
   public static get<K extends keyof Extendable>(structure: K): Extendable[K] {
     const struct = structures[structure];
@@ -225,8 +225,7 @@ export abstract class Structure {
 }
 
 export class Plugin {
-  public load(manager: Manager): void {
-  }
+  public load(manager: Manager): void {}
 }
 
 export type LoadType =
@@ -276,9 +275,9 @@ export interface VoicePacket {
     user_id: string;
     session_id: string;
     channel_id: string;
-  }> & VoiceEvent;
+  }> &
+    VoiceEvent;
 }
-
 
 export interface NodeMessage extends NodeStats {
   type: PlayerEventType;
@@ -307,17 +306,13 @@ export type TrackEndReason =
   | "REPLACED"
   | "CLEANUP";
 
-export type Severity =
-  | "COMMON"
-  | "SUSPICIOUS"
-  | "FAULT";
+export type Severity = "COMMON" | "SUSPICIOUS" | "FAULT";
 
 export interface PlayerEvent {
   op: "event";
   type: PlayerEventType;
   guildId: string;
 }
-
 
 export interface Exception {
   severity: Severity;
@@ -355,7 +350,7 @@ export interface WebSocketClosedEvent extends PlayerEvent {
 }
 
 export interface PlayerUpdate {
-  op: "playerUpdate"
+  op: "playerUpdate";
   state: {
     position: number;
     time: number;
