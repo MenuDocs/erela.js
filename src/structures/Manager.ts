@@ -180,12 +180,6 @@ export class Manager extends EventEmitter {
     if (!options.send)
       throw new RangeError("Missing send method in ManageOptions.");
 
-    if (!options.clientId) {
-      throw new Error(
-        '"clientId" is not set. Pass it in Manager#init() or as a option in the constructor.'
-      );
-    }
-
     this.options = {
       plugins: [],
       nodes: [{ host: "localhost" }],
@@ -199,9 +193,19 @@ export class Manager extends EventEmitter {
     for (const nodeOptions of this.options.nodes) {
       const node = new (Structure.get("Node"))(this, nodeOptions)
       this.nodes.set(node.options.identifier, node);
-      node.connect();
+    }
+  }
+
+  public init(clientId?: string) {
+    if (typeof clientId === "string") this.options.clientId = clientId;
+
+    if (!this.options.clientId) {
+      throw new Error(
+        '"clientId" is not set. Pass it in Manager#init() or as a option in the constructor.'
+      );
     }
 
+    for (const node of this.nodes.values()) node.connect();
     Structure.get("Player").init(this);
   }
 
@@ -356,7 +360,7 @@ export interface ManagerOptions {
   /** The array of nodes to connect to. */
   nodes?: NodeOptions[];
   /** The client ID to use. */
-  clientId: string;
+  clientId?: string;
   /** The shard count. */
   shards?: number;
   /** A array of plugins to use. */
