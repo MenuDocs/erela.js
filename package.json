@@ -8,7 +8,7 @@
     "build": "tsc",
     "lint": "eslint --ext .ts ./src",
     "types": "dts-bundle --removeSource --name erela.js --main ./dist --out ../typings/index.d.ts --baseDir ./dist",
-    "docs": "typedoc --json ./docs.json --mode file --excludeProtected --excludePrivate src/structures",
+    "docs": "typedoc --json ./docs.json --mode file --excludeProtected --excludePrivate --excludeExternals src/structures",
     "publish:stable": "npm run build && npm run types && npm publish --access=public",
     "publish:beta": "npm run build && npm run types && npm publish --tag beta --access=public"
   },

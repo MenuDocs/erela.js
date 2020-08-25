@@ -18,68 +18,6 @@ import {
   WebSocketClosedEvent
 } from "./Utils";
 
-export interface Payload {
-  /** The OP code */
-  op: number;
-  d: {
-    guild_id: string;
-    channel_id: string | null;
-    self_mute: boolean;
-    self_deaf: boolean;
-  };
-}
-
-/** The ManagerOptions interface. */
-export interface ManagerOptions {
-  /** The array of nodes to connect to. */
-  nodes?: NodeOptions[];
-  /** The client ID to use. */
-  clientId: string;
-  /** The shard count. */
-  shards?: number;
-  /** A array of plugins to use. */
-  plugins?: Plugin[];
-  /** Whether players should automatically play the next song. */
-  autoPlay?: boolean;
-
-  /**
-   * Function to send data to the websocket.
-   * @param id
-   * @param payload
-   */
-  send(id: string, payload: Payload): void;
-}
-
-export interface Query {
-  /** The source to search from. */
-  source?: "youtube" | "soundcloud";
-  /** The query to search for. */
-  query: string;
-}
-
-export interface SearchResult {
-  /** The load type of the result. */
-  loadType: LoadType;
-  /** The array of tracks. */
-  tracks?: Track[];
-  /** The playlist object if the load type is PLAYLIST_LOADED. */
-  playlist?: {
-    /** The playlist name. */
-    name: string;
-    /** The playlist selected track. */
-    selectedTrack?: Track;
-    /** The duration of the playlist. */
-    duration: number;
-  };
-  /** The exception when searching if one. */
-  exception?: {
-    /** The message for the exception. */
-    message: string;
-    /** The severity of exception. */
-    severity: string;
-  };
-}
-
 const template = JSON.stringify(["event", "guildId", "op", "sessionId"]);
 
 export interface Manager {
@@ -113,7 +51,7 @@ export interface Manager {
    */
   on(
     event: "nodeDisconnect",
-    listener: (node: Node, reason: { code: number; reason: string }) => void
+    listener: (node: Node, reason: { code?: number; reason?: string }) => void
   ): this;
 
   /**
@@ -192,7 +130,7 @@ export interface Manager {
   ): this;
 
   /**
-   * Emitted when a voice connect is closed.
+   * Emitted when a voice connection is closed.
    * @event Manager#socketClosed
    */
   on(
@@ -233,7 +171,7 @@ export class Manager extends EventEmitter {
   }
 
   /**
-   * Creates the Manager class.
+   * Initiates the Manager class.
    * @param options
    */
   constructor(options: ManagerOptions) {
@@ -250,14 +188,7 @@ export class Manager extends EventEmitter {
 
     this.options = {
       plugins: [],
-      nodes: [
-        {
-          host: "localhost",
-          port: 2333,
-          password: "youshallnotpass",
-          secure: false
-        },
-      ],
+      nodes: [{ host: "localhost" }],
       shards: 1,
       autoPlay: false,
       ...options,
@@ -266,23 +197,16 @@ export class Manager extends EventEmitter {
     for (const plugin of this.options.plugins) plugin.load(this);
 
     for (const nodeOptions of this.options.nodes) {
-      if (!nodeOptions.password) nodeOptions.password = "youshallnotpass"
-      if (!nodeOptions.port) nodeOptions.port = 2333
-      if (!nodeOptions.secure) nodeOptions.secure = false
-
-      const identifier = nodeOptions.identifier || `${nodeOptions.host}:${nodeOptions.port}`;
       const node = new (Structure.get("Node"))(this, nodeOptions)
-
-      this.nodes.set(identifier, node);
+      this.nodes.set(node.options.identifier, node);
       node.connect();
     }
 
-    for (const node of this.nodes.values())
     Structure.get("Player").init(this);
   }
 
   /**
-   * Searches YouTube with the query.
+   * Searches the enabled sources based off the url or the source property.
    * @param query
    * @param requester
    * @returns The search result.
@@ -373,7 +297,7 @@ export class Manager extends EventEmitter {
   }
 
   /**
-   * Create method for an easier option to creating players.
+   * Creates a player or returns one if it already exists.
    * @param options
    */
   public create(options: PlayerOptions): Player {
@@ -415,4 +339,67 @@ export class Manager extends EventEmitter {
     player.voiceState = state;
     if (JSON.stringify(Object.keys(state).sort()) === template) player.node.send(state);
   }
+}
+
+export interface Payload {
+  /** The OP code */
+  op: number;
+  d: {
+    guild_id: string;
+    channel_id: string | null;
+    self_mute: boolean;
+    self_deaf: boolean;
+  };
+}
+
+export interface ManagerOptions {
+  /** The array of nodes to connect to. */
+  nodes?: NodeOptions[];
+  /** The client ID to use. */
+  clientId: string;
+  /** The shard count. */
+  shards?: number;
+  /** A array of plugins to use. */
+  plugins?: Plugin[];
+  /** Whether players should automatically play the next song. */
+  autoPlay?: boolean;
+
+  /**
+   * Function to send data to the websocket.
+   * @param id
+   * @param payload
+   */
+  send(id: string, payload: Payload): void;
+}
+
+export interface Query {
+  /** The source to search from. */
+  source?: "youtube" | "soundcloud";
+  /** The query to search for. */
+  query: string;
+}
+
+export interface SearchResult {
+  /** The load type of the result. */
+  loadType: LoadType;
+  /** The array of tracks. */
+  tracks?: Track[];
+  /** The playlist object if the load type is PLAYLIST_LOADED. */
+  playlist?: PlaylistInfo;
+  /** The exception when searching if one. */
+  exception?: {
+    /** The message for the exception. */
+    message: string;
+    /** The severity of exception. */
+    severity: string;
+  };
+}
+
+export interface PlaylistInfo {
+  /** The playlist name. */
+  name: string;
+  /** The playlist selected track. */
+  selectedTrack?: Track;
+  /** The duration of the playlist. */
+  duration: number;
 }

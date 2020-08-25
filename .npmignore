@@ -8,3 +8,4 @@ tsconfig.json
 .gitignore
 .gitattributes
 .github
+docs.sh

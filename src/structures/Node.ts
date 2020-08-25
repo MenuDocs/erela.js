@@ -12,64 +12,9 @@ import {
   WebSocketClosedEvent
 } from "./Utils";
 
-export interface NodeOptions {
-  /** The host for the node. */
-  host: string;
-  /** The port for the node. */
-  port?: number;
-  /** The password for the node. */
-  password?: string;
-  /** Whether the host uses SSL. */
-  secure?: boolean;
-  /** The identifier for the node. */
-  identifier?: string;
-  /** The retryAmount for the node. */
-  retryAmount?: number;
-  /** The retryDelay for the node. */
-  retryDelay?: number;
-}
-
-export interface NodeStats {
-  /** The amount of players on the node. */
-  players: number;
-  /** The amount of playing players on the node. */
-  playingPlayers: number;
-  /** The uptime for the node. */
-  uptime: number;
-  /** The memory stats for the node. */
-  memory: {
-    /** The free memory of the allocated amount. */
-    free: number;
-    /** The used memory of the allocated amount. */
-    used: number;
-    /** The total allocated memory. */
-    allocated: number;
-    /** The reservable memory. */
-    reservable: number;
-  };
-  /** The cpu stats for the node. */
-  cpu: {
-    /** The core amount the host machine has. */
-    cores: number;
-    /** The system load. */
-    systemLoad: number;
-    /** The lavalink load. */
-    lavalinkLoad: number;
-  };
-  /** The frame stats for the node. */
-  frameStats: {
-    /** The amount of sent frames. */
-    sent?: number;
-    /** The amount of nulled frames. */
-    nulled?: number;
-    /** The amount of deficit frames. */
-    deficit?: number;
-  };
-}
-
 export class Node {
   /** The socket for the node. */
-  public socket: WebSocket | null;
+  public socket: WebSocket | null = null;
   /** The amount of rest calls the node has made. */
   public calls = 0;
   /** The stats for the node. */
@@ -89,6 +34,16 @@ export class Node {
    * @param options
    */
   constructor(public manager: Manager, public options: NodeOptions) {
+    this.options = {
+      port: 2333,
+      password: "youshallnotpass",
+      secure: false,
+      retryAmount: 5,
+      retryDelay: 30e3,
+      ...options
+    };
+
+    this.options.identifier = options.identifier || options.host;
     this.stats = {
       players: 0,
       playingPlayers: 0,
@@ -134,27 +89,6 @@ export class Node {
     this.socket.on("error", this.error.bind(this));
   }
 
-  /** Reconnects to the Node. */
-  public reconnect(): void {
-    this.reconnectTimeout = setTimeout(() => {
-      if (this.reconnectAttempts >= (this.options.retryAmount || 5)) {
-        this.manager.emit(
-          "nodeError",
-          this,
-          new Error(
-            `Unable to connect after ${this.options.retryAmount || 5} attempts.`
-          )
-        );
-        return this.destroy();
-      }
-      this.socket.removeAllListeners();
-      this.socket = null;
-      this.manager.emit("nodeReconnect", this);
-      this.connect();
-      this.reconnectAttempts++;
-    }, this.options.retryDelay || 30e3);
-  }
-
   /** Destroys the Node. */
   public destroy(): void {
     if (!this.connected) return;
@@ -181,6 +115,26 @@ export class Node {
         else resolve(true);
       });
     });
+  }
+
+  private reconnect(): void {
+    this.reconnectTimeout = setTimeout(() => {
+      if (this.reconnectAttempts >= (this.options.retryAmount)) {
+        this.manager.emit(
+          "nodeError",
+          this,
+          new Error(
+            `Unable to connect after ${this.options.retryAmount} attempts.`
+          )
+        );
+        return this.destroy();
+      }
+      this.socket.removeAllListeners();
+      this.socket = null;
+      this.manager.emit("nodeReconnect", this);
+      this.connect();
+      this.reconnectAttempts++;
+    }, this.options.retryDelay);
   }
 
   protected open(): void {
@@ -265,7 +219,9 @@ export class Node {
   }
 
   protected trackEnd(player: Player, track: Track, payload: TrackEndEvent): void {
-    if (track && player.trackRepeat) {
+    if (payload.reason === "REPLACED") {
+      this.manager.emit("trackEnd", player, track, payload);
+    } else if (track && player.trackRepeat) {
       this.manager.emit("trackEnd", player, track, payload);
       if (this.manager.options.autoPlay) player.play();
     } else if (track && player.queueRepeat) {
@@ -277,7 +233,7 @@ export class Node {
       player.queue.current = null;
       player.playing = false;
       this.manager.emit("trackEnd", player, track, payload);
-      if (["REPLACED", "FINISHED", "STOPPED"].includes(payload.reason)) {
+      if (payload.reason === "FINISHED") {
         this.manager.emit("queueEnd", player);
       }
     } else if (player.queue.length) {
@@ -300,4 +256,65 @@ export class Node {
   protected socketClosed(player: Player, payload: WebSocketClosedEvent): void {
     this.manager.emit("socketClosed", player, payload);
   }
+}
+
+export interface NodeOptions {
+  /** The host for the node. */
+  host: string;
+  /** The port for the node. */
+  port?: number;
+  /** The password for the node. */
+  password?: string;
+  /** Whether the host uses SSL. */
+  secure?: boolean;
+  /** The identifier for the node. */
+  identifier?: string;
+  /** The retryAmount for the node. */
+  retryAmount?: number;
+  /** The retryDelay for the node. */
+  retryDelay?: number;
+}
+
+export interface NodeStats {
+  /** The amount of players on the node. */
+  players: number;
+  /** The amount of playing players on the node. */
+  playingPlayers: number;
+  /** The uptime for the node. */
+  uptime: number;
+  /** The memory stats for the node. */
+  memory: MemoryStats;
+  /** The cpu stats for the node. */
+  cpu: CPUStats;
+  /** The frame stats for the node. */
+  frameStats: FrameStats;
+}
+
+export interface MemoryStats {
+  /** The free memory of the allocated amount. */
+  free: number;
+  /** The used memory of the allocated amount. */
+  used: number;
+  /** The total allocated memory. */
+  allocated: number;
+  /** The reservable memory. */
+  reservable: number;
+}
+
+export interface CPUStats {
+  /** The core amount the host machine has. */
+  cores: number;
+  /** The system load. */
+  systemLoad: number;
+  /** The lavalink load. */
+  lavalinkLoad: number;
+}
+
+export interface FrameStats {
+  /** The amount of sent frames. */
+  sent?: number;
+  /** The amount of nulled frames. */
+  nulled?: number;
+  /** The amount of deficit frames. */
+  deficit?: number;
 }

@@ -1,78 +1,7 @@
 import { Manager, Query, SearchResult } from "./Manager";
 import { Node } from "./Node";
 import { Queue } from "./Queue";
-import { State, Structure, VoiceState } from "./Utils";
-
-export interface PlayerOptions {
-  /** The guild the Player belongs to. */
-  guild: string;
-  /** The text channel the Player belongs to. */
-  textChannel: string;
-  /** The voice channel the Player belongs to. */
-  voiceChannel?: string;
-  /** The node the Player uses. */
-  node?: string;
-  /** The initial volume the Player will use. */
-  volume?: number;
-  /** If the player should mute itself. */
-  selfMute?: boolean;
-  /** If the player should deaf itself. */
-  selfDeaf?: boolean;
-}
-
-export interface Track {
-  /** The base64 encoded track. */
-  readonly track: string;
-  /** The title of the track. */
-  readonly title: string;
-  /** The identifier of the track. */
-  readonly identifier: string;
-  /** The author of the track. */
-  readonly author: string;
-  /** The duration of the track. */
-  readonly duration: number;
-  /** If the track is seekable. */
-  readonly isSeekable: boolean;
-  /** If the track is a stream.. */
-  readonly isStream: boolean;
-  /** The uri of the track. */
-  readonly uri: string;
-  /** The thumbnail of the track. */
-  readonly thumbnail: string;
-  /** The user that requested the track. */
-  readonly requester: unknown | null
-
-  /** Displays the track thumbnail with a size in "0", "1", "2", "3", "default", "mqdefault", "hqdefault", "maxresdefault". Only for youtube as others require an API. */
-  displayThumbnail(
-    size?:
-      | "0"
-      | "1"
-      | "2"
-      | "3"
-      | "default"
-      | "mqdefault"
-      | "hqdefault"
-      | "maxresdefault"
-  ): string;
-}
-
-export interface PlayOptions {
-  /** The track to play. */
-  readonly track?: Track;
-  /** The position to start the track. */
-  readonly startTime?: number;
-  /** The position to end the track. */
-  readonly endTime?: number;
-  /** Whether to not replace the track if a play payload is sent. */
-  readonly noReplace?: boolean;
-}
-
-export interface EqualizerBand {
-  /** The band number being 0 to 14. */
-  band: number;
-  /** The gain amount being -0.25 to 1.00, 0.25 being double. */
-  gain: number;
-}
+import { template, sizes, State, Structure, VoiceState } from "./Utils";
 
 export class Player {
   /** The Queue for the Player. */
@@ -105,6 +34,24 @@ export class Player {
   public voiceState: VoiceState = Object.assign({});
   private readonly player: typeof Player;
   private static manager: Manager;
+  private readonly data: Record<string, unknown> = {};
+
+  /**
+   * Set custom data.
+   * @param key
+   * @param value
+   */
+  public set(key: string, value: unknown): void {
+    this.data[key] = value;
+  }
+
+  /**
+   * Get custom data.
+   * @param key
+   */
+  public get<T>(key: string): T {
+    return this.data[key] as T;
+  }
 
   /** @hidden */
   public static init(manager: Manager): void {
@@ -148,7 +95,7 @@ export class Player {
   }
 
   /**
-   * Sets the players equalizer band. Passing nothing will clear it.
+   * Sets the players equalizer band on-top of the existing ones.
    * @param bands
    */
   public setEQ(...bands: EqualizerBand[]): this {
@@ -163,7 +110,7 @@ export class Player {
     return this;
   }
 
-  /** Clears the equalizer. */
+  /** Clears the equalizer bands. */
   public clearEQ(): this {
     this.bands = new Array(15).fill(0.0);
     return this.setEQ();
@@ -245,25 +192,52 @@ export class Player {
     return this;
   }
 
+  /** Plays the next track. */
+  public play(): this
+
   /**
-   * Plays the next track or a specified track in the PlayOptions.
-   * @param [options={}]
+   * Plays the specified track.
+   * @param track
    */
-  public play(options: PlayOptions = {}): this {
+  public play(track: Track): this
+
+  /**
+   * Plays the next track with some options.
+   * @param options
+   */
+  public play(options: PlayOptions): this
+
+  /**
+   * Plays the specified track with some options.
+   * @param track
+   * @param options
+   */
+  public play(track: Track, options: PlayOptions): this
+  public play(optionsOrTrack?: PlayOptions | Track, playOptions?: PlayOptions): this {
+    if (
+      typeof optionsOrTrack !== "undefined" &&
+      template.every(v => Object.keys(optionsOrTrack).includes(v))
+    ) {
+      this.queue.current = optionsOrTrack as Track;
+    }
+
     if (!this.queue.current) throw new RangeError("Player#play() No current track.");
 
-    const finalOptions = {
+    const finalOptions = playOptions ? playOptions : ["startTime", "endTime", "noReplace"]
+        .every(v => Object.keys(optionsOrTrack || {}).includes(v)) ? optionsOrTrack as PlayOptions : {};
+
+    const options = {
       op: "play",
       guildId: this.guild,
       track: this.queue.current.track,
-      ...options,
+      ...finalOptions,
     };
 
-    if (typeof finalOptions.track !== "string") {
-      finalOptions.track = (finalOptions.track as Track).track;
+    if (typeof options.track !== "string") {
+      options.track = (options.track as Track).track;
     }
 
-    this.node.send(finalOptions);
+    this.node.send(options);
     return this;
   }
 
@@ -379,4 +353,63 @@ export class Player {
 
     return this;
   }
+}
+
+export interface PlayerOptions {
+  /** The guild the Player belongs to. */
+  guild: string;
+  /** The text channel the Player belongs to. */
+  textChannel: string;
+  /** The voice channel the Player belongs to. */
+  voiceChannel?: string;
+  /** The node the Player uses. */
+  node?: string;
+  /** The initial volume the Player will use. */
+  volume?: number;
+  /** If the player should mute itself. */
+  selfMute?: boolean;
+  /** If the player should deaf itself. */
+  selfDeaf?: boolean;
+}
+
+export interface Track {
+  /** The base64 encoded track. */
+  readonly track: string;
+  /** The title of the track. */
+  readonly title: string;
+  /** The identifier of the track. */
+  readonly identifier: string;
+  /** The author of the track. */
+  readonly author: string;
+  /** The duration of the track. */
+  readonly duration: number;
+  /** If the track is seekable. */
+  readonly isSeekable: boolean;
+  /** If the track is a stream.. */
+  readonly isStream: boolean;
+  /** The uri of the track. */
+  readonly uri: string;
+  /** The thumbnail of the track. */
+  readonly thumbnail: string;
+  /** The user that requested the track. */
+  readonly requester: unknown | null
+
+  /** Displays the track thumbnail with optional size. Only for youtube as others require an API. */
+  displayThumbnail(size?: sizes): string;
+}
+
+export interface PlayOptions {
+  /** The position to start the track. */
+  readonly startTime?: number;
+  /** The position to end the track. */
+  readonly endTime?: number;
+  /** Whether to not replace the track if a play payload is sent. */
+  readonly noReplace?: boolean;
+}
+
+export interface EqualizerBand {
+  /** The band number being 0 to 14. */
+  band: number;
+  /** The gain amount being -0.25 to 1.00, 0.25 being double. */
+  gain: number;
 }

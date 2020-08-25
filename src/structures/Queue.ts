@@ -1,21 +1,9 @@
 import { Track } from "./Player";
-
-const template = [
-  "track",
-  "title",
-  "identifier",
-  "author",
-  "duration",
-  "isSeekable",
-  "isStream",
-  "uri",
-  "thumbnail",
-  "user",
-];
+import { template } from "./Utils";
 
 /** @noInheritDoc */
 export class Queue extends Array<Track> {
-  /** Returns the total duration of the queue including the current track. */
+  /** The total duration of the queue. */
   public get duration(): number {
     const current = (this.current || {}).duration || 0;
     return this.map((track: Track) => track.duration).reduce(
@@ -24,13 +12,13 @@ export class Queue extends Array<Track> {
     );
   }
 
-  /** Returns the amount of tracks in the queue including the current if it exists. */
-  public get length(): number {
-    return super.length + (this.current ? 1 : 0)
+  /** The total size of tracks in the queue. */
+  public get size(): number {
+    return this.length + (this.current ? 1 : 0)
   }
 
   /** The current track */
-  public current: Track = null
+  public current: Track | null = null
 
   /**
    * Adds a track to the queue.
@@ -40,8 +28,8 @@ export class Queue extends Array<Track> {
   public add(track: Track | Track[], offset?: number): void {
     if (
       !(
-        Array.isArray(track) ||
-        !template.every((v) => Object.keys(track).includes(v))
+        (Array.isArray(track) && track.length) ||
+        template.every((v) => Object.keys(track || {}).includes(v))
       )
     ) {
       throw new RangeError('Queue#add() Track must be a "Track" or "Track[]".');
@@ -78,19 +66,18 @@ export class Queue extends Array<Track> {
   }
 
   /**
-   * Removes a track from the queue. Defaults to the first track.
+   * Removes a track from the queue. Defaults to the first track, returning the removed track.
    * @param [position=0]
-   * @returns The tracks that were removed, or null if the tracks do not exist.
    */
-  public remove(position: number): Track[] | null
+  public remove(position?: number): Track[]
+
   /**
-   * Removes an amount of tracks using a start and end index.
+   * Removes an amount of tracks using a start and end index, returning the removed tracks.
    * @param start
    * @param end
-   * @returns The tracks that were removed, or null if the tracks do not exist.
    */
-  public remove(start: number, end: number): Track[] | null
-  public remove(startOrPosition = 0, end?: number): Track[] | null {
+  public remove(start: number, end: number): Track[]
+  public remove(startOrPosition = 0, end?: number): Track[] {
     if (typeof end !== "undefined") {
       if (isNaN(startOrPosition)) {
         throw new RangeError(`Queue#remove() Missing "start" parameter.`);
