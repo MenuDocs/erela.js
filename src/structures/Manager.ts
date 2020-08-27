@@ -196,6 +196,10 @@ export class Manager extends EventEmitter {
     }
   }
 
+  /**
+   * Initiates the Manager.
+   * @param clientId
+   */
   public init(clientId?: string): this {
     if (typeof clientId === "string") this.options.clientId = clientId;
 

@@ -15,7 +15,7 @@ const sizes = [
   "maxresdefault",
 ];
 
-export const template = [
+const template = [
   "track",
   "title",
   "identifier",
@@ -46,6 +46,7 @@ export abstract class TrackUtils {
 
     return validate(trackOrTracks);
   }
+
   /**
    * Builds a Track from the raw data from Lavalink and a optional requester.
    * @param data
@@ -113,7 +114,7 @@ export class Plugin {
   public load(manager: Manager): void {}
 }
 
-export const structures = {
+const structures = {
   Player: require("./Player").Player,
   Queue: require("./Queue").Queue,
   Node: require("./Node").Node,
