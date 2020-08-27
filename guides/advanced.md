@@ -64,7 +64,7 @@ const { Manager } = require("erela.js");
 const MyPlugin = require("my-erela.js-plugin");
 
 const manager = new Manager({
-  plugins: [ new MyPlugin() ]
+  plugins: [ new MyPlugin({ foo: "bar" }) ]
 })
 ```
 

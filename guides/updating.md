@@ -81,6 +81,15 @@ const player = new Player(options);
 
 In both these examples the [`options`](/docs/typedefs/ManagerOptions.html) is same as before.
 
+### Destroying players
+
+In previous versions you had to destroy players using the PlayerStore `destory` method, now you use it directly on the Player class.
+
+```javascript
+const player = manager.players.get("guildId")
+player.destroy();
+```
+
 ### Connecting to voice
 
 Before Erela.js would automatically connect to the voice channel. Now you must use the <code>Player#<a href="/docs/classes/Player.html#connect">connect</a>()</code> method.

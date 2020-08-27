@@ -14,6 +14,7 @@ To start using Erela.js you first have to install it using NPM or Yarn.
 
 :::: tabs type:border-card stretch:true
 
+<!-- remove later on -->
 ::: tip
 If you are looking to use the beta then you must use the `beta` tag like so `erela.js@beta`
 :::
@@ -43,8 +44,19 @@ const { Manager } = require("erela.js");
 // Initiate both main classes
 const client = new Client();
 
+// Define some options for the node
+const nodes = [
+  {
+    host: "localhost",
+    password: "youshallnotpass",
+    port: 2333,
+  }
+];
+
 // Assign Manager to the client variable
 client.manager = new Manager({
+  // The nodes to connect to, optional if using default lavalink options
+  nodes,
   // Automatically play the next track
   autoPlay: true,
   // Method to send voice data to Discord
