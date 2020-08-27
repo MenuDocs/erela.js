@@ -196,7 +196,7 @@ export class Manager extends EventEmitter {
     }
   }
 
-  public init(clientId?: string) {
+  public init(clientId?: string): this {
     if (typeof clientId === "string") this.options.clientId = clientId;
 
     if (!this.options.clientId) {
@@ -207,6 +207,8 @@ export class Manager extends EventEmitter {
 
     for (const node of this.nodes.values()) node.connect();
     Structure.get("Player").init(this);
+
+    return this;
   }
 
   /**
@@ -386,9 +388,9 @@ export interface Query {
 export interface SearchResult {
   /** The load type of the result. */
   loadType: LoadType;
-  /** The array of tracks. */
-  tracks?: Track[];
-  /** The playlist object if the load type is PLAYLIST_LOADED. */
+  /** The array of tracks from the result. */
+  tracks: Track[];
+  /** The playlist info if the load type is PLAYLIST_LOADED. */
   playlist?: PlaylistInfo;
   /** The exception when searching if one. */
   exception?: {

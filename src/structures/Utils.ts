@@ -27,7 +27,25 @@ export const template = [
   "thumbnail"
 ];
 
+const validate = (track: unknown) => template.every(
+  v => Object.keys(track || {}).includes(v)
+);
+
 export abstract class TrackUtils {
+  /**
+   * Checks if the provided argument is a valid track or if the array is
+   * @param trackOrTracks
+   */
+  static validate(trackOrTracks: unknown): boolean {
+    if (Array.isArray(trackOrTracks) && trackOrTracks.length) {
+      for (const track of trackOrTracks) {
+        if (!validate(track)) return false;
+      }
+      return true;
+    }
+
+    return validate(trackOrTracks);
+  }
   /**
    * Builds a Track from the raw data from Lavalink and a optional requester.
    * @param data

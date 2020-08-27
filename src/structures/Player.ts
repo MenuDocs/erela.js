@@ -1,7 +1,7 @@
 import { Manager, Query, SearchResult } from "./Manager";
 import { Node } from "./Node";
 import { Queue } from "./Queue";
-import { template, sizes, State, Structure, VoiceState } from "./Utils";
+import { sizes, State, Structure, VoiceState, TrackUtils } from "./Utils";
 
 export class Player {
   /** The Queue for the Player. */
@@ -214,10 +214,7 @@ export class Player {
    */
   public play(track: Track, options: PlayOptions): this
   public play(optionsOrTrack?: PlayOptions | Track, playOptions?: PlayOptions): this {
-    if (
-      typeof optionsOrTrack !== "undefined" &&
-      template.every(v => Object.keys(optionsOrTrack).includes(v))
-    ) {
+    if (typeof optionsOrTrack !== "undefined" && TrackUtils.validate(optionsOrTrack)) {
       this.queue.current = optionsOrTrack as Track;
     }
 

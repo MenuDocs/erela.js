@@ -1,5 +1,5 @@
 import { Track } from "./Player";
-import { template } from "./Utils";
+import { TrackUtils } from "./Utils";
 
 /** @noInheritDoc */
 export class Queue extends Array<Track> {
@@ -26,12 +26,7 @@ export class Queue extends Array<Track> {
    * @param [offset=null]
    */
   public add(track: Track | Track[], offset?: number): void {
-    if (
-      !(
-        (Array.isArray(track) && track.length) ||
-        template.every((v) => Object.keys(track || {}).includes(v))
-      )
-    ) {
+    if (!TrackUtils.validate(track)) {
       throw new RangeError('Queue#add() Track must be a "Track" or "Track[]".');
     }
 
@@ -40,7 +35,7 @@ export class Queue extends Array<Track> {
         this.current = track;
         return;
       } else {
-        this.current = track.shift();
+        this.current = (track = [...track]).shift();
       }
     }
 
