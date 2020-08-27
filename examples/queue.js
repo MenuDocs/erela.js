@@ -17,8 +17,9 @@ module.exports = {
     if (!player) return message.reply("there is no player for this guild.");
 
     const queue = player.queue;
-    const embed = new MessageEmbed().setAuthor(`Queue for ${message.guild.id}`);
+    const embed = new MessageEmbed().setAuthor(`Queue for ${message.guild.name}`);
 
+    // change for the amount of tracks per page
     const multiple = 10;
     const page = args.length && Number(args[0]) ? Number(args[0]) : 1;
 
@@ -34,7 +35,7 @@ module.exports = {
     if (!tracks.length) embed.setDescription("No tracks in the queue.");
     else embed.setDescription(tracks.map((track, i) => `${start + (++i)} - [${track.title}](${track.uri})`).join("\n"));
 
-    embed.setFooter(`Page ${page} of ${Math.ceil(queue.length / 10)}`);
+    embed.setFooter(`Page ${page} of ${Math.ceil(queue.length / multiple)}`);
     
     return message.reply(embed);
   }
