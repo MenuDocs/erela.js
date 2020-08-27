@@ -3,7 +3,7 @@ THIS IS JUST THE COMMAND IT SELF, IF YOU USE THIS EXACTLY THEN YOU WILL NEED A W
 https://solaris.codes/erelajs-rewrite/guides/moreCommands.html#before-you-start
 
 YOU ALSO NEED TO INITIATE THE MANAGER AS SHOWN HERE:
-http://localhost:8080/erelajs-rewrite/guides/basics.html#first-start
+https://solaris.codes/erelajs-rewrite/guides/basics.html#first-start
 
 Or copy the code inside the run function as its simply the message and arguments.
 */

@@ -9,3 +9,5 @@ tsconfig.json
 .gitattributes
 .github
 docs.sh
+guides
+examples
