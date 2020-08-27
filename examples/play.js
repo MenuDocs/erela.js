@@ -17,9 +17,9 @@ module.exports = {
     if (!args.length) return message.reply('you need to give me a URL or a search term.');
 
     const player = message.client.manager.create({
-        guild: message.guild.id,
-        voiceChannel: channel.id,
-        textChannel: message.channel.id,
+      guild: message.guild.id,
+      voiceChannel: channel.id,
+      textChannel: message.channel.id,
     });
 
     player.connect();

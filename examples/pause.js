@@ -20,7 +20,7 @@ module.exports = {
     if (channel.id !== player.voiceChannel) return message.reply("you're not in the same voice channel.");
     if (player.paused) return message.reply("the player is already paused.");
 
-    player.pause(true)
+    player.pause(true);
     return message.reply("paused the player.");
   }
 }

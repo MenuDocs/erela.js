@@ -28,15 +28,15 @@ module.exports = {
 
     const tracks = queue.slice(start, end);
 
-    if (!tracks.length) return message.reply("that page does not exist.");
-
     if (queue.current) embed.addField("Current", `[${queue.current.title}](${queue.current.uri})`);
 
-    if (!tracks.length) embed.setDescription("No tracks in the queue.");
+    if (!tracks.length) embed.setDescription(`No tracks in ${page > 1 ? `page ${page}` : "the queue"}.`);
     else embed.setDescription(tracks.map((track, i) => `${start + (++i)} - [${track.title}](${track.uri})`).join("\n"));
 
-    embed.setFooter(`Page ${page} of ${Math.ceil(queue.length / multiple)}`);
-    
+    const maxPages = Math.ceil(queue.length / multiple);
+
+    embed.setFooter(`Page ${page > maxPages ? maxPages : page} of ${maxPages}`);
+
     return message.reply(embed);
   }
 }
