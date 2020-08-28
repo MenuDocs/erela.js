@@ -2,19 +2,20 @@
 
 > An easy-to-use Lavalink client for NodeJS.
 
-## Documentation
+## Documentation & Guides
 
-You can find the documentation at <http://projects.solaris.codes/erelajs-rewrite>
+Documentation: <http://projects.solaris.codes/erelajs-rewrite/docs/gettingstarted.html>
+Guides: <http://projects.solaris.codes/erelajs-rewrite/guides/introduction.html>
 
-## Installation
-
-### Prerequisites
+## Prerequisites
 
 - [Java](https://www.java.com/en/download)
 
 - [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1)
 
 > Note: Java v11 or newer is required to run the Lavalink.jar. Java v13 is recommended.
+
+## Installation
 
 ```shell
 npm install erela.js@beta
@@ -42,12 +43,15 @@ const client = new Client();
 // Initiate the Manager with some options and listen to some events.
 client.manager = new Manager({
     // Pass an array of node. Note: You do not need to pass any if you are using the default values (ones shown below).
-    nodes: [{
-        host: "localhost", // Optional if Lavalink is local
-        port: 2333, // Optional if Lavalink is set to default
-        password: "youshallnotpass", // Optional if Lavalink is set to default
-        secure: false // Uses HTTPS and WSS if enabled
-    }],
+    nodes: [
+        // If you pass a object like so the "host" property is required
+        {
+            host: "localhost", // Optional if Lavalink is local
+            port: 2333, // Optional if Lavalink is set to default
+            password: "youshallnotpass", // Optional if Lavalink is set to default
+            secure: false // Uses HTTPS and WSS if enabled
+        }
+    ],
     // Auto plays tracks after one ends, defaults to "false".
     autoPlay: true,
     // A send method to send data to the Discord WebSocket using your library.
@@ -80,11 +84,11 @@ client.on("raw", d => client.manager.updateVoiceState(d));
 
 client.on("message", async message => {
     if (message.content.startsWith("!play")) {
-        // Retrieves tracks with your query and the requester of the track(s).
+        // Note: This example only works for retrieving tracks using a query, such as "Rick Astley - Never Gonna Give You Up".
+
+        // Retrieves tracks with your query and the requester of the tracks.
         // Note: This retrieves tracks from youtube by default, to get from other sources you must enable them in application.yml and provide a link for the source.
-        // Note: If you want to "search" with you must provide an object with a "query" property being the query to use, and "source" being one of "youtube", "soundcloud".
-        // Note: This example only works for searching tracks using a query, such as "Rick Astley - Never Gonna Give You Up".
-        // Returns a SearchResult.
+        // Note: If you want to "search" for tracks you must provide an object with a "query" property being the query to use, and "source" being one of "youtube", "soundcloud".
         const res = await client.manager.search(message.content.slice(6), message.author);
 
         // Create a new player. This will return the player if it already exists.
@@ -103,76 +107,14 @@ client.on("message", async message => {
 
         // Plays the player (plays the first track in the queue).
         // The if statement is needed else it will play the current track again
-        if (!player.playing && !player.paused && !player.queue.size) player.play();
+        if (!player.playing && !player.paused && !player.queue.length) player.play();
     
         // For playlists you'll have to use slightly different if statement
-        if (!player.playing && !player.paused && player.queue.size === res.tracks.length) player.play()
+        if (!player.playing && !player.paused && player.queue.size === res.tracks.length) player.play();
     }
 });
 
 client.login("your token");
-```
-
-## Extending
-
-Erela.JS can expand on its functionality by extending its classes.
-Note: This should only used if you are adding *your own* functions.
-
-```javascript
-const { Structure } = require("erela.js");
-
-// Use the extend method to extend the class.
-Structure.extend("Queue", Queue => class extends Queue {
-    save() {
-        somehowSaveQueue();
-    }
-});
-
-// Usage:
-const player = somehowGetPlayer();
-player.queue.save();
-```
-
-## Plugins
-
-Erela.JS can expand on its functionality with plugins.
-Note: This should only be used if you want to use others functions.
-
-```javascript
-// Only for demonstration.
-const { Manager } = require("erela.js");
-const SaveQueue = require("erela.js-save-queue");
-
-const manager = new Manager({
-    plugins: [ new SaveQueue({ max: 10 }) ],
-})
-
-// Usage.
-const player = somehowGetPlayer();
-player.queue.save();
-```
-
-### Creating your own plugin
-
-```javascript
-const { Structure, Plugin } = require("erela.js");
-
-Structure.extend("Queue", Queue => class extends Queue {
-    save() {
-        somehowSaveQueue();
-    }
-});
-
-module.exports = class MyQueuePlugin extends Plugin {
-    // Use the constructor to pass values to the plugin.
-    constructor(options) {
-        super();
-        // Able to use "max" as a option.
-        this.options = options;
-    }
-
-    load(manager) {}
-}
 ```
 
 ## Contributors

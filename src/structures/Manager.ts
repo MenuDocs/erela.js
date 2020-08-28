@@ -147,6 +147,7 @@ export class Manager extends EventEmitter {
   public readonly nodes = new Collection<string, Node>();
   /** The options that were set. */
   public readonly options: ManagerOptions;
+  private initiated = false;
 
   /** Returns the least used Nodes. */
   public get leastUsedNodes(): Collection<string, Node> {
@@ -201,6 +202,7 @@ export class Manager extends EventEmitter {
    * @param clientId
    */
   public init(clientId?: string): this {
+    if (this.initiated) return this;
     if (typeof clientId === "string") this.options.clientId = clientId;
 
     if (!this.options.clientId) {
@@ -212,6 +214,7 @@ export class Manager extends EventEmitter {
     for (const node of this.nodes.values()) node.connect();
     Structure.get("Player").init(this);
 
+    this.initiated = true;
     return this;
   }
 
