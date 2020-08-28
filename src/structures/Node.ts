@@ -119,7 +119,7 @@ export class Node {
 
   private reconnect(): void {
     this.reconnectTimeout = setTimeout(() => {
-      if (this.reconnectAttempts >= (this.options.retryAmount)) {
+      if (this.reconnectAttempts >= this.options.retryAmount) {
         this.manager.emit(
           "nodeError",
           this,

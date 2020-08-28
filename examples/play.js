@@ -56,9 +56,9 @@ module.exports = {
         if (res.tracks.length < max) max = res.tracks.length;
 
         const results = res.tracks
-          .slice(0, max)
-          .map((track, index) => `${++index} - \`${track.title}\``)
-          .join('\n');
+            .slice(0, max)
+            .map((track, index) => `${++index} - \`${track.title}\``)
+            .join('\n');
 
         message.channel.send(results);
 
@@ -71,7 +71,7 @@ module.exports = {
 
         const first = collected.first().content;
 
-        if (first === 'end') {
+        if (first.toLowerCase() === 'end') {
           if (!player.queue.current) player.destroy();
           return message.channel.send('Cancelled selection.');
         }

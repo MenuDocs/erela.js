@@ -64,8 +64,8 @@ export abstract class TrackUtils {
         isStream: data.info.isStream,
         uri: data.info.uri,
         thumbnail: `https://img.youtube.com/vi/${data.info.identifier}/default.jpg`,
-        displayThumbnail(size): string {
-          const finalSize = sizes.find((s) => s === size) || "default";
+        displayThumbnail(size= "default"): string {
+          const finalSize = sizes.find((s) => s === size);
           return this.uri.includes("youtube")
             ? `https://img.youtube.com/vi/${data.info.identifier}/${finalSize}.jpg`
             : "";
@@ -90,7 +90,7 @@ export abstract class Structure {
    */
   public static extend<K extends keyof Extendable, T extends Extendable[K]>(
     name: K,
-    extender: (klass: Extendable[K]) => T
+    extender: (target: Extendable[K]) => T
   ): T {
     if (!structures[name])
       throw new TypeError(`"${name} is not a valid structure`);
@@ -101,12 +101,12 @@ export abstract class Structure {
 
   /**
    * Get a structure from available structures by name.
-   * @param structure The name of the structure
+   * @param name
    */
-  public static get<K extends keyof Extendable>(structure: K): Extendable[K] {
-    const struct = structures[structure];
-    if (!struct) throw new TypeError('"structure" must be provided.');
-    return struct;
+  public static get<K extends keyof Extendable>(name: K): Extendable[K] {
+    const structure = structures[name];
+    if (!structure) throw new TypeError('"structure" must be provided.');
+    return structure;
   }
 }
 
