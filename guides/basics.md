@@ -66,6 +66,16 @@ client.manager = new Manager({
   }
 });
 
+// Emitted whenever a node connects
+client.manager.on("nodeConnect", node => {
+    console.log(`Node "${node.options.identifier}" connected.`)
+})
+
+// Emitted whenever a node encountered an error
+client.manager.on("nodeError", (node, error) => {
+    console.log(`Node "${node.options.identifier}" encountered an error: ${error.message}.`)
+})
+
 // Listen for when the client becomes ready
 client.once("ready", () => {
   // Initiates the manager and connects to all the nodes
