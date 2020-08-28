@@ -7,6 +7,7 @@ sidebarDepth: 1
 ## Player data
 
 Players can hold custom data like the text channel object or more.
+All of this data is similar to a Map and can be referenced easily as shown below.
 
 ```javascript
 const player = manager.create(/* options */);
@@ -19,6 +20,7 @@ const textChannel = player.get("textChannel");
 ```
 
 Now the type will show as `any` for typings, but you can add some JSDoc to give it a proper type for your editor.
+JSDoc must be defined by you or else there will be no type besides `any` in your editor.
 
 ```javascript
 /** @type {import("discord.js").TextChannel} */
