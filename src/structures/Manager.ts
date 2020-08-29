@@ -237,7 +237,7 @@ export class Manager extends EventEmitter {
   ): Promise<SearchResult> {
     return new Promise(async (resolve, reject) => {
       const node: Node = this.leastUsedNodes.first();
-      if (!node) throw new Error("Manager#search() No available nodes.");
+      if (!node) throw new Error("Manager: no available nodes.");
 
       const source = { soundcloud: "sc" }[(query as Query).source] || "yt";
       let search = (query as Query).query || (query as string);
@@ -260,7 +260,7 @@ export class Manager extends EventEmitter {
       node.calls++;
 
       if (!res || !res.data) {
-        return reject(new Error("No data returned from query."));
+        return reject(new Error("Manager: query not found."));
       }
 
       const result: SearchResult = {
@@ -299,7 +299,7 @@ export class Manager extends EventEmitter {
   public decodeTrack(track: string): Promise<TrackData> {
     return new Promise(async (resolve, reject) => {
       const node: Node = this.leastUsedNodes.first();
-      if (!node) throw new Error("Manager#search() No available nodes.");
+      if (!node) throw new Error("Manager: no available nodes.");
       const url = `http${node.options.secure ? "s" : ""}://${
         node.options.host
       }:${node.options.port}/decodetrack`;
