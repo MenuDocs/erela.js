@@ -190,7 +190,7 @@ export class Manager extends EventEmitter {
 
     this.options = {
       plugins: [],
-      nodes: [{ host: "localhost" }],
+      nodes: [{ identifier: "default", host: "localhost" }],
       shards: 1,
       autoPlay: false,
       ...options,
@@ -236,10 +236,14 @@ export class Manager extends EventEmitter {
     requester?: unknown
   ): Promise<SearchResult> {
     return new Promise(async (resolve, reject) => {
-      const node: Node = this.leastUsedNodes.first();
+      const node = this.leastUsedNodes.first();
       if (!node) throw new Error("Manager: no available nodes.");
 
-      const source = { soundcloud: "sc" }[(query as Query).source] || "yt";
+      const sources = {
+        soundcloud: "sc",
+        youtube: "yt",
+      };
+      const source = sources[(query as Query).source ?? "youtube"];
       let search = (query as Query).query || (query as string);
 
       if (!/^https?:\/\//.test(search)) {
@@ -266,13 +270,13 @@ export class Manager extends EventEmitter {
       const result: SearchResult = {
         loadType: res.data.loadType,
         exception: res.data.exception,
-        tracks: res.data.tracks.map((track) =>
+        tracks: res.data.tracks.map((track: any) =>
           TrackUtils.build(track, requester)
         ),
       };
 
       if (["SEARCH_RESULT", "TRACK_LOADED"].includes(result.loadType)) {
-        result.tracks = res.data.tracks.map((track) =>
+        result.tracks = res.data.tracks.map((track: any) =>
           TrackUtils.build(track, requester)
         );
       } else if (result.loadType === "PLAYLIST_LOADED") {
@@ -298,7 +302,7 @@ export class Manager extends EventEmitter {
    */
   public decodeTrack(track: string): Promise<TrackData> {
     return new Promise(async (resolve, reject) => {
-      const node: Node = this.leastUsedNodes.first();
+      const node = this.leastUsedNodes.first();
       if (!node) throw new Error("Manager: no available nodes.");
       const url = `http${node.options.secure ? "s" : ""}://${
         node.options.host
@@ -327,10 +331,11 @@ export class Manager extends EventEmitter {
    */
   public create(options: PlayerOptions): Player {
     if (this.players.has(options.guild)) {
-      return this.players.get(options.guild);
-    } else {
-      return new (Structure.get("Player"))(options);
+      return this.players.get(options.guild)!;
     }
+
+    const player = new (Structure.get("Player"))(options);
+    return player;
   }
 
   /**
