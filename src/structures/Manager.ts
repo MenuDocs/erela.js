@@ -196,11 +196,15 @@ export class Manager extends EventEmitter {
       ...options,
     };
 
-    for (const plugin of this.options.plugins) plugin.load(this);
+    if (this.options.plugins) {
+      for (const plugin of this.options.plugins) plugin.load(this);
+    }
 
-    for (const nodeOptions of this.options.nodes) {
-      const node = new (Structure.get("Node"))(this, nodeOptions);
-      this.nodes.set(node.options.identifier, node);
+    if (this.options.nodes) {
+      for (const nodeOptions of this.options.nodes) {
+        const node = new (Structure.get("Node"))(this, nodeOptions);
+        this.nodes.set(node.options.identifier, node);
+      }
     }
   }
 

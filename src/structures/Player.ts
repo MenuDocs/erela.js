@@ -23,9 +23,9 @@ export class Player {
   /** The guild the player. */
   public guild: string;
   /** The voice channel for the player. */
-  public voiceChannel: string;
+  public voiceChannel?: string;
   /** The text channel for the player. */
-  public textChannel: string;
+  public textChannel?: string;
   /** The current state of the player. */
   public state: State = "DISCONNECTED";
   /** The equalizer bands array. */

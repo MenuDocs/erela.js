@@ -51,7 +51,7 @@ export abstract class TrackUtils {
    * @param data
    * @param requester
    */
-  static build(data: TrackData, requester?: unknown): Track | null {
+  static build(data: TrackData, requester?: unknown): Track | undefined {
     try {
       const track: Track = {
         track: data.track,
@@ -76,7 +76,7 @@ export abstract class TrackUtils {
 
       return track;
     } catch {
-      return null;
+      return undefined;
     }
   }
 }
@@ -191,7 +191,7 @@ export interface VoiceState {
   op: "voiceUpdate";
   guildId: string;
   event: VoiceEvent;
-  sessionId: string;
+  sessionId?: string;
 }
 
 export interface VoiceEvent {
