@@ -15,7 +15,7 @@ import {
   TrackStuckEvent,
   TrackUtils,
   VoicePacket,
-  WebSocketClosedEvent
+  WebSocketClosedEvent,
 } from "./Utils";
 
 const template = JSON.stringify(["event", "guildId", "op", "sessionId"]);
@@ -126,7 +126,11 @@ export interface Manager {
    */
   on(
     event: "trackError",
-    listener: (player: Player, track: Track, payload: TrackExceptionEvent) => void
+    listener: (
+      player: Player,
+      track: Track,
+      payload: TrackExceptionEvent
+    ) => void
   ): this;
 
   /**
@@ -142,7 +146,10 @@ export interface Manager {
 /** @noInheritDoc */
 export class Manager extends EventEmitter {
   /** The map of players. */
-  public readonly players: Collection<string, Player> = new Collection<string, Player>();
+  public readonly players: Collection<string, Player> = new Collection<
+    string,
+    Player
+  >();
   /** The map of nodes. */
   public readonly nodes = new Collection<string, Node>();
   /** The options that were set. */
@@ -168,7 +175,7 @@ export class Manager extends EventEmitter {
           ? (b.stats.cpu.systemLoad / b.stats.cpu.cores) * 100
           : 0;
         return aload - bload;
-      })
+      });
   }
 
   /**
@@ -192,7 +199,7 @@ export class Manager extends EventEmitter {
     for (const plugin of this.options.plugins) plugin.load(this);
 
     for (const nodeOptions of this.options.nodes) {
-      const node = new (Structure.get("Node"))(this, nodeOptions)
+      const node = new (Structure.get("Node"))(this, nodeOptions);
       this.nodes.set(node.options.identifier, node);
     }
   }
@@ -224,9 +231,12 @@ export class Manager extends EventEmitter {
    * @param requester
    * @returns The search result.
    */
-  public search(query: string | Query, requester?: unknown): Promise<SearchResult> {
+  public search(
+    query: string | Query,
+    requester?: unknown
+  ): Promise<SearchResult> {
     return new Promise(async (resolve, reject) => {
-      const node: Node = this.leastUsedNodes.first()
+      const node: Node = this.leastUsedNodes.first();
       if (!node) throw new Error("Manager#search() No available nodes.");
 
       const source = { soundcloud: "sc" }[(query as Query).source] || "yt";
@@ -236,7 +246,9 @@ export class Manager extends EventEmitter {
         search = `${source}search:${search}`;
       }
 
-      const url = `http${node.options.secure ? "s" : ""}://${node.options.host}:${node.options.port}/loadtracks`;
+      const url = `http${node.options.secure ? "s" : ""}://${
+        node.options.host
+      }:${node.options.port}/loadtracks`;
 
       const res = await Axios.get(url, {
         headers: { Authorization: node.options.password },
@@ -254,14 +266,12 @@ export class Manager extends EventEmitter {
       const result: SearchResult = {
         loadType: res.data.loadType,
         exception: res.data.exception,
-        tracks: res.data.tracks.map((track) => TrackUtils.build(track, requester)),
+        tracks: res.data.tracks.map((track) =>
+          TrackUtils.build(track, requester)
+        ),
       };
 
-      if (
-        ["SEARCH_RESULT", "TRACK_LOADED"].includes(
-          result.loadType
-        )
-      ) {
+      if (["SEARCH_RESULT", "TRACK_LOADED"].includes(result.loadType)) {
         result.tracks = res.data.tracks.map((track) =>
           TrackUtils.build(track, requester)
         );
@@ -288,9 +298,11 @@ export class Manager extends EventEmitter {
    */
   public decodeTrack(track: string): Promise<TrackData> {
     return new Promise(async (resolve, reject) => {
-      const node: Node = this.leastUsedNodes.first()
+      const node: Node = this.leastUsedNodes.first();
       if (!node) throw new Error("Manager#search() No available nodes.");
-      const url = `http${node.options.secure ? "s" : ""}://${node.options.host}:${node.options.port}/decodetrack`;
+      const url = `http${node.options.secure ? "s" : ""}://${
+        node.options.host
+      }:${node.options.port}/decodetrack`;
 
       const res = await Axios.get(url, {
         headers: { Authorization: node.options.password },
@@ -305,8 +317,8 @@ export class Manager extends EventEmitter {
         return reject(new Error("No data returned from query."));
       }
 
-      return resolve({ track, info: res.data })
-    })
+      return resolve({ track, info: res.data });
+    });
   }
 
   /**
@@ -345,12 +357,13 @@ export class Manager extends EventEmitter {
       state.sessionId = data.d.session_id;
       if (player.voiceChannel !== data.d.channel_id) {
         this.emit("playerMove", player, player.voiceChannel, data.d.channel_id);
-        player.voiceChannel = data.d.channel_id
+        player.voiceChannel = data.d.channel_id;
       }
     }
 
     player.voiceState = state;
-    if (JSON.stringify(Object.keys(state).sort()) === template) player.node.send(state);
+    if (JSON.stringify(Object.keys(state).sort()) === template)
+      player.node.send(state);
   }
 }
 

@@ -24,12 +24,11 @@ const template = [
   "isSeekable",
   "isStream",
   "uri",
-  "thumbnail"
+  "thumbnail",
 ];
 
-const validate = (track: unknown) => template.every(
-  v => Object.keys(track || {}).includes(v)
-);
+const validate = (track: unknown) =>
+  template.every((v) => Object.keys(track || {}).includes(v));
 
 export abstract class TrackUtils {
   /**

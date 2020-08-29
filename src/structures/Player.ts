@@ -1,11 +1,11 @@
 import { Manager, Query, SearchResult } from "./Manager";
 import { Node } from "./Node";
 import { Queue } from "./Queue";
-import { sizes, State, Structure, VoiceState, TrackUtils } from "./Utils";
+import { sizes, State, Structure, TrackUtils, VoiceState } from "./Utils";
 
 export class Player {
   /** The Queue for the Player. */
-  public readonly queue = new (Structure.get("Queue")) as Queue;
+  public readonly queue = new (Structure.get("Queue"))() as Queue;
   /** Whether the queue repeats the track. */
   public trackRepeat = false;
   /** Whether the queue repeats the queue. */
@@ -90,7 +90,10 @@ export class Player {
    * @param query
    * @param requester
    */
-  public search(query: string | Query, requester?: unknown): Promise<SearchResult> {
+  public search(
+    query: string | Query,
+    requester?: unknown
+  ): Promise<SearchResult> {
     return this.player.manager.search(query, requester);
   }
 
@@ -193,35 +196,47 @@ export class Player {
   }
 
   /** Plays the next track. */
-  public play(): this
+  public play(): this;
 
   /**
    * Plays the specified track.
    * @param track
    */
-  public play(track: Track): this
+  public play(track: Track): this;
 
   /**
    * Plays the next track with some options.
    * @param options
    */
-  public play(options: PlayOptions): this
+  public play(options: PlayOptions): this;
 
   /**
    * Plays the specified track with some options.
    * @param track
    * @param options
    */
-  public play(track: Track, options: PlayOptions): this
-  public play(optionsOrTrack?: PlayOptions | Track, playOptions?: PlayOptions): this {
-    if (typeof optionsOrTrack !== "undefined" && TrackUtils.validate(optionsOrTrack)) {
+  public play(track: Track, options: PlayOptions): this;
+  public play(
+    optionsOrTrack?: PlayOptions | Track,
+    playOptions?: PlayOptions
+  ): this {
+    if (
+      typeof optionsOrTrack !== "undefined" &&
+      TrackUtils.validate(optionsOrTrack)
+    ) {
       this.queue.current = optionsOrTrack as Track;
     }
 
-    if (!this.queue.current) throw new RangeError("Player#play() No current track.");
+    if (!this.queue.current)
+      throw new RangeError("Player#play() No current track.");
 
-    const finalOptions = playOptions ? playOptions : ["startTime", "endTime", "noReplace"]
-        .every(v => Object.keys(optionsOrTrack || {}).includes(v)) ? optionsOrTrack as PlayOptions : {};
+    const finalOptions = playOptions
+      ? playOptions
+      : ["startTime", "endTime", "noReplace"].every((v) =>
+          Object.keys(optionsOrTrack || {}).includes(v)
+        )
+      ? (optionsOrTrack as PlayOptions)
+      : {};
 
     const options = {
       op: "play",
@@ -389,7 +404,7 @@ export interface Track {
   /** The thumbnail of the track. */
   readonly thumbnail: string;
   /** The user that requested the track. */
-  readonly requester: unknown | null
+  readonly requester: unknown | null;
 
   /** Displays the track thumbnail with optional size. Only for youtube as others require an API. */
   displayThumbnail(size?: sizes): string;

@@ -9,7 +9,7 @@ import {
   TrackExceptionEvent,
   TrackStartEvent,
   TrackStuckEvent,
-  WebSocketClosedEvent
+  WebSocketClosedEvent,
 } from "./Utils";
 
 export class Node {
@@ -40,7 +40,7 @@ export class Node {
       secure: false,
       retryAmount: 5,
       retryDelay: 30e3,
-      ...options
+      ...options,
     };
 
     this.options.identifier = options.identifier || options.host;
@@ -80,7 +80,9 @@ export class Node {
     };
 
     this.socket = new WebSocket(
-      `ws${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}/`,
+      `ws${this.options.secure ? "s" : ""}://${this.options.host}:${
+        this.options.port
+      }/`,
       { headers }
     );
     this.socket.on("open", this.open.bind(this));
@@ -164,7 +166,7 @@ export class Node {
     switch (payload.op) {
       case "stats":
         delete payload.op;
-        this.stats = { ...payload } as unknown as NodeStats;
+        this.stats = ({ ...payload } as unknown) as NodeStats;
         break;
       case "playerUpdate":
         const player = this.manager.players.get(payload.guildId);
@@ -191,7 +193,7 @@ export class Node {
     if (!player) return;
 
     const track = player.queue.current;
-    const type = payload.type
+    const type = payload.type;
 
     if (payload.type === "TrackStartEvent") {
       this.trackStart(player, track, payload);
@@ -212,13 +214,21 @@ export class Node {
     }
   }
 
-  protected trackStart(player: Player, track: Track, payload: TrackStartEvent): void {
+  protected trackStart(
+    player: Player,
+    track: Track,
+    payload: TrackStartEvent
+  ): void {
     player.playing = true;
     player.paused = false;
     this.manager.emit("trackStart", player, track, payload);
   }
 
-  protected trackEnd(player: Player, track: Track, payload: TrackEndEvent): void {
+  protected trackEnd(
+    player: Player,
+    track: Track,
+    payload: TrackEndEvent
+  ): void {
     if (payload.reason === "REPLACED") {
       this.manager.emit("trackEnd", player, track, payload);
     } else if (track && player.trackRepeat) {
@@ -243,12 +253,20 @@ export class Node {
     }
   }
 
-  protected trackStuck(player: Player, track: Track, payload: TrackStuckEvent): void {
+  protected trackStuck(
+    player: Player,
+    track: Track,
+    payload: TrackStuckEvent
+  ): void {
     player.stop();
     this.manager.emit("trackStuck", player, track, payload);
   }
 
-  protected trackError(player: Player, track: Track, payload: TrackExceptionEvent): void {
+  protected trackError(
+    player: Player,
+    track: Track,
+    payload: TrackExceptionEvent
+  ): void {
     player.stop();
     this.manager.emit("trackError", player, track, payload);
   }

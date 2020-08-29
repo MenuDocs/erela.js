@@ -14,11 +14,11 @@ export class Queue extends Array<Track> {
 
   /** The total size of tracks in the queue. */
   public get size(): number {
-    return this.length + (this.current ? 1 : 0)
+    return this.length + (this.current ? 1 : 0);
   }
 
   /** The current track */
-  public current: Track | null = null
+  public current: Track | null = null;
 
   /**
    * Adds a track to the queue.
@@ -64,14 +64,14 @@ export class Queue extends Array<Track> {
    * Removes a track from the queue. Defaults to the first track, returning the removed track.
    * @param [position=0]
    */
-  public remove(position?: number): Track[]
+  public remove(position?: number): Track[];
 
   /**
    * Removes an amount of tracks using a start and end index, returning the removed tracks.
    * @param start
    * @param end
    */
-  public remove(start: number, end: number): Track[]
+  public remove(start: number, end: number): Track[];
   public remove(startOrPosition = 0, end?: number): Track[] {
     if (typeof end !== "undefined") {
       if (isNaN(startOrPosition)) {
