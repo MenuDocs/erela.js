@@ -146,10 +146,7 @@ export interface Manager {
 /** @noInheritDoc */
 export class Manager extends EventEmitter {
   /** The map of players. */
-  public readonly players: Collection<string, Player> = new Collection<
-    string,
-    Player
-  >();
+  public readonly players = new Collection<string, Player>();
   /** The map of nodes. */
   public readonly nodes = new Collection<string, Node>();
   /** The options that were set. */
@@ -241,12 +238,13 @@ export class Manager extends EventEmitter {
   ): Promise<SearchResult> {
     return new Promise(async (resolve, reject) => {
       const node = this.leastUsedNodes.first();
-      if (!node) throw new Error("Manager: no available nodes.");
+      if (!node) throw new Error("No available nodes.");
 
       const sources = {
         soundcloud: "sc",
         youtube: "yt",
       };
+
       const source = sources[(query as Query).source ?? "youtube"];
       let search = (query as Query).query || (query as string);
 
@@ -268,22 +266,18 @@ export class Manager extends EventEmitter {
       node.calls++;
 
       if (!res || !res.data) {
-        return reject(new Error("Manager: query not found."));
+        return reject(new Error("Query not found."));
       }
 
       const result: SearchResult = {
         loadType: res.data.loadType,
         exception: res.data.exception,
-        tracks: res.data.tracks.map((track: any) =>
+        tracks: res.data.tracks.map((track: TrackData) =>
           TrackUtils.build(track, requester)
         ),
       };
 
-      if (["SEARCH_RESULT", "TRACK_LOADED"].includes(result.loadType)) {
-        result.tracks = res.data.tracks.map((track: any) =>
-          TrackUtils.build(track, requester)
-        );
-      } else if (result.loadType === "PLAYLIST_LOADED") {
+      if (result.loadType === "PLAYLIST_LOADED") {
         result.playlist = {
           name: res.data.playlistInfo.name,
           selectedTrack: TrackUtils.build(
@@ -307,7 +301,7 @@ export class Manager extends EventEmitter {
   public decodeTrack(track: string): Promise<TrackData> {
     return new Promise(async (resolve, reject) => {
       const node = this.leastUsedNodes.first();
-      if (!node) throw new Error("Manager: no available nodes.");
+      if (!node) throw new Error("No available nodes.");
       const url = `http${node.options.secure ? "s" : ""}://${
         node.options.host
       }:${node.options.port}/decodetrack`;

@@ -3,6 +3,32 @@ import { Node } from "./Node";
 import { Queue } from "./Queue";
 import { sizes, State, Structure, TrackUtils, VoiceState } from "./Utils";
 
+function check(options: PlayerOptions) {
+  if (!options)
+    throw new TypeError("PlayerOptions must not be empty.");
+
+  if (!/\d/.test(options.guild))
+    throw new TypeError("Player option \"guild\" must present and be a non-empty string.");
+
+  if (options.textChannel && !/\d/.test(options.textChannel))
+    throw new TypeError("Player option \"textChannel\" must be a non-empty string.");
+
+  if (options.voiceChannel && !/\d/.test(options.voiceChannel))
+    throw new TypeError("Player option \"voiceChannel\" must be a non-empty string.");
+
+  if (options.node && typeof options.node !== "string")
+    throw new TypeError("Player option \"node\" must be a non-empty string.");
+
+  if (typeof options.volume !== "undefined" && typeof options.volume !== "number")
+    throw new TypeError("Player option \"volume\" must be a number.");
+
+  if (typeof options.selfMute !== "undefined" && typeof options.selfMute !== "boolean")
+    throw new TypeError("Player option \"selfMute\" must be a boolean.");
+
+  if (typeof options.selfDeafen !== "undefined" && typeof options.selfDeafen !== "boolean")
+    throw new TypeError("Player option \"selfDeafen\" must be a boolean.");
+}
+
 export class Player {
   /** The Queue for the Player. */
   public readonly queue = new (Structure.get("Queue"))() as Queue;
@@ -23,9 +49,9 @@ export class Player {
   /** The guild the player. */
   public guild: string;
   /** The voice channel for the player. */
-  public voiceChannel?: string;
+  public voiceChannel: string | null = null;
   /** The text channel for the player. */
-  public textChannel?: string;
+  public textChannel: string | null = null;
   /** The current state of the player. */
   public state: State = "DISCONNECTED";
   /** The equalizer bands array. */
@@ -71,15 +97,18 @@ export class Player {
       return this.player.manager.players.get(options.guild);
     }
 
+    check(options);
+
     this.volume = options.volume || 100;
     this.guild = options.guild;
-    this.voiceChannel = options.voiceChannel;
-    this.textChannel = options.textChannel;
+
+    if(options.voiceChannel) this.voiceChannel = options.voiceChannel;
+    if(options.textChannel) this.textChannel = options.textChannel;
 
     const node = this.player.manager.nodes.get(options.node);
     this.node = node || this.player.manager.leastLoadNodes.first();
 
-    if (!this.node) throw new RangeError("Player() No available nodes.");
+    if (!this.node) throw new RangeError("No available nodes.");
 
     this.player.manager.players.set(options.guild, this);
     this.player.manager.emit("playerCreate", this);
@@ -102,6 +131,11 @@ export class Player {
    * @param bands
    */
   public setEQ(...bands: EqualizerBand[]): this {
+    if (bands.length && !bands.every(band =>
+      JSON.stringify(Object.keys(band).sort()) === '["band","gain"]'
+    ))
+      throw new TypeError("Channel must be a non-empty string.");
+
     for (const { band, gain } of bands) this.bands[band] = gain;
 
     this.node.send({
@@ -122,9 +156,7 @@ export class Player {
   /** Connect to the voice channel. */
   public connect(): this {
     if (!this.voiceChannel)
-      throw new RangeError(
-        "Player#connect() No voice channel has been set in PlayerOptions."
-      );
+      throw new RangeError("No voice channel has been set.");
     this.state = "CONNECTING";
 
     this.player.manager.options.send(this.guild, {
@@ -133,7 +165,7 @@ export class Player {
         guild_id: this.guild,
         channel_id: this.voiceChannel,
         self_mute: this.options.selfMute || false,
-        self_deaf: this.options.selfDeaf || false,
+        self_deaf: this.options.selfDeafen || false,
       },
     });
 
@@ -142,8 +174,8 @@ export class Player {
   }
 
   /** Disconnect from the voice channel. */
-  public disconnect(): this | void {
-    if (!this.voiceChannel) return undefined;
+  public disconnect(): this {
+    if (this.voiceChannel === null) return this;
     this.state = "DISCONNECTING";
 
     this.pause(true);
@@ -181,6 +213,9 @@ export class Player {
    * @param channel
    */
   public setVoiceChannel(channel: string): this {
+    if (typeof channel !== "string")
+      throw new TypeError("Channel must be a non-empty string.");
+
     this.voiceChannel = channel;
     this.connect();
     return this;
@@ -191,6 +226,9 @@ export class Player {
    * @param channel
    */
   public setTextChannel(channel: string): this {
+    if (typeof channel !== "string")
+      throw new TypeError("Channel must be a non-empty string.");
+
     this.textChannel = channel;
     return this;
   }
@@ -228,7 +266,7 @@ export class Player {
     }
 
     if (!this.queue.current)
-      throw new RangeError("Player#play() No current track.");
+      throw new RangeError("No current track.");
 
     const finalOptions = playOptions
       ? playOptions
@@ -258,8 +296,10 @@ export class Player {
    * @param volume
    */
   public setVolume(volume: number): this {
+    volume = Number(volume);
+
     if (isNaN(volume))
-      throw new RangeError("Player#setVolume() Volume must be a number.");
+      throw new TypeError("Volume must be a number.");
     this.volume = Math.max(Math.min(volume, 1000), 0);
 
     this.node.send({
@@ -277,8 +317,8 @@ export class Player {
    */
   public setTrackRepeat(repeat: boolean): this {
     if (typeof repeat !== "boolean")
-      throw new RangeError(
-        'Player#setTrackRepeat() Repeat can only be "true" or "false".'
+      throw new TypeError(
+        'Repeat can only be "true" or "false".'
       );
 
     if (repeat) {
@@ -298,8 +338,8 @@ export class Player {
    */
   public setQueueRepeat(repeat: boolean): this {
     if (typeof repeat !== "boolean")
-      throw new RangeError(
-        'Player#setQueueRepeat() Repeat can only be "true" or "false".'
+      throw new TypeError(
+        'Repeat can only be "true" or "false".'
       );
 
     if (repeat) {
@@ -330,7 +370,7 @@ export class Player {
   public pause(pause: boolean): this {
     if (typeof pause !== "boolean")
       throw new RangeError(
-        'Player#pause() Pause can only be "true" or "false".'
+        'Pause can only be "true" or "false".'
       );
 
     this.playing = !pause;
@@ -350,8 +390,10 @@ export class Player {
    */
   public seek(position: number): this | void {
     if (!this.queue.current) return undefined;
+    position = Number(position);
+
     if (isNaN(position)) {
-      throw new RangeError("Player#seek() Position must be a number.");
+      throw new RangeError("Position must be a number.");
     }
     if (position < 0 || position > this.queue.current.duration)
       position = Math.max(Math.min(position, this.queue.current.duration), 0);
@@ -381,7 +423,7 @@ export interface PlayerOptions {
   /** If the player should mute itself. */
   selfMute?: boolean;
   /** If the player should deaf itself. */
-  selfDeaf?: boolean;
+  selfDeafen?: boolean;
 }
 
 export interface Track {

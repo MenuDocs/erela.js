@@ -27,7 +27,7 @@ export class Queue extends Array<Track> {
    */
   public add(track: Track | Track[], offset?: number): void {
     if (!TrackUtils.validate(track)) {
-      throw new RangeError('Queue#add() Track must be a "Track" or "Track[]".');
+      throw new RangeError('Track must be a "Track" or "Track[]".');
     }
 
     if (!this.current) {
@@ -41,12 +41,12 @@ export class Queue extends Array<Track> {
 
     if (typeof offset !== "undefined" && typeof offset === "number") {
       if (isNaN(offset)) {
-        throw new RangeError("Queue#add() Offset must be a number.");
+        throw new RangeError("Offset must be a number.");
       }
 
       if (offset < 0 || offset > this.length) {
         throw new RangeError(
-          `Queue#add() Offset must be or between 0 and ${this.length}.`
+          `Offset must be or between 0 and ${this.length}.`
         );
       }
     }
@@ -74,22 +74,27 @@ export class Queue extends Array<Track> {
   public remove(start: number, end: number): Track[];
   public remove(startOrPosition = 0, end?: number): Track[] {
     if (typeof end !== "undefined") {
+      console.log(startOrPosition)
+      console.log(end)
+
       if (isNaN(startOrPosition)) {
-        throw new RangeError(`Queue#remove() Missing "start" parameter.`);
+        throw new RangeError(`Missing "start" parameter.`);
       } else if (isNaN(end)) {
-        throw new RangeError(`Queue#remove() Missing "end" parameter.`);
+        throw new RangeError(`Missing "end" parameter.`);
       } else if (startOrPosition >= end) {
         throw new RangeError(
-          "Queue#remove() Start can not be bigger than end."
+          "Start can not be bigger than end."
         );
       } else if (startOrPosition >= this.length) {
         throw new RangeError(
-          `Queue#remove() Start can not be bigger than ${this.length}.`
+          `Start can not be bigger than ${this.length}.`
         );
       }
 
       return this.splice(startOrPosition, end - startOrPosition);
     }
+
+    console.log(startOrPosition)
 
     return this.splice(startOrPosition, 1);
   }
