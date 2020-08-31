@@ -1,5 +1,5 @@
 <div align = "center">
-    <img src = "./assets/transparent_logo.png">
+    <img src = "https://projects.solaris.codes/erelajs/images/transparent_logo.png">
     <hr>
     <br>
     <a href="https://discord.gg/D6FXw55">
