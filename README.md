@@ -1,37 +1,69 @@
-# Erela.js &middot; [![Discord](https://discordapp.com/api/guilds/653436871858454538/embed.png)](https://discord.gg/D6FXw55) [![Downloads](https://badgen.net/npm/dt/erela.js)](https://www.npmjs.com/package/erela.js) [![Version](https://img.shields.io/npm/v/erela.js.svg?maxAge=3600)](https://www.npmjs.com/package/erela.js) [![GitHub Stars](https://badgen.net/github/stars/Solaris9/erela.js)](https://github.com/Solaris9/erela.js) [![License](https://badgen.net/github/license/Solaris9/erela.js)](https://github.com/Solaris9/erela.js/blob/master/LICENSE)
+<div align = "center">
+    <img src = "./assets/transparent_logo.png">
+    <strong> <i> An easy to use Lavalink client for Node.js </i> </strong>
+    <hr>
+    <br>
+    <a href="https://discord.gg/D6FXw55">
+<img src="https://img.shields.io/discord/653436871858454538?color=7289DA&label=Support&logo=discord&style=for-the-badge", alt="Discord">
+</a> 
 
-> An easy-to-use Lavalink client for NodeJS.
+<a href="https://www.npmjs.com/package/erela.js">
+<img src="https://img.shields.io/npm/dw/erela.js?color=CC3534&logo=npm&style=for-the-badge", alt="Downloads">
+</a>
 
-## Documentation & Guides
+<a href="https://www.npmjs.com/package/erela.js">
+<img src="https://img.shields.io/npm/v/erela.js?color=red&label=Version&logo=npm&style=for-the-badge", alt="Npm version">
+</a>
 
-Documentation: <http://projects.solaris.codes/erelajs-rewrite/docs/gettingstarted.html>
-Guides: <http://projects.solaris.codes/erelajs-rewrite/guides/introduction.html>
+<br>
 
-## Prerequisites
+<a href="https://github.com/WarHammer414/erela.js">
+<img src="https://img.shields.io/github/stars/WarHammer414/erela.js?color=333&logo=github&style=for-the-badge", alt="Github stars">
+</a>
 
-- [Java](https://www.java.com/en/download)
+<a href="https://github.com/WarHammer414/erela.js/blob/master/LICENSE">
+<img src="https://img.shields.io/github/license/WarHammer414/erela.js?color=6e5494&logo=github&style=for-the-badge", alt="License">
+</a>
+<hr>
+</div>
 
-- [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1)
+# Documentation & Guides
 
-> Note: Java v11 or newer is required to run the Lavalink.jar. Java v13 is recommended.
+- [Documentation](http://projects.solaris.codes/erelajs-rewrite/docs/gettingstarted.html, 'Erela.js Documentation') 
 
-## Installation
+- [Guides](http://projects.solaris.codes/erelajs-rewrite/guides/introduction.html, 'Erela.js Guides')
 
-```shell
-npm install erela.js@beta
+
+# Prerequisites
+
+ - [Java](https://www.java.com/en/download)
+
+ - [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1, 'Download Lavalink')
+
+ 
+*Note: Java v11 or newer is required to run the Lavalink.jar. Java v13 is recommended.<br>**Warning**: Don't use Java v14 it has issues when using with lavalink*
+
+# Installation
+
+Npm :
+```sh
+npm install erela.js
 ```
 
-## Getting Started
+Yarn :
+```sh
+yarn add erela.js
+```
 
-- Create an `application.yml` file in your working directory and copy the [example](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example) into the created file and edit it with your configuration.
+# Getting Started
+
+- Create an application.yml file in your working directory and copy the [example](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example, 'application.yml file') into the created file and edit it with your configuration.
 
 - Run the jar file by running `java -jar Lavalink.jar` in a Terminal window.
 
 ## Example usage
 
-> Note: Discord.js is used in this example, but it does work with other libraries with the same example but with your library functions.
-
-```javascript
+```js
 // To install Discord.JS and Erela.JS, run:
 // npm install discord.js erela.js
 const { Client } = require("discord.js");
@@ -116,8 +148,11 @@ client.on("message", async message => {
 
 client.login("your token");
 ```
+*Discord.js is used in this example, but it does work with other libraries with the same example but with your library functions.*
 
-## Contributors
+You can find more examples in the [examples](./examples) folder
+
+# Contributors
 
 👤 **Solaris**
 
