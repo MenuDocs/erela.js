@@ -74,12 +74,9 @@ export class Queue extends Array<Track> {
   public remove(start: number, end: number): Track[];
   public remove(startOrPosition = 0, end?: number): Track[] {
     if (typeof end !== "undefined") {
-      console.log(startOrPosition)
-      console.log(end)
-
-      if (isNaN(startOrPosition)) {
+      if (!Number(startOrPosition)) {
         throw new RangeError(`Missing "start" parameter.`);
-      } else if (isNaN(end)) {
+      } else if (!Number(end)) {
         throw new RangeError(`Missing "end" parameter.`);
       } else if (startOrPosition >= end) {
         throw new RangeError(
@@ -93,8 +90,6 @@ export class Queue extends Array<Track> {
 
       return this.splice(startOrPosition, end - startOrPosition);
     }
-
-    console.log(startOrPosition)
 
     return this.splice(startOrPosition, 1);
   }
