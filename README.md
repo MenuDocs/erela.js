@@ -41,16 +41,16 @@
  - [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1, 'Download Lavalink')
 
  
-*Note: Java v11 or newer is required to run the Lavalink.jar. Java v13 is recommended.<br>**Warning**: Don't use Java v14 it has issues when using with lavalink*
+***Note**: Java v11 or newer is required to run the Lavalink.jar. Java v13 is recommended<br>**Warning**: Java v14 has issues with lavalink*
 
 # Installation
 
-Npm :
+**NPM** :
 ```sh
 npm install erela.js
 ```
 
-Yarn :
+**Yarn** :
 ```sh
 yarn add erela.js
 ```
@@ -148,9 +148,9 @@ client.on("message", async message => {
 
 client.login("your token");
 ```
-*Discord.js is used in this example, but it does work with other libraries with the same example but with your library functions.*
+***Note**: Discord.js is used in this example, but it does work with other libraries with the same example but with your library functions.*
 
-You can find more examples in the [examples](./examples) folder
+You can find more examples in the *[examples](./examples)* folder.
 
 # Contributors
 
