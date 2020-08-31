@@ -1,6 +1,5 @@
 <div align = "center">
     <img src = "./assets/transparent_logo.png">
-    <strong> <i> An easy to use Lavalink client for Node.js </i> </strong>
     <hr>
     <br>
     <a href="https://discord.gg/D6FXw55">
@@ -29,19 +28,23 @@
 
 # Documentation & Guides
 
-- [Documentation](http://projects.solaris.codes/erelajs-rewrite/docs/gettingstarted.html, 'Erela.js Documentation') 
+- [Documentation](http://projects.solaris.codes/erelajs/docs/gettingstarted.html, 'Erela.js Documentation') 
 
-- [Guides](http://projects.solaris.codes/erelajs-rewrite/guides/introduction.html, 'Erela.js Guides')
+- [Guides](http://projects.solaris.codes/erelajs/guides/introduction.html, 'Erela.js Guides')
 
 
 # Prerequisites
 
- - [Java](https://www.java.com/en/download)
+ - Java - [Azul](https://www.azul.com/downloads/zulu-community/?architecture=x86-64-bit&package=jdk, 'Download Azul OpenJDK') or [Adopt](https://adoptopenjdk.net/, 'Download Adopt OpenJDK') or [sdkman](https://sdkman.io/install, 'Download sdkman')
 
  - [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1, 'Download Lavalink')
 
  
-***Note**: Java v11 or newer is required to run the Lavalink.jar. Java v13 is recommended<br>**Warning**: Java v14 has issues with lavalink*
+**Note**: *Java v11 or newer is required to run the Lavalink.jar. Java v13 is recommended.* If you are using **sdkman** then *its a manager, not Java, you have to install sdkman and use sdkman to install java*
+
+
+***Warning**: Java v14 has issues with lavalink*
+
 
 # Installation
 
