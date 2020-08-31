@@ -28,16 +28,16 @@
 
 # Documentation & Guides
 
-- [Documentation](http://projects.solaris.codes/erelajs/docs/gettingstarted.html, 'Erela.js Documentation') 
+- [Documentation](http://projects.solaris.codes/erelajs/docs/gettingstarted.html 'Erela.js Documentation') 
 
-- [Guides](http://projects.solaris.codes/erelajs/guides/introduction.html, 'Erela.js Guides')
+- [Guides](http://projects.solaris.codes/erelajs/guides/introduction.html 'Erela.js Guides')
 
 
 # Prerequisites
 
- - Java - [Azul](https://www.azul.com/downloads/zulu-community/?architecture=x86-64-bit&package=jdk, 'Download Azul OpenJDK') or [Adopt](https://adoptopenjdk.net/, 'Download Adopt OpenJDK') or [sdkman](https://sdkman.io/install, 'Download sdkman')
+ - Java - [Azul](https://www.azul.com/downloads/zulu-community/?architecture=x86-64-bit&package=jdk 'Download Azul OpenJDK') or [Adopt](https://adoptopenjdk.net/ 'Download Adopt OpenJDK') or [sdkman](https://sdkman.io/install 'Download sdkman')
 
- - [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1, 'Download Lavalink')
+ - [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1 'Download Lavalink')
 
  
 **Note**: *Java v11 or newer is required to run the Lavalink.jar. Java v13 is recommended.* If you are using **sdkman** then *its a manager, not Java, you have to install sdkman and use sdkman to install java*
@@ -60,7 +60,7 @@ yarn add erela.js
 
 # Getting Started
 
-- Create an application.yml file in your working directory and copy the [example](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example, 'application.yml file') into the created file and edit it with your configuration.
+- Create an application.yml file in your working directory and copy the [example](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example 'application.yml file') into the created file and edit it with your configuration.
 
 - Run the jar file by running `java -jar Lavalink.jar` in a Terminal window.
 
