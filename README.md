@@ -26,14 +26,14 @@
 <hr>
 </div>
 
-# Documentation & Guides
+## Documentation & Guides
 
 - [Documentation](http://projects.solaris.codes/erelajs/docs/gettingstarted.html 'Erela.js Documentation') 
 
 - [Guides](http://projects.solaris.codes/erelajs/guides/introduction.html 'Erela.js Guides')
 
 
-# Prerequisites
+## Prerequisites
 
  - Java - [Azul](https://www.azul.com/downloads/zulu-community/?architecture=x86-64-bit&package=jdk 'Download Azul OpenJDK') or [Adopt](https://adoptopenjdk.net/ 'Download Adopt OpenJDK') or [sdkman](https://sdkman.io/install 'Download sdkman')
 
@@ -46,7 +46,7 @@
 ***Warning**: Java v14 has issues with lavalink*
 
 
-# Installation
+## Installation
 
 **NPM** :
 ```sh
@@ -58,7 +58,7 @@ npm install erela.js
 yarn add erela.js
 ```
 
-# Getting Started
+## Getting Started
 
 - Create an application.yml file in your working directory and copy the [example](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example 'application.yml file') into the created file and edit it with your configuration.
 
@@ -155,7 +155,7 @@ client.login("your token");
 
 You can find more examples in the *[examples](./examples)* folder.
 
-# Contributors
+## Contributors
 
 👤 **Solaris**
 
