@@ -3,25 +3,25 @@
     <hr>
     <br>
     <a href="https://discord.gg/D6FXw55">
-<img src="https://img.shields.io/discord/653436871858454538?color=7289DA&label=Support&logo=discord&style=for-the-badge", alt="Discord">
+<img src="https://img.shields.io/discord/653436871858454538?color=7289DA&label=Support&logo=discord&style=for-the-badge" alt="Discord">
 </a> 
 
 <a href="https://www.npmjs.com/package/erela.js">
-<img src="https://img.shields.io/npm/dw/erela.js?color=CC3534&logo=npm&style=for-the-badge", alt="Downloads">
+<img src="https://img.shields.io/npm/dw/erela.js?color=CC3534&logo=npm&style=for-the-badge" alt="Downloads">
 </a>
 
 <a href="https://www.npmjs.com/package/erela.js">
-<img src="https://img.shields.io/npm/v/erela.js?color=red&label=Version&logo=npm&style=for-the-badge", alt="Npm version">
+<img src="https://img.shields.io/npm/v/erela.js?color=red&label=Version&logo=npm&style=for-the-badge" alt="Npm version">
 </a>
 
 <br>
 
 <a href="https://github.com/WarHammer414/erela.js">
-<img src="https://img.shields.io/github/stars/WarHammer414/erela.js?color=333&logo=github&style=for-the-badge", alt="Github stars">
+<img src="https://img.shields.io/github/stars/WarHammer414/erela.js?color=333&logo=github&style=for-the-badge" alt="Github stars">
 </a>
 
 <a href="https://github.com/WarHammer414/erela.js/blob/master/LICENSE">
-<img src="https://img.shields.io/github/license/WarHammer414/erela.js?color=6e5494&logo=github&style=for-the-badge", alt="License">
+<img src="https://img.shields.io/github/license/WarHammer414/erela.js?color=6e5494&logo=github&style=for-the-badge" alt="License">
 </a>
 <hr>
 </div>
