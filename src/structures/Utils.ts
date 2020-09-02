@@ -62,7 +62,9 @@ export abstract class TrackUtils {
         isSeekable: data.info.isSeekable,
         isStream: data.info.isStream,
         uri: data.info.uri,
-        thumbnail: `https://img.youtube.com/vi/${data.info.identifier}/default.jpg`,
+        thumbnail: data.info.uri.includes("youtube")
+          ? `https://img.youtube.com/vi/${data.info.identifier}/default.jpg`
+          : "",
         displayThumbnail(size = "default"): string {
           const finalSize = sizes.find((s) => s === size) || "default";
           return this.uri.includes("youtube")
