@@ -1,6 +1,6 @@
 src
 node_modules
-tslint.json
+
 package-lock.json
 tsconfig.json
 .idea

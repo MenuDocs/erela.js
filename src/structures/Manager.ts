@@ -256,7 +256,7 @@ export class Manager extends EventEmitter {
         node.options.host
       }:${node.options.port}/loadtracks`;
 
-      const res = await Axios.get(url, {
+      const res = await Axios.get<LavalinkResult>(url, {
         headers: { Authorization: node.options.password },
         params: { identifier: search },
       }).catch((err) => {
@@ -431,4 +431,19 @@ export interface PlaylistInfo {
   selectedTrack?: Track;
   /** The duration of the playlist. */
   duration: number;
+}
+
+export interface LavalinkResult {
+  tracks: TrackData[];
+  loadType: LoadType;
+  exception?: {
+    /** The message for the exception. */
+    message: string;
+    /** The severity of exception. */
+    severity: string;
+  };
+  playlistInfo: {
+    name: string;
+    selectedTrack?: number;
+  }
 }

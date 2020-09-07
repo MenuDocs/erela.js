@@ -84,3 +84,7 @@ module.exports = class MyPlugin extends Plugin {
   load(manager) {}
 }
 ```
+
+### Spotify
+
+You can search using Spotify URL's using the [Spotify plugin](https://github.com/Solaris9/erela.js-spotify) for Erela.JS. 

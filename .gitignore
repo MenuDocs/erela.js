@@ -1,7 +1,6 @@
 # folders
 node_modules
 dist
-tests
 .idea
 typings
 
