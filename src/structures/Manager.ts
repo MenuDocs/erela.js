@@ -295,20 +295,19 @@ export class Manager extends EventEmitter {
   }
 
   /**
-   * Decodes the base64 encoded track and returns a TrackData.
-   * @param track
+   * Decodes the base64 encoded tracks and returns a TrackData array.
+   * @param tracks
    */
-  public decodeTrack(track: string): Promise<TrackData> {
+  public decodeTracks(tracks: string[]): Promise<TrackData[]> {
     return new Promise(async (resolve, reject) => {
       const node = this.leastUsedNodes.first();
       if (!node) throw new Error("No available nodes.");
       const url = `http${node.options.secure ? "s" : ""}://${
         node.options.host
-      }:${node.options.port}/decodetrack`;
+      }:${node.options.port}/decodetracks`;
 
-      const res = await Axios.get(url, {
-        headers: { Authorization: node.options.password },
-        params: { track: track },
+      const res = await Axios.post<TrackData[]>(url, tracks, {
+        headers: { Authorization: node.options.password }
       }).catch((err) => {
         return reject(err);
       });
@@ -319,7 +318,22 @@ export class Manager extends EventEmitter {
         return reject(new Error("No data returned from query."));
       }
 
-      return resolve({ track, info: res.data });
+      return resolve(res.data);
+    });
+  }
+
+  /**
+   * Decodes the base64 encoded track and returns a TrackData.
+   * @param track
+   */
+  public decodeTrack(track: string): Promise<TrackData> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const res = await this.decodeTracks([track])
+        return resolve(res[0]);
+      } catch (e) {
+        return reject(e)
+      }
     });
   }
 

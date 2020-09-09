@@ -58,8 +58,9 @@ export class Player {
   public bands = new Array<number>(15).fill(0.0);
   /** The voice state object from Discord. */
   public voiceState: VoiceState = Object.assign({});
-  private readonly player: typeof Player;
-  private static manager: Manager;
+  /** The Manager. */
+  public manager: Manager;
+  private static _manager: Manager;
   private readonly data: Record<string, unknown> = {};
 
   /**
@@ -81,7 +82,7 @@ export class Player {
 
   /** @hidden */
   public static init(manager: Manager): void {
-    this.manager = manager;
+    this._manager = manager;
   }
 
   /**
@@ -89,12 +90,12 @@ export class Player {
    * @param options
    */
   constructor(public options: PlayerOptions) {
-    if (!this.player) this.player = Structure.get("Player");
-    if (!this.player.manager)
+    if (!this.manager) this.manager = Structure.get("Player")._manager;
+    if (!this.manager)
       throw new RangeError("Manager has not been initiated.");
 
-    if (this.player.manager.players.has(options.guild)) {
-      return this.player.manager.players.get(options.guild);
+    if (this.manager.players.has(options.guild)) {
+      return this.manager.players.get(options.guild);
     }
 
     check(options);
@@ -105,13 +106,13 @@ export class Player {
     if(options.voiceChannel) this.voiceChannel = options.voiceChannel;
     if(options.textChannel) this.textChannel = options.textChannel;
 
-    const node = this.player.manager.nodes.get(options.node);
-    this.node = node || this.player.manager.leastLoadNodes.first();
+    const node = this.manager.nodes.get(options.node);
+    this.node = node || this.manager.leastLoadNodes.first();
 
     if (!this.node) throw new RangeError("No available nodes.");
 
-    this.player.manager.players.set(options.guild, this);
-    this.player.manager.emit("playerCreate", this);
+    this.manager.players.set(options.guild, this);
+    this.manager.emit("playerCreate", this);
   }
 
   /**
@@ -123,7 +124,7 @@ export class Player {
     query: string | Query,
     requester?: unknown
   ): Promise<SearchResult> {
-    return this.player.manager.search(query, requester);
+    return this.manager.search(query, requester);
   }
 
   /**
@@ -159,7 +160,7 @@ export class Player {
       throw new RangeError("No voice channel has been set.");
     this.state = "CONNECTING";
 
-    this.player.manager.options.send(this.guild, {
+    this.manager.options.send(this.guild, {
       op: 4,
       d: {
         guild_id: this.guild,
@@ -179,7 +180,7 @@ export class Player {
     this.state = "DISCONNECTING";
 
     this.pause(true);
-    this.player.manager.options.send(this.guild, {
+    this.manager.options.send(this.guild, {
       op: 4,
       d: {
         guild_id: this.guild,
@@ -204,8 +205,8 @@ export class Player {
       guildId: this.guild,
     });
 
-    this.player.manager.emit("playerDestroy", this);
-    this.player.manager.players.delete(this.guild);
+    this.manager.emit("playerDestroy", this);
+    this.manager.players.delete(this.guild);
   }
 
   /**
