@@ -161,7 +161,7 @@ client.on("message", async (message) => {
 client.login("your token");
 ```
 
-**\*Note**: Discord.js is used in this example, but it does work with other libraries with the same example but with your library functions.\*
+**Note**: Discord.js is used in this example, but it does work with other libraries with the same example but with your library functions.
 
 You can find more examples in the _[examples](./examples)_ folder.
 
