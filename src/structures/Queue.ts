@@ -45,9 +45,7 @@ export class Queue extends Array<Track> {
       }
 
       if (offset < 0 || offset > this.length) {
-        throw new RangeError(
-          `Offset must be or between 0 and ${this.length}.`
-        );
+        throw new RangeError(`Offset must be or between 0 and ${this.length}.`);
       }
     }
 
@@ -79,13 +77,9 @@ export class Queue extends Array<Track> {
       } else if (!Number(end)) {
         throw new RangeError(`Missing "end" parameter.`);
       } else if (startOrPosition >= end) {
-        throw new RangeError(
-          "Start can not be bigger than end."
-        );
+        throw new RangeError("Start can not be bigger than end.");
       } else if (startOrPosition >= this.length) {
-        throw new RangeError(
-          `Start can not be bigger than ${this.length}.`
-        );
+        throw new RangeError(`Start can not be bigger than ${this.length}.`);
       }
 
       return this.splice(startOrPosition, end - startOrPosition);

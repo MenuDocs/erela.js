@@ -4,29 +4,43 @@ import { Queue } from "./Queue";
 import { sizes, State, Structure, TrackUtils, VoiceState } from "./Utils";
 
 function check(options: PlayerOptions) {
-  if (!options)
-    throw new TypeError("PlayerOptions must not be empty.");
+  if (!options) throw new TypeError("PlayerOptions must not be empty.");
 
   if (!/\d/.test(options.guild))
-    throw new TypeError("Player option \"guild\" must present and be a non-empty string.");
+    throw new TypeError(
+      'Player option "guild" must present and be a non-empty string.'
+    );
 
   if (options.textChannel && !/\d/.test(options.textChannel))
-    throw new TypeError("Player option \"textChannel\" must be a non-empty string.");
+    throw new TypeError(
+      'Player option "textChannel" must be a non-empty string.'
+    );
 
   if (options.voiceChannel && !/\d/.test(options.voiceChannel))
-    throw new TypeError("Player option \"voiceChannel\" must be a non-empty string.");
+    throw new TypeError(
+      'Player option "voiceChannel" must be a non-empty string.'
+    );
 
   if (options.node && typeof options.node !== "string")
-    throw new TypeError("Player option \"node\" must be a non-empty string.");
+    throw new TypeError('Player option "node" must be a non-empty string.');
 
-  if (typeof options.volume !== "undefined" && typeof options.volume !== "number")
-    throw new TypeError("Player option \"volume\" must be a number.");
+  if (
+    typeof options.volume !== "undefined" &&
+    typeof options.volume !== "number"
+  )
+    throw new TypeError('Player option "volume" must be a number.');
 
-  if (typeof options.selfMute !== "undefined" && typeof options.selfMute !== "boolean")
-    throw new TypeError("Player option \"selfMute\" must be a boolean.");
+  if (
+    typeof options.selfMute !== "undefined" &&
+    typeof options.selfMute !== "boolean"
+  )
+    throw new TypeError('Player option "selfMute" must be a boolean.');
 
-  if (typeof options.selfDeafen !== "undefined" && typeof options.selfDeafen !== "boolean")
-    throw new TypeError("Player option \"selfDeafen\" must be a boolean.");
+  if (
+    typeof options.selfDeafen !== "undefined" &&
+    typeof options.selfDeafen !== "boolean"
+  )
+    throw new TypeError('Player option "selfDeafen" must be a boolean.');
 }
 
 export class Player {
@@ -91,8 +105,7 @@ export class Player {
    */
   constructor(public options: PlayerOptions) {
     if (!this.manager) this.manager = Structure.get("Player")._manager;
-    if (!this.manager)
-      throw new RangeError("Manager has not been initiated.");
+    if (!this.manager) throw new RangeError("Manager has not been initiated.");
 
     if (this.manager.players.has(options.guild)) {
       return this.manager.players.get(options.guild);
@@ -103,8 +116,8 @@ export class Player {
     this.volume = options.volume || 100;
     this.guild = options.guild;
 
-    if(options.voiceChannel) this.voiceChannel = options.voiceChannel;
-    if(options.textChannel) this.textChannel = options.textChannel;
+    if (options.voiceChannel) this.voiceChannel = options.voiceChannel;
+    if (options.textChannel) this.textChannel = options.textChannel;
 
     const node = this.manager.nodes.get(options.node);
     this.node = node || this.manager.leastLoadNodes.first();
@@ -132,9 +145,12 @@ export class Player {
    * @param bands
    */
   public setEQ(...bands: EqualizerBand[]): this {
-    if (bands.length && !bands.every(band =>
-      JSON.stringify(Object.keys(band).sort()) === '["band","gain"]'
-    ))
+    if (
+      bands.length &&
+      !bands.every(
+        (band) => JSON.stringify(Object.keys(band).sort()) === '["band","gain"]'
+      )
+    )
       throw new TypeError("Channel must be a non-empty string.");
 
     for (const { band, gain } of bands) this.bands[band] = gain;
@@ -266,8 +282,7 @@ export class Player {
       this.queue.current = optionsOrTrack as Track;
     }
 
-    if (!this.queue.current)
-      throw new RangeError("No current track.");
+    if (!this.queue.current) throw new RangeError("No current track.");
 
     const finalOptions = playOptions
       ? playOptions
@@ -299,8 +314,7 @@ export class Player {
   public setVolume(volume: number): this {
     volume = Number(volume);
 
-    if (isNaN(volume))
-      throw new TypeError("Volume must be a number.");
+    if (isNaN(volume)) throw new TypeError("Volume must be a number.");
     this.volume = Math.max(Math.min(volume, 1000), 0);
 
     this.node.send({
@@ -318,9 +332,7 @@ export class Player {
    */
   public setTrackRepeat(repeat: boolean): this {
     if (typeof repeat !== "boolean")
-      throw new TypeError(
-        'Repeat can only be "true" or "false".'
-      );
+      throw new TypeError('Repeat can only be "true" or "false".');
 
     if (repeat) {
       this.trackRepeat = true;
@@ -339,9 +351,7 @@ export class Player {
    */
   public setQueueRepeat(repeat: boolean): this {
     if (typeof repeat !== "boolean")
-      throw new TypeError(
-        'Repeat can only be "true" or "false".'
-      );
+      throw new TypeError('Repeat can only be "true" or "false".');
 
     if (repeat) {
       this.trackRepeat = false;
@@ -370,9 +380,7 @@ export class Player {
    */
   public pause(pause: boolean): this {
     if (typeof pause !== "boolean")
-      throw new RangeError(
-        'Pause can only be "true" or "false".'
-      );
+      throw new RangeError('Pause can only be "true" or "false".');
 
     this.playing = !pause;
     this.paused = pause;

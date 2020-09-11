@@ -307,7 +307,7 @@ export class Manager extends EventEmitter {
       }:${node.options.port}/decodetracks`;
 
       const res = await Axios.post<TrackData[]>(url, tracks, {
-        headers: { Authorization: node.options.password }
+        headers: { Authorization: node.options.password },
       }).catch((err) => {
         return reject(err);
       });
@@ -329,10 +329,10 @@ export class Manager extends EventEmitter {
   public decodeTrack(track: string): Promise<TrackData> {
     return new Promise(async (resolve, reject) => {
       try {
-        const res = await this.decodeTracks([track])
+        const res = await this.decodeTracks([track]);
         return resolve(res[0]);
       } catch (e) {
-        return reject(e)
+        return reject(e);
       }
     });
   }
@@ -459,5 +459,5 @@ export interface LavalinkResult {
   playlistInfo: {
     name: string;
     selectedTrack?: number;
-  }
+  };
 }
