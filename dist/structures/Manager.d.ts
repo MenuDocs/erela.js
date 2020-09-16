@@ -1,0 +1,213 @@
+/// <reference types="node" />
+import Collection from "@discordjs/collection";
+import { EventEmitter } from "events";
+import { Node, NodeOptions } from "./Node";
+import { Player, PlayerOptions, Track } from "./Player";
+import { LoadType, Plugin, TrackData, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, WebSocketClosedEvent } from "./Utils";
+export interface Manager {
+    /**
+     * Emitted when a Node is created.
+     * @event Manager#nodeCreate
+     */
+    on(event: "nodeCreate", listener: (node: Node) => void): this;
+    /**
+     * Emitted when a Node is destroyed.
+     * @event Manager#nodeDestroy
+     */
+    on(event: "nodeDestroy", listener: (node: Node) => void): this;
+    /**
+     * Emitted when a Node connects.
+     * @event Manager#nodeConnect
+     */
+    on(event: "nodeConnect", listener: (node: Node) => void): this;
+    /**
+     * Emitted when a Node reconnects.
+     * @event Manager#nodeReconnect
+     */
+    on(event: "nodeReconnect", listener: (node: Node) => void): this;
+    /**
+     * Emitted when a Node disconnects.
+     * @event Manager#nodeDisconnect
+     */
+    on(event: "nodeDisconnect", listener: (node: Node, reason: {
+        code?: number;
+        reason?: string;
+    }) => void): this;
+    /**
+     * Emitted when a Node has an error.
+     * @event Manager#nodeError
+     */
+    on(event: "nodeError", listener: (node: Node, error: Error) => void): this;
+    /**
+     * Emitted whenever any Lavalink event is received.
+     * @event Manager#nodeRaw
+     */
+    on(event: "nodeRaw", listener: (payload: unknown) => void): this;
+    /**
+     * Emitted when a player is created.
+     * @event Manager#playerCreate
+     */
+    on(event: "playerCreate", listener: (player: Player) => void): this;
+    /**
+     * Emitted when a player is destroyed.
+     * @event Manager#playerDestroy
+     */
+    on(event: "playerDestroy", listener: (player: Player) => void): this;
+    /**
+     * Emitted when a player queue ends.
+     * @event Manager#queueEnd
+     */
+    on(event: "queueEnd", listener: (player: Player) => void): this;
+    /**
+     * Emitted when a player is moved to a new voice channel.
+     * @event Manager#playerMove
+     */
+    on(event: "playerMove", listener: (player: Player, oldChannel: string, newChannel: string) => void): this;
+    /**
+     * Emitted when a track starts.
+     * @event Manager#trackStart
+     */
+    on(event: "trackStart", listener: (player: Player, track: Track, payload: TrackStartEvent) => void): this;
+    /**
+     * Emitted when a track ends.
+     * @event Manager#trackEnd
+     */
+    on(event: "trackEnd", listener: (player: Player, track: Track, payload: TrackEndEvent) => void): this;
+    /**
+     * Emitted when a track gets stuck during playback.
+     * @event Manager#trackStuck
+     */
+    on(event: "trackStuck", listener: (player: Player, track: Track, payload: TrackStuckEvent) => void): this;
+    /**
+     * Emitted when a track has an error during playback.
+     * @event Manager#trackError
+     */
+    on(event: "trackError", listener: (player: Player, track: Track, payload: TrackExceptionEvent) => void): this;
+    /**
+     * Emitted when a voice connection is closed.
+     * @event Manager#socketClosed
+     */
+    on(event: "socketClosed", listener: (player: Player, payload: WebSocketClosedEvent) => void): this;
+}
+/** @noInheritDoc */
+export declare class Manager extends EventEmitter {
+    /** The map of players. */
+    readonly players: Collection<string, Player>;
+    /** The map of nodes. */
+    readonly nodes: Collection<string, Node>;
+    /** The options that were set. */
+    readonly options: ManagerOptions;
+    private initiated;
+    /** Returns the least used Nodes. */
+    get leastUsedNodes(): Collection<string, Node>;
+    /** Returns the least system load Nodes. */
+    get leastLoadNodes(): Collection<string, Node>;
+    /**
+     * Initiates the Manager class.
+     * @param options
+     */
+    constructor(options: ManagerOptions);
+    /**
+     * Initiates the Manager.
+     * @param clientId
+     */
+    init(clientId?: string): this;
+    /**
+     * Searches the enabled sources based off the url or the source property.
+     * @param query
+     * @param requester
+     * @returns The search result.
+     */
+    search(query: string | Query, requester?: unknown): Promise<SearchResult>;
+    /**
+     * Decodes the base64 encoded tracks and returns a TrackData array.
+     * @param tracks
+     */
+    decodeTracks(tracks: string[]): Promise<TrackData[]>;
+    /**
+     * Decodes the base64 encoded track and returns a TrackData.
+     * @param track
+     */
+    decodeTrack(track: string): Promise<TrackData>;
+    /**
+     * Creates a player or returns one if it already exists.
+     * @param options
+     */
+    create(options: PlayerOptions): Player;
+    /**
+     * Sends voice data to the Lavalink server.
+     * @param data
+     */
+    updateVoiceState(data: VoicePacket): void;
+}
+export interface Payload {
+    /** The OP code */
+    op: number;
+    d: {
+        guild_id: string;
+        channel_id: string | null;
+        self_mute: boolean;
+        self_deaf: boolean;
+    };
+}
+export interface ManagerOptions {
+    /** The array of nodes to connect to. */
+    nodes?: NodeOptions[];
+    /** The client ID to use. */
+    clientId?: string;
+    /** The shard count. */
+    shards?: number;
+    /** A array of plugins to use. */
+    plugins?: Plugin[];
+    /** Whether players should automatically play the next song. */
+    autoPlay?: boolean;
+    /**
+     * Function to send data to the websocket.
+     * @param id
+     * @param payload
+     */
+    send(id: string, payload: Payload): void;
+}
+export interface Query {
+    /** The source to search from. */
+    source?: "youtube" | "soundcloud";
+    /** The query to search for. */
+    query: string;
+}
+export interface SearchResult {
+    /** The load type of the result. */
+    loadType: LoadType;
+    /** The array of tracks from the result. */
+    tracks: Track[];
+    /** The playlist info if the load type is PLAYLIST_LOADED. */
+    playlist?: PlaylistInfo;
+    /** The exception when searching if one. */
+    exception?: {
+        /** The message for the exception. */
+        message: string;
+        /** The severity of exception. */
+        severity: string;
+    };
+}
+export interface PlaylistInfo {
+    /** The playlist name. */
+    name: string;
+    /** The playlist selected track. */
+    selectedTrack?: Track;
+    /** The duration of the playlist. */
+    duration: number;
+}
+export interface LavalinkResult {
+    tracks: TrackData[];
+    loadType: LoadType;
+    exception?: {
+        /** The message for the exception. */
+        message: string;
+        /** The severity of exception. */
+        severity: string;
+    };
+    playlistInfo: {
+        name: string;
+        selectedTrack?: number;
+    };
+}
