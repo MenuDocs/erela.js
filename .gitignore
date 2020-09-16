@@ -1,4 +1,10 @@
+# folders
 node_modules
 dist
+.idea
+typings
+
+# files
 package-lock.json
-docs.json
+yarn.lock
+docs.sh
