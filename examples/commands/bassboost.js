@@ -27,7 +27,7 @@ module.exports = {
     if (channel.id !== player.voiceChannel) return message.reply("you're not in the same voice channel.");
 
     let level = "none";
-    if (args.length && args[0].toLowerCase() in level) level = args[0].toLowerCase();
+    if (args.length && args[0].toLowerCase() in levels) level = args[0].toLowerCase();
 
     player.setEQ(...new Array(3).fill(null).map((_, i) => ({ band: i, gain: levels[level] })));
 
