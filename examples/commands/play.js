@@ -82,7 +82,7 @@ module.exports = {
         const track = res.tracks[index];
         player.queue.add(track);
 
-        if (!player.playing && !player.paused && !player.queue.length) player.play();
+        if (!player.playing && !player.paused) player.play();
         return message.reply(`enqueuing \`${track.title}\`.`);
     }
   },
