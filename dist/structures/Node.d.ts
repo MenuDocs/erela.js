@@ -53,7 +53,7 @@ export interface NodeOptions {
     /** Whether the host uses SSL. */
     secure?: boolean;
     /** The identifier for the node. */
-    identifier: string;
+    identifier?: string;
     /** The retryAmount for the node. */
     retryAmount?: number;
     /** The retryDelay for the node. */

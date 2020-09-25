@@ -29,6 +29,7 @@ class Player {
      * @param options
      */
     constructor(options) {
+        var _a;
         this.options = options;
         /** The Queue for the Player. */
         this.queue = new (Utils_1.Structure.get("Queue"))();
@@ -61,7 +62,6 @@ class Player {
             return this.manager.players.get(options.guild);
         }
         check(options);
-        this.volume = options.volume || 100;
         this.guild = options.guild;
         if (options.voiceChannel)
             this.voiceChannel = options.voiceChannel;
@@ -73,6 +73,7 @@ class Player {
             throw new RangeError("No available nodes.");
         this.manager.players.set(options.guild, this);
         this.manager.emit("playerCreate", this);
+        this.setVolume((_a = options.volume) !== null && _a !== void 0 ? _a : 100);
     }
     /**
      * Set custom data.
