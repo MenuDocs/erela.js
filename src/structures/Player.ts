@@ -113,7 +113,6 @@ export class Player {
 
     check(options);
 
-    this.volume = options.volume || 100;
     this.guild = options.guild;
 
     if (options.voiceChannel) this.voiceChannel = options.voiceChannel;
@@ -126,6 +125,7 @@ export class Player {
 
     this.manager.players.set(options.guild, this);
     this.manager.emit("playerCreate", this);
+    this.setVolume(options.volume ?? 100);
   }
 
   /**

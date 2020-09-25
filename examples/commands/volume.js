@@ -12,7 +12,9 @@ module.exports = {
   name: "volume",
   run: (message, args) => {
     const player = message.client.manager.players.get(message.guild.id);
+
     if (!player) return message.reply("there is no player for this guild.");
+    if (!args.length) return message.reply(`the player volume is \`${player.volume}\`.`)
 
     const { channel } = message.member.voice;
     
