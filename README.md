@@ -89,7 +89,7 @@ client.manager = new Manager({
   autoPlay: true,
   // A send method to send data to the Discord WebSocket using your library.
   // Getting the shard for the guild and sending the data to the WebSocket.
-  send(id, payload) {
+  send: (id, payload) => {
     const guild = client.guilds.cache.get(id);
     if (guild) guild.shard.send(payload);
   },
