@@ -66,7 +66,7 @@ class Queue extends Array {
             if (isNaN(Number(startOrPosition))) {
                 throw new RangeError(`Missing "start" parameter.`);
             }
-            else if (!isNaN(Number(end))) {
+            else if (isNaN(Number(end))) {
                 throw new RangeError(`Missing "end" parameter.`);
             }
             else if (startOrPosition >= end) {
