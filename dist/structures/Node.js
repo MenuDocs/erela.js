@@ -6,6 +6,32 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Node = void 0;
 /* eslint-disable no-case-declarations */
 const ws_1 = __importDefault(require("ws"));
+function check(options) {
+    if (!options)
+        throw new TypeError("NodeOptions must not be empty.");
+    if (typeof options.host !== "string" ||
+        !/.+/.test(options.host))
+        throw new TypeError('Node option "host" must be present and be a non-empty string.');
+    if (typeof options.port !== "undefined" &&
+        typeof options.port !== "number")
+        throw new TypeError('Node option "port" must be a number.');
+    if (typeof options.password !== "undefined" &&
+        (typeof options.password !== "string" ||
+            !/.+/.test(options.password)))
+        throw new TypeError('Node option "password" must be a non-empty string.');
+    if (typeof options.secure !== "undefined" &&
+        typeof options.secure !== "boolean")
+        throw new TypeError('Node option "secure" must be a boolean.');
+    if (typeof options.identifier !== "undefined" &&
+        typeof options.identifier !== "string")
+        throw new TypeError('Node option "identifier" must be a non-empty string.');
+    if (typeof options.retryAmount !== "undefined" &&
+        typeof options.retryAmount !== "number")
+        throw new TypeError('Node option "retryAmount" must be a number.');
+    if (typeof options.retryDelay !== "undefined" &&
+        typeof options.retryDelay !== "number")
+        throw new TypeError('Node option "retryDelay" must be a number.');
+}
 class Node {
     /**
      * Creates an instance of Node.
@@ -20,6 +46,7 @@ class Node {
         /** The amount of rest calls the node has made. */
         this.calls = 0;
         this.reconnectAttempts = 1;
+        check(options);
         this.options = Object.assign({ port: 2333, password: "youshallnotpass", secure: false, retryAmount: 5, retryDelay: 30e3 }, options);
         this.options.identifier = options.identifier || options.host;
         this.stats = {
@@ -99,7 +126,8 @@ class Node {
     reconnect() {
         this.reconnectTimeout = setTimeout(() => {
             if (this.reconnectAttempts >= this.options.retryAmount) {
-                this.manager.emit("nodeError", this, new Error(`Unable to connect after ${this.options.retryAmount} attempts.`));
+                const error = new Error(`Unable to connect after ${this.options.retryAmount} attempts.`);
+                this.manager.emit("nodeError", this, error);
                 return this.destroy();
             }
             this.socket.removeAllListeners();
@@ -147,14 +175,13 @@ class Node {
                 this.handleEvent(payload);
                 break;
             default:
-                this.manager.emit("nodeError", this, new Error(`Unexpected op "${payload.op}" with data ${payload}`));
+                this.manager.emit("nodeError", this, new Error(`Unexpected op "${payload.op}" with data: ${payload}`));
                 return;
         }
     }
     handleEvent(payload) {
-        if (!payload.guildId) {
+        if (!payload.guildId)
             return;
-        }
         const player = this.manager.players.get(payload.guildId);
         if (!player)
             return;
@@ -176,7 +203,7 @@ class Node {
             this.socketClosed(player, payload);
         }
         else {
-            this.manager.emit("nodeError", this, new Error(`Node#event Unknown event '${type}'.`));
+            this.manager.emit("nodeError", this, new Error(`Node#event unknown event '${type}'.`));
         }
     }
     trackStart(player, track, payload) {
@@ -203,10 +230,10 @@ class Node {
         else if (!player.queue.length) {
             player.queue.current = null;
             player.playing = false;
-            this.manager.emit("trackEnd", player, track, payload);
-            if (payload.reason === "FINISHED") {
-                this.manager.emit("queueEnd", player);
-            }
+            // this.manager.emit("trackEnd", player, track, payload);
+            // if (["FINISHED", "STOPPED"].includes(payload.reason)) {
+            this.manager.emit("queueEnd", player);
+            // }
         }
         else if (player.queue.length) {
             player.queue.current = player.queue.shift();

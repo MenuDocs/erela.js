@@ -2,7 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Queue = void 0;
 const Utils_1 = require("./Utils");
-/** @noInheritDoc */
+/**
+ * The player's queue, the `current` property is the currently playing track, think of the rest as the up-coming tracks.
+ * @noInheritDoc
+ */
 class Queue extends Array {
     constructor() {
         super(...arguments);
@@ -11,7 +14,8 @@ class Queue extends Array {
     }
     /** The total duration of the queue. */
     get duration() {
-        const current = (this.current || {}).duration || 0;
+        var _a, _b;
+        const current = (_b = (_a = this.current) === null || _a === void 0 ? void 0 : _a.duration) !== null && _b !== void 0 ? _b : 0;
         return this.map((track) => track.duration).reduce((acc, cur) => acc + cur, current);
     }
     /** The total size of tracks in the queue. */
@@ -59,10 +63,10 @@ class Queue extends Array {
     }
     remove(startOrPosition = 0, end) {
         if (typeof end !== "undefined") {
-            if (!Number(startOrPosition)) {
+            if (isNaN(Number(startOrPosition))) {
                 throw new RangeError(`Missing "start" parameter.`);
             }
-            else if (!Number(end)) {
+            else if (!isNaN(Number(end))) {
                 throw new RangeError(`Missing "end" parameter.`);
             }
             else if (startOrPosition >= end) {

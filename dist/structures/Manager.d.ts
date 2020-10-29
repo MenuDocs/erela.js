@@ -135,6 +135,11 @@ export declare class Manager extends EventEmitter {
      */
     create(options: PlayerOptions): Player;
     /**
+     * Returns a player or undefined if it does not exist.
+     * @param guild
+     */
+    get(guild: string): Player | undefined;
+    /**
      * Sends voice data to the Lavalink server.
      * @param data
      */

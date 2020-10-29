@@ -11,7 +11,7 @@ const sizes = [
     "hqdefault",
     "maxresdefault",
 ];
-const template = [
+const defaultTemplate = [
     "track",
     "title",
     "identifier",
@@ -22,7 +22,10 @@ const template = [
     "uri",
     "thumbnail",
 ];
-const validate = (track) => template.every((v) => Object.keys(track || {}).includes(v));
+const validate = (track) => {
+    const keys = Object.keys(track || {});
+    return defaultTemplate.every((v) => keys.includes(v));
+};
 class TrackUtils {
     /**
      * Checks if the provided argument is a valid track or if the array is
@@ -56,12 +59,13 @@ class TrackUtils {
                 uri: data.info.uri,
                 thumbnail: data.info.uri.includes("youtube")
                     ? `https://img.youtube.com/vi/${data.info.identifier}/default.jpg`
-                    : "",
+                    : null,
                 displayThumbnail(size = "default") {
-                    const finalSize = sizes.find((s) => s === size) || "default";
+                    var _a;
+                    const finalSize = (_a = sizes.find((s) => s === size)) !== null && _a !== void 0 ? _a : "default";
                     return this.uri.includes("youtube")
                         ? `https://img.youtube.com/vi/${data.info.identifier}/${finalSize}.jpg`
-                        : "";
+                        : null;
                 },
                 requester: requester,
             };
@@ -100,7 +104,8 @@ class Structure {
 }
 exports.Structure = Structure;
 class Plugin {
-    load(manager) { }
+    load(manager) {
+    }
 }
 exports.Plugin = Plugin;
 const structures = {

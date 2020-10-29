@@ -19,6 +19,27 @@ const axios_1 = __importDefault(require("axios"));
 const events_1 = require("events");
 const Utils_1 = require("./Utils");
 const template = JSON.stringify(["event", "guildId", "op", "sessionId"]);
+function check(options) {
+    if (!options)
+        throw new TypeError("ManagerOptions must not be empty.");
+    if (typeof options.send !== "function")
+        throw new TypeError('Manager option "send" must be present and a function.');
+    if (typeof options.clientId !== "undefined" &&
+        !/^\d+$/.test(options.clientId))
+        throw new TypeError('Manager option "clientId" must be a non-empty string.');
+    if (typeof options.nodes !== "undefined" &&
+        !Array.isArray(options.nodes))
+        throw new TypeError('Manager option "nodes" must be a array.');
+    if (typeof options.shards !== "undefined" &&
+        typeof options.shards !== "number")
+        throw new TypeError('Manager option "shards" must be a number.');
+    if (typeof options.plugins !== "undefined" &&
+        !Array.isArray(options.plugins))
+        throw new TypeError('Manager option "plugins" must be a Plugin array.');
+    if (typeof options.autoPlay !== "undefined" &&
+        typeof options.autoPlay !== "boolean")
+        throw new TypeError('Manager option "autoPlay" must be a boolean.');
+}
 /** @noInheritDoc */
 class Manager extends events_1.EventEmitter {
     /**
@@ -32,8 +53,7 @@ class Manager extends events_1.EventEmitter {
         /** The map of nodes. */
         this.nodes = new collection_1.default();
         this.initiated = false;
-        if (!options.send)
-            throw new RangeError("Missing send method in ManageOptions.");
+        check(options);
         this.options = Object.assign({ plugins: [], nodes: [{ identifier: "default", host: "localhost" }], shards: 1, autoPlay: false }, options);
         if (this.options.plugins) {
             for (const plugin of this.options.plugins)
@@ -73,11 +93,12 @@ class Manager extends events_1.EventEmitter {
     init(clientId) {
         if (this.initiated)
             return this;
-        if (typeof clientId === "string")
+        if (typeof clientId !== "undefined")
             this.options.clientId = clientId;
-        if (!this.options.clientId) {
+        if (typeof this.options.clientId !== "string")
+            throw new Error('"clientId" set is not type of "string"');
+        if (!this.options.clientId)
             throw new Error('"clientId" is not set. Pass it in Manager#init() or as a option in the constructor.');
-        }
         for (const node of this.nodes.values())
             node.connect();
         Utils_1.Structure.get("Player").init(this);
@@ -92,7 +113,7 @@ class Manager extends events_1.EventEmitter {
      */
     search(query, requester) {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            var _a;
+            var _a, _b;
             const node = this.leastUsedNodes.first();
             if (!node)
                 throw new Error("No available nodes.");
@@ -118,16 +139,15 @@ class Manager extends events_1.EventEmitter {
             }
             const result = {
                 loadType: res.data.loadType,
-                exception: res.data.exception,
+                exception: (_b = res.data.exception) !== null && _b !== void 0 ? _b : null,
                 tracks: res.data.tracks.map((track) => Utils_1.TrackUtils.build(track, requester)),
             };
             if (result.loadType === "PLAYLIST_LOADED") {
                 result.playlist = {
                     name: res.data.playlistInfo.name,
                     selectedTrack: Utils_1.TrackUtils.build(res.data.tracks[res.data.playlistInfo.selectedTrack], requester),
-                    duration: res.data.tracks
-                        .map((track) => track.info.length)
-                        .reduce((acc, cur) => acc + cur, 0),
+                    duration: result.tracks
+                        .reduce((acc, cur) => acc + (cur.duration || 0), 0),
                 };
             }
             return resolve(result);
@@ -139,7 +159,7 @@ class Manager extends events_1.EventEmitter {
      */
     decodeTracks(tracks) {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            const node = this.leastUsedNodes.first();
+            const node = this.nodes.first();
             if (!node)
                 throw new Error("No available nodes.");
             const url = `http${node.options.secure ? "s" : ""}://${node.options.host}:${node.options.port}/decodetracks`;
@@ -178,8 +198,14 @@ class Manager extends events_1.EventEmitter {
         if (this.players.has(options.guild)) {
             return this.players.get(options.guild);
         }
-        const player = new (Utils_1.Structure.get("Player"))(options);
-        return player;
+        return new (Utils_1.Structure.get("Player"))(options);
+    }
+    /**
+     * Returns a player or undefined if it does not exist.
+     * @param guild
+     */
+    get(guild) {
+        return this.players.get(guild);
     }
     /**
      * Sends voice data to the Lavalink server.

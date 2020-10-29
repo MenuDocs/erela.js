@@ -5,11 +5,11 @@ const Utils_1 = require("./Utils");
 function check(options) {
     if (!options)
         throw new TypeError("PlayerOptions must not be empty.");
-    if (!/\d/.test(options.guild))
-        throw new TypeError('Player option "guild" must present and be a non-empty string.');
-    if (options.textChannel && !/\d/.test(options.textChannel))
+    if (!/^\d+$/.test(options.guild))
+        throw new TypeError('Player option "guild" must be present and be a non-empty string.');
+    if (options.textChannel && !/^\d+$/.test(options.textChannel))
         throw new TypeError('Player option "textChannel" must be a non-empty string.');
-    if (options.voiceChannel && !/\d/.test(options.voiceChannel))
+    if (options.voiceChannel && !/^\d+$/.test(options.voiceChannel))
         throw new TypeError('Player option "voiceChannel" must be a non-empty string.');
     if (options.node && typeof options.node !== "string")
         throw new TypeError('Player option "node" must be a non-empty string.');
