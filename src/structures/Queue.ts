@@ -77,7 +77,7 @@ export class Queue extends Array<Track> {
     if (typeof end !== "undefined") {
       if (isNaN(Number(startOrPosition))) {
         throw new RangeError(`Missing "start" parameter.`);
-      } else if (!isNaN(Number(end))) {
+      } else if (isNaN(Number(end))) {
         throw new RangeError(`Missing "end" parameter.`);
       } else if (startOrPosition >= end) {
         throw new RangeError("Start can not be bigger than end.");
