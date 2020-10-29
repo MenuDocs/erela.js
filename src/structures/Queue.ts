@@ -1,11 +1,14 @@
 import { Track } from "./Player";
 import { TrackUtils } from "./Utils";
 
-/** @noInheritDoc */
+/**
+ * The player's queue, the `current` property is the currently playing track, think of the rest as the up-coming tracks.
+ * @noInheritDoc
+ */
 export class Queue extends Array<Track> {
   /** The total duration of the queue. */
   public get duration(): number {
-    const current = (this.current || {}).duration || 0;
+    const current = this.current?.duration ?? 0;
     return this.map((track: Track) => track.duration).reduce(
       (acc: number, cur: number) => acc + cur,
       current
@@ -59,22 +62,22 @@ export class Queue extends Array<Track> {
   }
 
   /**
-   * Removes a track from the queue. Defaults to the first track, returning the removed track.
+   * Removes a track from the queue. Defaults to the first track, returning the removed track, EXCLUDING THE `current` TRACK.
    * @param [position=0]
    */
   public remove(position?: number): Track[];
 
   /**
-   * Removes an amount of tracks using a start and end index, returning the removed tracks.
+   * Removes an amount of tracks using a exclusive start and end exclusive index, returning the removed tracks, EXCLUDING THE `current` TRACK.
    * @param start
    * @param end
    */
   public remove(start: number, end: number): Track[];
   public remove(startOrPosition = 0, end?: number): Track[] {
     if (typeof end !== "undefined") {
-      if (!Number(startOrPosition)) {
+      if (isNaN(Number(startOrPosition))) {
         throw new RangeError(`Missing "start" parameter.`);
-      } else if (!Number(end)) {
+      } else if (!isNaN(Number(end))) {
         throw new RangeError(`Missing "end" parameter.`);
       } else if (startOrPosition >= end) {
         throw new RangeError("Start can not be bigger than end.");

@@ -12,6 +12,53 @@ import {
   WebSocketClosedEvent,
 } from "./Utils";
 
+function check(options: NodeOptions) {
+  if (!options) throw new TypeError("NodeOptions must not be empty.");
+
+  if (
+    typeof options.host !== "string" ||
+    !/.+/.test(options.host)
+  )
+    throw new TypeError('Node option "host" must be present and be a non-empty string.');
+
+  if (
+    typeof options.port !== "undefined" &&
+    typeof options.port !== "number"
+  )
+    throw new TypeError('Node option "port" must be a number.');
+
+  if (
+    typeof options.password !== "undefined" &&
+    (typeof options.password !== "string" ||
+    !/.+/.test(options.password))
+  )
+    throw new TypeError('Node option "password" must be a non-empty string.');
+
+  if (
+    typeof options.secure !== "undefined" &&
+    typeof options.secure !== "boolean"
+  )
+    throw new TypeError('Node option "secure" must be a boolean.');
+
+  if (
+    typeof options.identifier !== "undefined" &&
+    typeof options.identifier !== "string"
+  )
+    throw new TypeError('Node option "identifier" must be a non-empty string.');
+
+  if (
+    typeof options.retryAmount !== "undefined" &&
+    typeof options.retryAmount !== "number"
+  )
+    throw new TypeError('Node option "retryAmount" must be a number.');
+
+  if (
+    typeof options.retryDelay !== "undefined" &&
+    typeof options.retryDelay !== "number"
+  )
+    throw new TypeError('Node option "retryDelay" must be a number.');
+}
+
 export class Node {
   /** The socket for the node. */
   public socket: WebSocket | null = null;
@@ -34,6 +81,8 @@ export class Node {
    * @param options
    */
   constructor(public manager: Manager, public options: NodeOptions) {
+    check(options);
+
     this.options = {
       port: 2333,
       password: "youshallnotpass",
@@ -122,13 +171,11 @@ export class Node {
   private reconnect(): void {
     this.reconnectTimeout = setTimeout(() => {
       if (this.reconnectAttempts >= this.options.retryAmount) {
-        this.manager.emit(
-          "nodeError",
-          this,
-          new Error(
-            `Unable to connect after ${this.options.retryAmount} attempts.`
-          )
-        );
+        const error = new Error(
+          `Unable to connect after ${this.options.retryAmount} attempts.`
+        )
+
+        this.manager.emit("nodeError", this, error);
         return this.destroy();
       }
       this.socket.removeAllListeners();
@@ -179,16 +226,15 @@ export class Node {
         this.manager.emit(
           "nodeError",
           this,
-          new Error(`Unexpected op "${payload.op}" with data ${payload}`)
+          new Error(`Unexpected op "${payload.op}" with data: ${payload}`)
         );
         return;
     }
   }
 
   protected handleEvent(payload: PlayerEvent & PlayerEvents): void {
-    if (!payload.guildId) {
-      return;
-    }
+    if (!payload.guildId) return;
+
     const player = this.manager.players.get(payload.guildId);
     if (!player) return;
 
@@ -209,7 +255,7 @@ export class Node {
       this.manager.emit(
         "nodeError",
         this,
-        new Error(`Node#event Unknown event '${type}'.`)
+        new Error(`Node#event unknown event '${type}'.`)
       );
     }
   }
@@ -242,10 +288,10 @@ export class Node {
     } else if (!player.queue.length) {
       player.queue.current = null;
       player.playing = false;
-      this.manager.emit("trackEnd", player, track, payload);
-      if (payload.reason === "FINISHED") {
+      // this.manager.emit("trackEnd", player, track, payload);
+      // if (["FINISHED", "STOPPED"].includes(payload.reason)) {
         this.manager.emit("queueEnd", player);
-      }
+      // }
     } else if (player.queue.length) {
       player.queue.current = player.queue.shift();
       this.manager.emit("trackEnd", player, track, payload);

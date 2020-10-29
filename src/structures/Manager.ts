@@ -20,6 +20,43 @@ import {
 
 const template = JSON.stringify(["event", "guildId", "op", "sessionId"]);
 
+function check(options: ManagerOptions) {
+  if (!options) throw new TypeError("ManagerOptions must not be empty.");
+
+  if (typeof options.send !== "function")
+    throw new TypeError('Manager option "send" must be present and a function.');
+
+  if (
+    typeof options.clientId !== "undefined" &&
+    !/^\d+$/.test(options.clientId)
+  )
+    throw new TypeError('Manager option "clientId" must be a non-empty string.');
+
+  if (
+    typeof options.nodes !== "undefined" &&
+    !Array.isArray(options.nodes)
+  )
+    throw new TypeError('Manager option "nodes" must be a array.');
+
+  if (
+    typeof options.shards !== "undefined" &&
+    typeof options.shards !== "number"
+  )
+    throw new TypeError('Manager option "shards" must be a number.');
+
+  if (
+    typeof options.plugins !== "undefined" &&
+    !Array.isArray(options.plugins)
+  )
+    throw new TypeError('Manager option "plugins" must be a Plugin array.');
+
+  if (
+    typeof options.autoPlay !== "undefined" &&
+    typeof options.autoPlay !== "boolean"
+  )
+    throw new TypeError('Manager option "autoPlay" must be a boolean.');
+}
+
 export interface Manager {
   /**
    * Emitted when a Node is created.
@@ -182,8 +219,7 @@ export class Manager extends EventEmitter {
   constructor(options: ManagerOptions) {
     super();
 
-    if (!options.send)
-      throw new RangeError("Missing send method in ManageOptions.");
+    check(options);
 
     this.options = {
       plugins: [],
@@ -211,13 +247,15 @@ export class Manager extends EventEmitter {
    */
   public init(clientId?: string): this {
     if (this.initiated) return this;
-    if (typeof clientId === "string") this.options.clientId = clientId;
+    if (typeof clientId !== "undefined") this.options.clientId = clientId;
 
-    if (!this.options.clientId) {
+    if (typeof this.options.clientId !== "string")
+      throw new Error('"clientId" set is not type of "string"');
+
+    if (!this.options.clientId)
       throw new Error(
         '"clientId" is not set. Pass it in Manager#init() or as a option in the constructor.'
       );
-    }
 
     for (const node of this.nodes.values()) node.connect();
     Structure.get("Player").init(this);
@@ -271,7 +309,7 @@ export class Manager extends EventEmitter {
 
       const result: SearchResult = {
         loadType: res.data.loadType,
-        exception: res.data.exception,
+        exception: res.data.exception ?? null,
         tracks: res.data.tracks.map((track: TrackData) =>
           TrackUtils.build(track, requester)
         ),
@@ -284,9 +322,8 @@ export class Manager extends EventEmitter {
             res.data.tracks[res.data.playlistInfo.selectedTrack],
             requester
           ),
-          duration: res.data.tracks
-            .map((track: TrackData) => track.info.length)
-            .reduce((acc: number, cur: number) => acc + cur, 0),
+          duration: result.tracks
+            .reduce((acc: number, cur: Track) => acc + (cur.duration || 0), 0),
         };
       }
 
@@ -300,7 +337,7 @@ export class Manager extends EventEmitter {
    */
   public decodeTracks(tracks: string[]): Promise<TrackData[]> {
     return new Promise(async (resolve, reject) => {
-      const node = this.leastUsedNodes.first();
+      const node = this.nodes.first();
       if (!node) throw new Error("No available nodes.");
       const url = `http${node.options.secure ? "s" : ""}://${
         node.options.host
@@ -343,11 +380,18 @@ export class Manager extends EventEmitter {
    */
   public create(options: PlayerOptions): Player {
     if (this.players.has(options.guild)) {
-      return this.players.get(options.guild)!;
+      return this.players.get(options.guild);
     }
 
-    const player = new (Structure.get("Player"))(options);
-    return player;
+    return new (Structure.get("Player"))(options);
+  }
+
+  /**
+   * Returns a player or undefined if it does not exist.
+   * @param guild
+   */
+  public get(guild: string): Player | undefined {
+    return this.players.get(guild);
   }
 
   /**

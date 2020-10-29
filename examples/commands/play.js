@@ -1,9 +1,9 @@
 /*
 THIS IS JUST THE COMMAND IT SELF, IF YOU USE THIS EXACTLY THEN YOU WILL NEED A WAY TO LOAD THE FILE LIKE THE FOLLOWING HERE:
-https://solaris.codes/erelajs-rewrite/guides/moreCommands.html#before-you-start
+https://solaris.codes/erelajs/guides/moreCommands.html#before-you-start
 
 YOU ALSO NEED TO INITIATE THE MANAGER AS SHOWN HERE:
-https://solaris.codes/erelajs-rewrite/guides/basics.html#first-start
+https://solaris.codes/erelajs/guides/basics.html#first-start
 
 Or copy the code inside the run function as its simply the message and arguments.
 */
@@ -31,7 +31,7 @@ module.exports = {
       res = await player.search(search, message.author);
       if (res.loadType === 'LOAD_FAILED') {
         if (!player.queue.current) player.destroy();
-        throw new Error(res.exception.message);
+        throw res.exception;
       }
     } catch (err) {
       return message.reply(`there was an error while searching: ${err.message}`);

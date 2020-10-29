@@ -6,17 +6,17 @@ import { sizes, State, Structure, TrackUtils, VoiceState } from "./Utils";
 function check(options: PlayerOptions) {
   if (!options) throw new TypeError("PlayerOptions must not be empty.");
 
-  if (!/\d/.test(options.guild))
+  if (!/^\d+$/.test(options.guild))
     throw new TypeError(
-      'Player option "guild" must present and be a non-empty string.'
+      'Player option "guild" must be present and be a non-empty string.'
     );
 
-  if (options.textChannel && !/\d/.test(options.textChannel))
+  if (options.textChannel && !/^\d+$/.test(options.textChannel))
     throw new TypeError(
       'Player option "textChannel" must be a non-empty string.'
     );
 
-  if (options.voiceChannel && !/\d/.test(options.voiceChannel))
+  if (options.voiceChannel && !/^\d+$/.test(options.voiceChannel))
     throw new TypeError(
       'Player option "voiceChannel" must be a non-empty string.'
     );
@@ -452,12 +452,12 @@ export interface Track {
   readonly isStream: boolean;
   /** The uri of the track. */
   readonly uri: string;
-  /** The thumbnail of the track. */
-  readonly thumbnail: string;
+  /** The thumbnail of the track or null if it's a unsupported source. */
+  readonly thumbnail: string | null;
   /** The user that requested the track. */
   readonly requester: unknown | null;
 
-  /** Displays the track thumbnail with optional size. Only for youtube as others require an API. */
+  /** Displays the track thumbnail with optional size or null if it's a unsupported source. */
   displayThumbnail(size?: sizes): string;
 }
 
