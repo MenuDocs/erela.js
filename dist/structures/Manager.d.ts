@@ -2,7 +2,7 @@
 import Collection from "@discordjs/collection";
 import { EventEmitter } from "events";
 import { Node, NodeOptions } from "./Node";
-import { Player, PlayerOptions, Track } from "./Player";
+import { Player, PlayerOptions, Track, UnresolvedTrack } from "./Player";
 import { LoadType, Plugin, TrackData, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, WebSocketClosedEvent } from "./Utils";
 export interface Manager {
     /**
@@ -82,7 +82,7 @@ export interface Manager {
      * Emitted when a track has an error during playback.
      * @event Manager#trackError
      */
-    on(event: "trackError", listener: (player: Player, track: Track, payload: TrackExceptionEvent) => void): this;
+    on(event: "trackError", listener: (player: Player, track: Track | UnresolvedTrack, payload: TrackExceptionEvent) => void): this;
     /**
      * Emitted when a voice connection is closed.
      * @event Manager#socketClosed
@@ -113,7 +113,7 @@ export declare class Manager extends EventEmitter {
      */
     init(clientId?: string): this;
     /**
-     * Searches the enabled sources based off the url or the source property.
+     * Searches the enabled sources based off the URL or the `source` property.
      * @param query
      * @param requester
      * @returns The search result.
@@ -139,6 +139,11 @@ export declare class Manager extends EventEmitter {
      * @param guild
      */
     get(guild: string): Player | undefined;
+    /**
+     * Destroys a player if it exists.
+     * @param guild
+     */
+    destroy(guild: string): void;
     /**
      * Sends voice data to the Lavalink server.
      * @param data
@@ -166,6 +171,8 @@ export interface ManagerOptions {
     plugins?: Plugin[];
     /** Whether players should automatically play the next song. */
     autoPlay?: boolean;
+    /** An array of track properties to keep. `track` will always be present. */
+    trackPartial?: string[];
     /**
      * Function to send data to the websocket.
      * @param id

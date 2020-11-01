@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import WebSocket from "ws";
 import { Manager } from "./Manager";
-import { Player, Track } from "./Player";
+import { Player, Track, UnresolvedTrack } from "./Player";
 import { PlayerEvent, PlayerEvents, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from "./Utils";
 export declare class Node {
     manager: Manager;
@@ -40,7 +40,7 @@ export declare class Node {
     protected trackStart(player: Player, track: Track, payload: TrackStartEvent): void;
     protected trackEnd(player: Player, track: Track, payload: TrackEndEvent): void;
     protected trackStuck(player: Player, track: Track, payload: TrackStuckEvent): void;
-    protected trackError(player: Player, track: Track, payload: TrackExceptionEvent): void;
+    protected trackError(player: Player, track: Track | UnresolvedTrack, payload: TrackExceptionEvent): void;
     protected socketClosed(player: Player, payload: WebSocketClosedEvent): void;
 }
 export interface NodeOptions {

@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Manager = void 0;
-/* eslint-disable no-async-promise-executor, @typescript-eslint/no-explicit-any, no-undef */
+/* eslint-disable no-async-promise-executor */
 const collection_1 = __importDefault(require("@discordjs/collection"));
 const axios_1 = __importDefault(require("axios"));
 const events_1 = require("events");
@@ -39,6 +39,9 @@ function check(options) {
     if (typeof options.autoPlay !== "undefined" &&
         typeof options.autoPlay !== "boolean")
         throw new TypeError('Manager option "autoPlay" must be a boolean.');
+    if (typeof options.trackPartial !== "undefined" &&
+        !Array.isArray(options.trackPartial))
+        throw new TypeError('Manager option "trackPartial" must be a string array.');
 }
 /** @noInheritDoc */
 class Manager extends events_1.EventEmitter {
@@ -54,10 +57,17 @@ class Manager extends events_1.EventEmitter {
         this.nodes = new collection_1.default();
         this.initiated = false;
         check(options);
+        if (options.trackPartial) {
+            Utils_1.TrackUtils.setTrackPartial(options.trackPartial);
+            delete options.trackPartial;
+        }
         this.options = Object.assign({ plugins: [], nodes: [{ identifier: "default", host: "localhost" }], shards: 1, autoPlay: false }, options);
         if (this.options.plugins) {
-            for (const plugin of this.options.plugins)
+            for (const [index, plugin] of this.options.plugins.entries()) {
+                if (!(plugin instanceof Utils_1.Plugin))
+                    throw new RangeError(`Plugin at index ${index} does not extend Plugin.`);
                 plugin.load(this);
+            }
         }
         if (this.options.nodes) {
             for (const nodeOptions of this.options.nodes) {
@@ -106,7 +116,7 @@ class Manager extends events_1.EventEmitter {
         return this;
     }
     /**
-     * Searches the enabled sources based off the url or the source property.
+     * Searches the enabled sources based off the URL or the `source` property.
      * @param query
      * @param requester
      * @returns The search result.
@@ -206,6 +216,13 @@ class Manager extends events_1.EventEmitter {
      */
     get(guild) {
         return this.players.get(guild);
+    }
+    /**
+     * Destroys a player if it exists.
+     * @param guild
+     */
+    destroy(guild) {
+        this.players.delete(guild);
     }
     /**
      * Sends voice data to the Lavalink server.

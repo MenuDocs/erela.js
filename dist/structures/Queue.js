@@ -18,9 +18,13 @@ class Queue extends Array {
         const current = (_b = (_a = this.current) === null || _a === void 0 ? void 0 : _a.duration) !== null && _b !== void 0 ? _b : 0;
         return this.map((track) => track.duration).reduce((acc, cur) => acc + cur, current);
     }
-    /** The total size of tracks in the queue. */
-    get size() {
+    /** The total size of tracks in the queue including the current track. */
+    get total() {
         return this.length + (this.current ? 1 : 0);
+    }
+    /** The size of tracks in the queue. */
+    get size() {
+        return this.length;
     }
     /**
      * Adds a track to the queue.

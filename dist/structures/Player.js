@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Player = void 0;
 const Utils_1 = require("./Utils");
@@ -193,23 +202,40 @@ class Player {
         return this;
     }
     play(optionsOrTrack, playOptions) {
-        if (typeof optionsOrTrack !== "undefined" &&
-            Utils_1.TrackUtils.validate(optionsOrTrack)) {
-            this.queue.current = optionsOrTrack;
-        }
-        if (!this.queue.current)
-            throw new RangeError("No current track.");
-        const finalOptions = playOptions
-            ? playOptions
-            : ["startTime", "endTime", "noReplace"].every((v) => Object.keys(optionsOrTrack || {}).includes(v))
-                ? optionsOrTrack
-                : {};
-        const options = Object.assign({ op: "play", guildId: this.guild, track: this.queue.current.track }, finalOptions);
-        if (typeof options.track !== "string") {
-            options.track = options.track.track;
-        }
-        this.node.send(options);
-        return this;
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            if (typeof optionsOrTrack !== "undefined" &&
+                Utils_1.TrackUtils.validate(optionsOrTrack)) {
+                this.queue.current = optionsOrTrack;
+            }
+            if (!this.queue.current)
+                throw new RangeError("No current track.");
+            const finalOptions = playOptions
+                ? playOptions
+                : ["startTime", "endTime", "noReplace"].every((v) => Object.keys(optionsOrTrack || {}).includes(v))
+                    ? optionsOrTrack
+                    : {};
+            if (this.queue.current[Utils_1.unresolvedTrackSymbol]) {
+                try {
+                    const unresolvedTrack = this.queue.current;
+                    const res = yield this.search(unresolvedTrack.query, unresolvedTrack.requester);
+                    if (res.loadType !== "SEARCH_RESULT")
+                        throw (_a = res.exception) !== null && _a !== void 0 ? _a : { error: "No tracks found." };
+                    this.queue.current = res.tracks[0];
+                }
+                catch (error) {
+                    this.manager.emit("trackError", this, this.queue.current, error);
+                    if (this.queue[0])
+                        return this.play(this.queue[0]);
+                    return;
+                }
+            }
+            const options = Object.assign({ op: "play", guildId: this.guild, track: this.queue.current.track }, finalOptions);
+            if (typeof options.track !== "string") {
+                options.track = options.track.track;
+            }
+            yield this.node.send(options);
+        });
     }
     /**
      * Sets the player volume.

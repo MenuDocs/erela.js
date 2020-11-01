@@ -1,7 +1,7 @@
 import { Manager, Query, SearchResult } from "./Manager";
 import { Node } from "./Node";
 import { Queue } from "./Queue";
-import { sizes, State, VoiceState } from "./Utils";
+import { Sizes, State, VoiceState } from "./Utils";
 export declare class Player {
     options: PlayerOptions;
     /** The Queue for the Player. */
@@ -84,23 +84,23 @@ export declare class Player {
      */
     setTextChannel(channel: string): this;
     /** Plays the next track. */
-    play(): this;
+    play(): Promise<void>;
     /**
      * Plays the specified track.
      * @param track
      */
-    play(track: Track): this;
+    play(track: Track | UnresolvedTrack): Promise<void>;
     /**
      * Plays the next track with some options.
      * @param options
      */
-    play(options: PlayOptions): this;
+    play(options: PlayOptions): Promise<void>;
     /**
      * Plays the specified track with some options.
      * @param track
      * @param options
      */
-    play(track: Track, options: PlayOptions): this;
+    play(track: Track | UnresolvedTrack, options: PlayOptions): Promise<void>;
     /**
      * Sets the player volume.
      * @param volume
@@ -127,7 +127,7 @@ export declare class Player {
      * Seeks to the position in the current track.
      * @param position
      */
-    seek(position: number): this | void;
+    seek(position: number): this;
 }
 export interface PlayerOptions {
     /** The guild the Player belongs to. */
@@ -145,6 +145,7 @@ export interface PlayerOptions {
     /** If the player should deaf itself. */
     selfDeafen?: boolean;
 }
+/** If track partials are set some of these will be `undefined` as they were removed. */
 export interface Track {
     /** The base64 encoded track. */
     readonly track: string;
@@ -167,7 +168,12 @@ export interface Track {
     /** The user that requested the track. */
     readonly requester: unknown | null;
     /** Displays the track thumbnail with optional size or null if it's a unsupported source. */
-    displayThumbnail(size?: sizes): string;
+    displayThumbnail(size?: Sizes): string;
+}
+/** Unresolved tracks can't be played normally, they will resolve before playing into a Track. */
+export interface UnresolvedTrack extends Partial<Track> {
+    /** The query to search against. */
+    query?: string;
 }
 export interface PlayOptions {
     /** The position to start the track. */
