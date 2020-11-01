@@ -1,11 +1,11 @@
-import { Track } from "./Player";
+import { Track, UnresolvedTrack } from "./Player";
 import { TrackUtils } from "./Utils";
 
 /**
  * The player's queue, the `current` property is the currently playing track, think of the rest as the up-coming tracks.
  * @noInheritDoc
  */
-export class Queue extends Array<Track> {
+export class Queue extends Array<Track | UnresolvedTrack> {
   /** The total duration of the queue. */
   public get duration(): number {
     const current = this.current?.duration ?? 0;
@@ -15,20 +15,28 @@ export class Queue extends Array<Track> {
     );
   }
 
-  /** The total size of tracks in the queue. */
-  public get size(): number {
+  /** The total size of tracks in the queue including the current track. */
+  public get total(): number {
     return this.length + (this.current ? 1 : 0);
   }
 
+  /** The size of tracks in the queue. */
+  public get size(): number {
+    return this.length
+  }
+
   /** The current track */
-  public current: Track | null = null;
+  public current: Track | UnresolvedTrack | null = null;
 
   /**
    * Adds a track to the queue.
    * @param track
    * @param [offset=null]
    */
-  public add(track: Track | Track[], offset?: number): void {
+  public add(
+    track: (Track | UnresolvedTrack) | (Track | UnresolvedTrack)[],
+    offset?: number
+  ): void {
     if (!TrackUtils.validate(track)) {
       throw new RangeError('Track must be a "Track" or "Track[]".');
     }
@@ -72,8 +80,8 @@ export class Queue extends Array<Track> {
    * @param start
    * @param end
    */
-  public remove(start: number, end: number): Track[];
-  public remove(startOrPosition = 0, end?: number): Track[] {
+  public remove(start: number, end: number): (Track | UnresolvedTrack)[];
+  public remove(startOrPosition = 0, end?: number): (Track | UnresolvedTrack)[] {
     if (typeof end !== "undefined") {
       if (isNaN(Number(startOrPosition))) {
         throw new RangeError(`Missing "start" parameter.`);

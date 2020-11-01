@@ -1,9 +1,9 @@
-/* eslint-disable no-async-promise-executor, @typescript-eslint/no-explicit-any, no-undef */
+/* eslint-disable no-async-promise-executor */
 import Collection from "@discordjs/collection";
 import Axios from "axios";
 import { EventEmitter } from "events";
 import { Node, NodeOptions } from "./Node";
-import { Player, PlayerOptions, Track } from "./Player";
+import { Player, PlayerOptions, Track, UnresolvedTrack } from "./Player";
 import {
   LoadType,
   Plugin,
@@ -55,6 +55,12 @@ function check(options: ManagerOptions) {
     typeof options.autoPlay !== "boolean"
   )
     throw new TypeError('Manager option "autoPlay" must be a boolean.');
+
+  if (
+    typeof options.trackPartial !== "undefined" &&
+    !Array.isArray(options.trackPartial)
+  )
+    throw new TypeError('Manager option "trackPartial" must be a string array.');
 }
 
 export interface Manager {
@@ -165,7 +171,7 @@ export interface Manager {
     event: "trackError",
     listener: (
       player: Player,
-      track: Track,
+      track: Track | UnresolvedTrack,
       payload: TrackExceptionEvent
     ) => void
   ): this;
@@ -221,6 +227,11 @@ export class Manager extends EventEmitter {
 
     check(options);
 
+    if (options.trackPartial) {
+      TrackUtils.setTrackPartial(options.trackPartial);
+      delete options.trackPartial;
+    }
+
     this.options = {
       plugins: [],
       nodes: [{ identifier: "default", host: "localhost" }],
@@ -230,7 +241,11 @@ export class Manager extends EventEmitter {
     };
 
     if (this.options.plugins) {
-      for (const plugin of this.options.plugins) plugin.load(this);
+      for (const [index, plugin] of this.options.plugins.entries()) {
+        if (!(plugin instanceof Plugin))
+          throw new RangeError(`Plugin at index ${index} does not extend Plugin.`);
+        plugin.load(this);
+      }
     }
 
     if (this.options.nodes) {
@@ -265,7 +280,7 @@ export class Manager extends EventEmitter {
   }
 
   /**
-   * Searches the enabled sources based off the url or the source property.
+   * Searches the enabled sources based off the URL or the `source` property.
    * @param query
    * @param requester
    * @returns The search result.
@@ -395,6 +410,14 @@ export class Manager extends EventEmitter {
   }
 
   /**
+   * Destroys a player if it exists.
+   * @param guild
+   */
+  public destroy(guild: string): void {
+    this.players.delete(guild);
+  }
+
+  /**
    * Sends voice data to the Lavalink server.
    * @param data
    */
@@ -450,6 +473,8 @@ export interface ManagerOptions {
   plugins?: Plugin[];
   /** Whether players should automatically play the next song. */
   autoPlay?: boolean;
+  /** An array of track properties to keep. `track` will always be present. */
+  trackPartial?: string[];
 
   /**
    * Function to send data to the websocket.

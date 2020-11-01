@@ -19,12 +19,40 @@ player.set("textChannel", message.channel);
 const textChannel = player.get("textChannel");
 ```
 
-Now the type will show as `any` for typings, but you can add some JSDoc to give it a proper type for your editor.
-JSDoc must be defined by you or else there will be no type besides `any` in your editor.
+Now the type will show as `any` for typings, but you can add some JSDoc in your editor to give it a proper type for your editor.
 
 ```javascript
 /** @type {import("discord.js").TextChannel} */
 const textChannel = player.get("textChannel");
+```
+
+## Track Partials
+
+If you only need a part of the track object then you can provide an array with the properties to keep.
+The [`track`](/docs/typedefs/Track.html#track) property will always be present as it's required to play tracks.
+
+```javascript
+const { Manager } = require("erela.js");
+
+const manager = new Manager({
+  trackPartial: [ "title", "duration", "requester" ] // Every track object will have these properties. 
+})
+```
+
+## UnresolvedTrack
+
+Lavalink will only play from the sources enabled, if you want to use Spotify links you'll have to get the YouTube equivalent.
+Erela offers a UnresolvedTrack option that will resolve into a playable track before its played.
+This is useful for supporting other sources without sending dozens of requests to YouTube for playlists in a short time.
+
+```javascript
+const { TrackUtils } = require("erela.js");
+
+const unresolvedTrack = TrackUtils.buildUnresolved("Never gonna give you up - Rick Astley", message.author.tag);
+
+player.queue.add(unresolvedTrack);
+
+player.play(unresolvedTrack);
 ```
 
 ## Extending
@@ -39,7 +67,7 @@ You should not do exactly this as it is a waste of resources, a better way would
 const { Structure } = require("erela.js");
 
 Structure.extend("Queue", Queue => class extends Queue {
-  format(string, vars) {
+  format(string, ...vars) {
     return this.map(track => {
       let local = string;
       for (let i in vars) local = local.replace(`{${i}}`, track[vars[i]]);
@@ -78,7 +106,7 @@ const { Plugin } = require("erela.js");
 module.exports = class MyPlugin extends Plugin {
   constructor(options) {
     super();
-    this.options = options;
+    this.options = options; // will be { foo: 'bar' }
   }
   
   load(manager) {}

@@ -1,7 +1,7 @@
 import { Manager, Query, SearchResult } from "./Manager";
 import { Node } from "./Node";
 import { Queue } from "./Queue";
-import { sizes, State, Structure, TrackUtils, VoiceState } from "./Utils";
+import { Sizes, State, Structure, TrackUtils, unresolvedTrackSymbol, VoiceState } from "./Utils";
 
 function check(options: PlayerOptions) {
   if (!options) throw new TypeError("PlayerOptions must not be empty.");
@@ -251,30 +251,30 @@ export class Player {
   }
 
   /** Plays the next track. */
-  public play(): this;
+  public async play(): Promise<void>;
 
   /**
    * Plays the specified track.
    * @param track
    */
-  public play(track: Track): this;
+  public async play(track: Track | UnresolvedTrack): Promise<void>;
 
   /**
    * Plays the next track with some options.
    * @param options
    */
-  public play(options: PlayOptions): this;
+  public async play(options: PlayOptions): Promise<void>;
 
   /**
    * Plays the specified track with some options.
    * @param track
    * @param options
    */
-  public play(track: Track, options: PlayOptions): this;
-  public play(
-    optionsOrTrack?: PlayOptions | Track,
+  public async play(track: Track | UnresolvedTrack, options: PlayOptions): Promise<void>;
+  public async play(
+    optionsOrTrack?: PlayOptions | Track | UnresolvedTrack,
     playOptions?: PlayOptions
-  ): this {
+  ): Promise<void> {
     if (
       typeof optionsOrTrack !== "undefined" &&
       TrackUtils.validate(optionsOrTrack)
@@ -292,6 +292,19 @@ export class Player {
       ? (optionsOrTrack as PlayOptions)
       : {};
 
+    if (this.queue.current[unresolvedTrackSymbol]) {
+      try {
+        const unresolvedTrack = this.queue.current as UnresolvedTrack;
+        const res = await this.search(unresolvedTrack.query, unresolvedTrack.requester);
+        if (res.loadType !== "SEARCH_RESULT") throw res.exception ?? { error: "No tracks found." };
+        this.queue.current = res.tracks[0];
+      } catch (error) {
+        this.manager.emit("trackError", this, this.queue.current, error);
+        if (this.queue[0]) return this.play(this.queue[0]);
+        return;
+      }
+    }
+
     const options = {
       op: "play",
       guildId: this.guild,
@@ -303,8 +316,7 @@ export class Player {
       options.track = (options.track as Track).track;
     }
 
-    this.node.send(options);
-    return this;
+    await this.node.send(options);
   }
 
   /**
@@ -384,6 +396,7 @@ export class Player {
 
     this.playing = !pause;
     this.paused = pause;
+
     this.node.send({
       op: "pause",
       guildId: this.guild,
@@ -397,7 +410,7 @@ export class Player {
    * Seeks to the position in the current track.
    * @param position
    */
-  public seek(position: number): this | void {
+  public seek(position: number): this {
     if (!this.queue.current) return undefined;
     position = Number(position);
 
@@ -435,6 +448,7 @@ export interface PlayerOptions {
   selfDeafen?: boolean;
 }
 
+/** If track partials are set some of these will be `undefined` as they were removed. */
 export interface Track {
   /** The base64 encoded track. */
   readonly track: string;
@@ -458,7 +472,13 @@ export interface Track {
   readonly requester: unknown | null;
 
   /** Displays the track thumbnail with optional size or null if it's a unsupported source. */
-  displayThumbnail(size?: sizes): string;
+  displayThumbnail(size?: Sizes): string;
+}
+
+/** Unresolved tracks can't be played normally, they will resolve before playing into a Track. */
+export interface UnresolvedTrack extends Partial<Track> {
+  /** The query to search against. */
+  query?: string;
 }
 
 export interface PlayOptions {

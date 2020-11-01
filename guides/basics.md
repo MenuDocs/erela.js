@@ -14,11 +14,6 @@ To start using Erela.js you first have to install it using NPM or Yarn.
 
 :::: tabs type:border-card stretch:true
 
-<!-- remove later on -->
-::: tip
-If you are looking to use the beta then you must use the `beta` tag like so `erela.js@beta`
-:::
-
 ::: tab NPM
 ```bash
 npm install erela.js
@@ -34,7 +29,7 @@ yarn add erela.js
 
 ## First start
 
-The first place to start with Erela.js is the Manager class with some [options](https://projects.solaris.codes/erelajs-rewrite/docs/typedefs/ManagerOptions.html).
+The first place to start with Erela.js is the Manager class with some [options](/docs/typedefs/ManagerOptions.html).
 
 ```javascript
 // Require both libraries
@@ -116,11 +111,11 @@ client.on("message", async message => {
     let res;
 
     try {
-      // Search for tracks using a query or url, using a query searches youtube automatically and the track requester
+      // Search for tracks using a query or url, using a query searches youtube automatically and the track requester object
       res = await client.manager.search(search, message.author);
       // Check the load type as this command is not that advanced for basics
-      if (res.loadType === "LOAD_FAILED") throw new Error(res.exception.message);
-      else if (res.loadType === "PLAYLIST_LOADED") throw new Error("Playlists are not supported with this command.");
+      if (res.loadType === "LOAD_FAILED") throw res.exception;
+      else if (res.loadType === "PLAYLIST_LOADED") throw { message: "Playlists are not supported with this command." };
     } catch (err) {
       return message.reply(`there was an error while searching: ${err.message}`);
     }
@@ -158,6 +153,7 @@ client.manager = new Manager(/* options above */)
 // Emitted when a track starts
 client.manager.on("trackStart", (player, track) => {
   const channel = client.channels.cache.get(player.textChannel);
+  // Send a message when the track starts playing with the track name and the requester's Discord tag, e.g. username#discriminator
   channel.send(`Now playing: \`${track.title}\`, requested by \`${track.requester.tag}\`.`);
 });
 

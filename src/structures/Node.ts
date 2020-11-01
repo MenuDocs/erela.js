@@ -1,7 +1,7 @@
 /* eslint-disable no-case-declarations */
 import WebSocket from "ws";
 import { Manager } from "./Manager";
-import { Player, Track } from "./Player";
+import { Player, Track, UnresolvedTrack } from "./Player";
 import {
   PlayerEvent,
   PlayerEvents,
@@ -242,11 +242,11 @@ export class Node {
     const type = payload.type;
 
     if (payload.type === "TrackStartEvent") {
-      this.trackStart(player, track, payload);
+      this.trackStart(player, track as Track, payload);
     } else if (payload.type === "TrackEndEvent") {
-      this.trackEnd(player, track, payload);
+      this.trackEnd(player, track as Track, payload);
     } else if (payload.type === "TrackStuckEvent") {
-      this.trackStuck(player, track, payload);
+      this.trackStuck(player, track as Track, payload);
     } else if (payload.type === "TrackExceptionEvent") {
       this.trackError(player, track, payload);
     } else if (payload.type === "WebSocketClosedEvent") {
@@ -260,21 +260,13 @@ export class Node {
     }
   }
 
-  protected trackStart(
-    player: Player,
-    track: Track,
-    payload: TrackStartEvent
-  ): void {
+  protected trackStart(player: Player, track: Track, payload: TrackStartEvent): void {
     player.playing = true;
     player.paused = false;
     this.manager.emit("trackStart", player, track, payload);
   }
 
-  protected trackEnd(
-    player: Player,
-    track: Track,
-    payload: TrackEndEvent
-  ): void {
+  protected trackEnd(player: Player, track: Track, payload: TrackEndEvent): void {
     if (payload.reason === "REPLACED") {
       this.manager.emit("trackEnd", player, track, payload);
     } else if (track && player.trackRepeat) {
@@ -299,18 +291,14 @@ export class Node {
     }
   }
 
-  protected trackStuck(
-    player: Player,
-    track: Track,
-    payload: TrackStuckEvent
-  ): void {
+  protected trackStuck(player: Player, track: Track, payload: TrackStuckEvent): void {
     player.stop();
     this.manager.emit("trackStuck", player, track, payload);
   }
 
   protected trackError(
     player: Player,
-    track: Track,
+    track: Track | UnresolvedTrack,
     payload: TrackExceptionEvent
   ): void {
     player.stop();

@@ -8,7 +8,7 @@ sidebarDepth: 1
 Anything not specified means it was not changed or was forgotten to be added here.
 :::
 
-## ErelaClient
+### ErelaClient
 
 Previously:
 ```javascript
@@ -51,7 +51,7 @@ client.music = new Manager({
 })
 ```
 
-Previous in Erela.js you would initiate the ErelaClient class, this was changed to Manager with different parameters.
+Previous in Erela.js v1 you would initiate the ErelaClient class, this was changed to Manager with different parameters.
 
 <h3>What changed</h3>
 
@@ -61,11 +61,11 @@ Previous in Erela.js you would initiate the ErelaClient class, this was changed 
 - You no longer need to provide a node if you're using completely default lavalink options
 - You ***need*** provide a `send` function to send voice data to Discord
 
-## Player
+### Player
 
 ### Creating players
 
-Before in erela you had to get the PlayerStore and use the `spawn` method to create a Player, now PlayerStore was removed as it's completely useless and bloated the package.
+Before you had to get the PlayerStore and use the `spawn` method to create a Player, now PlayerStore was removed as it's completely useless and bloated the package.
 
 You can still create players using a similar method named `create` like so:
 
@@ -83,11 +83,29 @@ In both these examples the [`options`](/docs/typedefs/ManagerOptions.html) is sa
 
 ### Destroying players
 
-In previous versions you had to destroy players using the PlayerStore `destory` method, now you use it directly on the Player class.
+In v1 you had to destroy players using the PlayerStore `destroy` method, now you use it off of the Manager class or directly on the Player class.
 
 ```javascript
-const player = manager.players.get("guildId")
+const player = manager.get("guildId")
+
+manager.destroy("guildId");
+
+// Or
+
 player.destroy();
+```
+
+### Setting equalizer
+
+Before v2 you had to provide an array of objects to set the equalizer, now you just have to put each object on their own.
+If your band objects are in an array you can use the [spread operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax) to *spread* the objects out.
+
+```javascript
+// Before
+player.setEQ([{ band: 0, gain: .25}, { band: 2, gain: .25}])
+
+// After
+player.setEQ({ band: 0, gain: .25}, { band: 1, gain: .25})
 ```
 
 ### Connecting to voice
@@ -99,11 +117,11 @@ const player = new Player(options);
 player.connect();
 ```
 
-## Queue
+### Queue
 
-The Queue class had some changed regarding the current song, before it was the first element in the array but was changed to be a `current` property.
+The Queue class had some changed regarding the current song, before it was the first element in the array but was changed to the `current` property.
 
-## Utils
+### Utils
 
 The utils was removed as it bloated the package and didn't offer as much flexibility. There are some packages below to parse and format times.
 
@@ -114,7 +132,3 @@ The utils was removed as it bloated the package and didn't offer as much flexibi
 ### Parse time
 
 - [https://www.npmjs.com/package/timestring](https://www.npmjs.com/package/timestring)
-
-<!--### Format & Parse time
-
-- -->

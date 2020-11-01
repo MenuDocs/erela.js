@@ -1,8 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars, @typescript-eslint/no-use-before-define, @typescript-eslint/no-var-requires*/
+/* eslint-disable @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars, @typescript-eslint/no-var-requires*/
 import { Manager } from "./Manager";
 import { Node, NodeStats } from "./Node";
-import { Player, Track } from "./Player";
+import { Player, Track, UnresolvedTrack } from "./Player";
 import { Queue } from "./Queue";
+
+/** @hidden */
+const trackSymbol = Symbol("track");
+/** @hidden */
+export const unresolvedTrackSymbol = Symbol("unresolved");
 
 const sizes = [
   "0",
@@ -15,37 +20,49 @@ const sizes = [
   "maxresdefault",
 ];
 
-const defaultTemplate = [
-  "track",
-  "title",
-  "identifier",
-  "author",
-  "duration",
-  "isSeekable",
-  "isStream",
-  "uri",
-  "thumbnail",
-];
-
-const validate = (track: unknown): boolean => {
-  const keys = Object.keys(track || {});
-  return defaultTemplate.every((v) => keys.includes(v));
-}
-
 export abstract class TrackUtils {
+  static trackPartial: string[] | null = null;
+
+  static setTrackPartial(partial: string[]): void {
+    if (!Array.isArray(partial) || !partial.every(str => typeof str === "string"))
+      throw new Error("Provided partial is not an array or not a string array.");
+    if (!partial.includes("track")) partial.unshift("track");
+
+    this.trackPartial = partial;
+  }
+
   /**
-   * Checks if the provided argument is a valid track or if the array is
+   * Checks if the provided argument is a valid Track or UnresolvedTrack, if provided an array then every element will be checked.
    * @param trackOrTracks
    */
   static validate(trackOrTracks: unknown): boolean {
     if (Array.isArray(trackOrTracks) && trackOrTracks.length) {
       for (const track of trackOrTracks) {
-        if (!validate(track)) return false;
+        if (!(track[trackSymbol] || track[unresolvedTrackSymbol])) return false
       }
       return true;
     }
 
-    return validate(trackOrTracks);
+    return (
+      trackOrTracks[trackSymbol] ||
+      trackOrTracks[unresolvedTrackSymbol]
+    ) === true;
+  }
+
+  /**
+   * Checks if the provided argument is a valid UnresolvedTrack.
+   * @param track
+   */
+  static isUnresolvedTrack(track: unknown): boolean {
+    return track[unresolvedTrackSymbol]  === true;
+  }
+
+  /**
+   * Checks if the provided argument is a valid Track.
+   * @param track
+   */
+  static isTrack(track: unknown): boolean {
+    return track[trackSymbol]  === true;
   }
 
   /**
@@ -73,15 +90,41 @@ export abstract class TrackUtils {
             ? `https://img.youtube.com/vi/${data.info.identifier}/${finalSize}.jpg`
             : null;
         },
-        requester: requester,
+        requester,
       };
 
       track.displayThumbnail = track.displayThumbnail.bind(track);
+
+      if (this.trackPartial) {
+        for (const key of Object.keys(track)) {
+          if (this.trackPartial.includes(key)) continue;
+          delete track[key];
+        }
+      }
+
+      Object.defineProperty(track, trackSymbol, {
+        value: true
+      });
 
       return track;
     } catch {
       return undefined;
     }
+  }
+
+  /**
+   * Builds a UnresolvedTrack to be resolved before being played  .
+   * @param query
+   * @param requester
+   */
+  static buildUnresolved(query: string, requester?: unknown): UnresolvedTrack {
+    const unresolvedTrack = { query, requester };
+
+    Object.defineProperty(unresolvedTrack, unresolvedTrackSymbol, {
+      value: true
+    });
+
+    return unresolvedTrack;
   }
 }
 
@@ -124,7 +167,7 @@ const structures = {
   Node: require("./Node").Node,
 };
 
-export type sizes =
+export type Sizes =
   | "0"
   | "1"
   | "2"
