@@ -202,7 +202,6 @@ class Player {
         return this;
     }
     play(optionsOrTrack, playOptions) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             if (typeof optionsOrTrack !== "undefined" &&
                 Utils_1.TrackUtils.validate(optionsOrTrack)) {
@@ -215,13 +214,9 @@ class Player {
                 : ["startTime", "endTime", "noReplace"].every((v) => Object.keys(optionsOrTrack || {}).includes(v))
                     ? optionsOrTrack
                     : {};
-            if (this.queue.current[Utils_1.unresolvedTrackSymbol]) {
+            if (Utils_1.TrackUtils.isUnresolvedTrack(this.queue.current)) {
                 try {
-                    const unresolvedTrack = this.queue.current;
-                    const res = yield this.search(unresolvedTrack.query, unresolvedTrack.requester);
-                    if (res.loadType !== "SEARCH_RESULT")
-                        throw (_a = res.exception) !== null && _a !== void 0 ? _a : { error: "No tracks found." };
-                    this.queue.current = res.tracks[0];
+                    this.queue.current = yield Utils_1.getClosestTrack(this.manager, this.queue.current);
                 }
                 catch (error) {
                     this.manager.emit("trackError", this, this.queue.current, error);

@@ -18,7 +18,7 @@ const collection_1 = __importDefault(require("@discordjs/collection"));
 const axios_1 = __importDefault(require("axios"));
 const events_1 = require("events");
 const Utils_1 = require("./Utils");
-const template = JSON.stringify(["event", "guildId", "op", "sessionId"]);
+const TEMPLATE = JSON.stringify(["event", "guildId", "op", "sessionId"]);
 function check(options) {
     if (!options)
         throw new TypeError("ManagerOptions must not be empty.");
@@ -61,7 +61,7 @@ class Manager extends events_1.EventEmitter {
             Utils_1.TrackUtils.setTrackPartial(options.trackPartial);
             delete options.trackPartial;
         }
-        this.options = Object.assign({ plugins: [], nodes: [{ identifier: "default", host: "localhost" }], shards: 1, autoPlay: false }, options);
+        this.options = Object.assign({ plugins: [], nodes: [{ identifier: "default", host: "localhost" }], shards: 1, autoPlay: true }, options);
         if (this.options.plugins) {
             for (const [index, plugin] of this.options.plugins.entries()) {
                 if (!(plugin instanceof Utils_1.Plugin))
@@ -251,7 +251,7 @@ class Manager extends events_1.EventEmitter {
             }
         }
         player.voiceState = state;
-        if (JSON.stringify(Object.keys(state).sort()) === template)
+        if (JSON.stringify(Object.keys(state).sort()) === TEMPLATE)
             player.node.send(state);
     }
 }

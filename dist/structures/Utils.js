@@ -1,11 +1,16 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Plugin = exports.Structure = exports.TrackUtils = exports.unresolvedTrackSymbol = void 0;
-/** @hidden */
-const trackSymbol = Symbol("track");
-/** @hidden */
-exports.unresolvedTrackSymbol = Symbol("unresolved");
-const sizes = [
+exports.Plugin = exports.Structure = exports.TrackUtils = exports.getClosestTrack = void 0;
+const TRACK_SYMBOL = Symbol("track"), UNRESOLVED_TRACK_SYMBOL = Symbol("unresolved"), SIZES = [
     "0",
     "1",
     "2",
@@ -15,6 +20,39 @@ const sizes = [
     "hqdefault",
     "maxresdefault",
 ];
+const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+/** @hidden */
+function getClosestTrack(manager, unresolvedTrack) {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!TrackUtils.isUnresolvedTrack(unresolvedTrack))
+            throw new RangeError("Provided track is not a UnresolvedTrack.");
+        const query = [unresolvedTrack.artist, unresolvedTrack.title].filter(str => !!str).join(" - ");
+        const res = yield manager.search(query, unresolvedTrack.requester);
+        if (res.loadType !== "SEARCH_RESULT")
+            throw (_a = res.exception) !== null && _a !== void 0 ? _a : {
+                message: "No tracks found.",
+                severity: "COMMON",
+            };
+        if (unresolvedTrack.artist) {
+            const channelNames = [unresolvedTrack.artist, `${unresolvedTrack.artist} - Topic`];
+            const originalAudio = res.tracks.find(track => {
+                return (channelNames.some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.author)) ||
+                    new RegExp(`^${escapeRegExp(unresolvedTrack.title)}$`, "i").test(track.title));
+            });
+            if (originalAudio)
+                return originalAudio;
+        }
+        if (unresolvedTrack.duration) {
+            const sameDuration = res.tracks.find(track => (track.duration >= (unresolvedTrack.duration - 1500)) &&
+                (track.duration <= (unresolvedTrack.duration + 1500)));
+            if (sameDuration)
+                return sameDuration;
+        }
+        return res.tracks[0];
+    });
+}
+exports.getClosestTrack = getClosestTrack;
 class TrackUtils {
     static setTrackPartial(partial) {
         if (!Array.isArray(partial) || !partial.every(str => typeof str === "string"))
@@ -28,29 +66,35 @@ class TrackUtils {
      * @param trackOrTracks
      */
     static validate(trackOrTracks) {
+        if (typeof trackOrTracks === "undefined")
+            throw new RangeError("Provided argument must be present.");
         if (Array.isArray(trackOrTracks) && trackOrTracks.length) {
             for (const track of trackOrTracks) {
-                if (!(track[trackSymbol] || track[exports.unresolvedTrackSymbol]))
+                if (!(track[TRACK_SYMBOL] || track[UNRESOLVED_TRACK_SYMBOL]))
                     return false;
             }
             return true;
         }
-        return (trackOrTracks[trackSymbol] ||
-            trackOrTracks[exports.unresolvedTrackSymbol]) === true;
+        return (trackOrTracks[TRACK_SYMBOL] ||
+            trackOrTracks[UNRESOLVED_TRACK_SYMBOL]) === true;
     }
     /**
      * Checks if the provided argument is a valid UnresolvedTrack.
      * @param track
      */
     static isUnresolvedTrack(track) {
-        return track[exports.unresolvedTrackSymbol] === true;
+        if (typeof track === "undefined")
+            throw new RangeError("Provided argument must be present.");
+        return track[UNRESOLVED_TRACK_SYMBOL] === true;
     }
     /**
      * Checks if the provided argument is a valid Track.
      * @param track
      */
     static isTrack(track) {
-        return track[trackSymbol] === true;
+        if (typeof track === "undefined")
+            throw new RangeError("Provided argument must be present.");
+        return track[TRACK_SYMBOL] === true;
     }
     /**
      * Builds a Track from the raw data from Lavalink and a optional requester.
@@ -58,6 +102,8 @@ class TrackUtils {
      * @param requester
      */
     static build(data, requester) {
+        if (typeof data === "undefined")
+            throw new RangeError('Argument "data" must be present.');
         try {
             const track = {
                 track: data.track,
@@ -73,7 +119,7 @@ class TrackUtils {
                     : null,
                 displayThumbnail(size = "default") {
                     var _a;
-                    const finalSize = (_a = sizes.find((s) => s === size)) !== null && _a !== void 0 ? _a : "default";
+                    const finalSize = (_a = SIZES.find((s) => s === size)) !== null && _a !== void 0 ? _a : "default";
                     return this.uri.includes("youtube")
                         ? `https://img.youtube.com/vi/${data.info.identifier}/${finalSize}.jpg`
                         : null;
@@ -88,7 +134,7 @@ class TrackUtils {
                     delete track[key];
                 }
             }
-            Object.defineProperty(track, trackSymbol, {
+            Object.defineProperty(track, TRACK_SYMBOL, {
                 value: true
             });
             return track;
@@ -103,8 +149,14 @@ class TrackUtils {
      * @param requester
      */
     static buildUnresolved(query, requester) {
-        const unresolvedTrack = { query, requester };
-        Object.defineProperty(unresolvedTrack, exports.unresolvedTrackSymbol, {
+        if (typeof query === "undefined")
+            throw new RangeError('Argument "query" must be present.');
+        let unresolvedTrack = { requester };
+        if (typeof query === "string")
+            unresolvedTrack.title = query;
+        else
+            unresolvedTrack = Object.assign(Object.assign({}, unresolvedTrack), query);
+        Object.defineProperty(unresolvedTrack, UNRESOLVED_TRACK_SYMBOL, {
             value: true
         });
         return unresolvedTrack;

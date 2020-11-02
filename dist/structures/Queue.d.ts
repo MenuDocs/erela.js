@@ -7,7 +7,7 @@ export declare class Queue extends Array<Track | UnresolvedTrack> {
     /** The total duration of the queue. */
     get duration(): number;
     /** The total size of tracks in the queue including the current track. */
-    get total(): number;
+    get totalSize(): number;
     /** The size of tracks in the queue. */
     get size(): number;
     /** The current track */

@@ -172,8 +172,12 @@ export interface Track {
 }
 /** Unresolved tracks can't be played normally, they will resolve before playing into a Track. */
 export interface UnresolvedTrack extends Partial<Track> {
-    /** The query to search against. */
-    query?: string;
+    /** The title to search against. */
+    title: string;
+    /** The artist to search against. */
+    artist?: string;
+    /** The duration to search within 1500 milliseconds of the results from YouTube. */
+    duration?: number;
 }
 export interface PlayOptions {
     /** The position to start the track. */

@@ -3,7 +3,7 @@ import { Node, NodeStats } from "./Node";
 import { Player, Track, UnresolvedTrack } from "./Player";
 import { Queue } from "./Queue";
 /** @hidden */
-export declare const unresolvedTrackSymbol: unique symbol;
+export declare function getClosestTrack(manager: Manager, unresolvedTrack: UnresolvedTrack): Promise<Track>;
 export declare abstract class TrackUtils {
     static trackPartial: string[] | null;
     static setTrackPartial(partial: string[]): void;
@@ -33,7 +33,7 @@ export declare abstract class TrackUtils {
      * @param query
      * @param requester
      */
-    static buildUnresolved(query: string, requester?: unknown): UnresolvedTrack;
+    static buildUnresolved(query: string | UnresolvedQuery, requester?: unknown): UnresolvedTrack;
 }
 export declare abstract class Structure {
     /**
@@ -50,6 +50,14 @@ export declare abstract class Structure {
 }
 export declare class Plugin {
     load(manager: Manager): void;
+}
+export interface UnresolvedQuery {
+    /** The title of the unresolved track. */
+    title: string;
+    /** The artist of the unresolved track. If provided it will have a more precise search. */
+    artist?: string;
+    /** The duration of the unresolved track. If provided it will have a more precise search. */
+    duration?: number;
 }
 export declare type Sizes = "0" | "1" | "2" | "3" | "default" | "mqdefault" | "hqdefault" | "maxresdefault";
 export declare type LoadType = "TRACK_LOADED" | "PLAYLIST_LOADED" | "SEARCH_RESULT" | "LOAD_FAILED" | "NO_MATCHES";
