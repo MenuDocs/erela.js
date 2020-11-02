@@ -4,12 +4,9 @@ import { Node, NodeStats } from "./Node";
 import { Player, Track, UnresolvedTrack } from "./Player";
 import { Queue } from "./Queue";
 
-/** @hidden */
-const trackSymbol = Symbol("track");
-/** @hidden */
-export const unresolvedTrackSymbol = Symbol("unresolved");
-
-const sizes = [
+const TRACK_SYMBOL = Symbol("track"),
+  UNRESOLVED_TRACK_SYMBOL = Symbol("unresolved"),
+  SIZES = [
   "0",
   "1",
   "2",
@@ -19,6 +16,49 @@ const sizes = [
   "hqdefault",
   "maxresdefault",
 ];
+
+const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** @hidden */
+export async function getClosestTrack(
+  manager: Manager,
+  unresolvedTrack: UnresolvedTrack
+): Promise<Track> {
+  if (!TrackUtils.isUnresolvedTrack(unresolvedTrack))
+    throw new RangeError("Provided track is not a UnresolvedTrack.");
+
+  const query = [unresolvedTrack.artist, unresolvedTrack.title].filter(str => !!str).join(" - ");
+  const res = await manager.search(query, unresolvedTrack.requester);
+
+  if (res.loadType !== "SEARCH_RESULT") throw res.exception ?? {
+    message: "No tracks found.",
+    severity: "COMMON",
+  };
+
+  if (unresolvedTrack.artist) {
+    const channelNames = [unresolvedTrack.artist, `${unresolvedTrack.artist} - Topic`];
+
+    const originalAudio = res.tracks.find(track => {
+      return (
+        channelNames.some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.author)) ||
+        new RegExp(`^${escapeRegExp(unresolvedTrack.title)}$`, "i").test(track.title)
+      );
+    });
+
+    if (originalAudio) return originalAudio;
+  }
+
+  if (unresolvedTrack.duration) {
+    const sameDuration = res.tracks.find(track =>
+      (track.duration >= (unresolvedTrack.duration - 1500)) &&
+      (track.duration <= (unresolvedTrack.duration + 1500))
+    );
+
+    if (sameDuration) return sameDuration;
+  }
+
+  return res.tracks[0];
+}
 
 export abstract class TrackUtils {
   static trackPartial: string[] | null = null;
@@ -36,16 +76,19 @@ export abstract class TrackUtils {
    * @param trackOrTracks
    */
   static validate(trackOrTracks: unknown): boolean {
+    if (typeof trackOrTracks === "undefined")
+      throw new RangeError("Provided argument must be present.");
+
     if (Array.isArray(trackOrTracks) && trackOrTracks.length) {
       for (const track of trackOrTracks) {
-        if (!(track[trackSymbol] || track[unresolvedTrackSymbol])) return false
+        if (!(track[TRACK_SYMBOL] || track[UNRESOLVED_TRACK_SYMBOL])) return false
       }
       return true;
     }
 
     return (
-      trackOrTracks[trackSymbol] ||
-      trackOrTracks[unresolvedTrackSymbol]
+      trackOrTracks[TRACK_SYMBOL] ||
+      trackOrTracks[UNRESOLVED_TRACK_SYMBOL]
     ) === true;
   }
 
@@ -54,7 +97,9 @@ export abstract class TrackUtils {
    * @param track
    */
   static isUnresolvedTrack(track: unknown): boolean {
-    return track[unresolvedTrackSymbol]  === true;
+    if (typeof track === "undefined")
+      throw new RangeError("Provided argument must be present.");
+    return track[UNRESOLVED_TRACK_SYMBOL]  === true;
   }
 
   /**
@@ -62,7 +107,9 @@ export abstract class TrackUtils {
    * @param track
    */
   static isTrack(track: unknown): boolean {
-    return track[trackSymbol]  === true;
+    if (typeof track === "undefined")
+      throw new RangeError("Provided argument must be present.");
+    return track[TRACK_SYMBOL]  === true;
   }
 
   /**
@@ -71,6 +118,9 @@ export abstract class TrackUtils {
    * @param requester
    */
   static build(data: TrackData, requester?: unknown): Track | undefined {
+    if (typeof data === "undefined")
+      throw new RangeError('Argument "data" must be present.');
+
     try {
       const track: Track = {
         track: data.track,
@@ -85,7 +135,7 @@ export abstract class TrackUtils {
           ? `https://img.youtube.com/vi/${data.info.identifier}/default.jpg`
           : null,
         displayThumbnail(size = "default"): string | null {
-          const finalSize = sizes.find((s) => s === size) ?? "default";
+          const finalSize = SIZES.find((s) => s === size) ?? "default";
           return this.uri.includes("youtube")
             ? `https://img.youtube.com/vi/${data.info.identifier}/${finalSize}.jpg`
             : null;
@@ -102,7 +152,7 @@ export abstract class TrackUtils {
         }
       }
 
-      Object.defineProperty(track, trackSymbol, {
+      Object.defineProperty(track, TRACK_SYMBOL, {
         value: true
       });
 
@@ -117,14 +167,20 @@ export abstract class TrackUtils {
    * @param query
    * @param requester
    */
-  static buildUnresolved(query: string, requester?: unknown): UnresolvedTrack {
-    const unresolvedTrack = { query, requester };
+  static buildUnresolved(query: string | UnresolvedQuery, requester?: unknown): UnresolvedTrack {
+    if (typeof query === "undefined")
+      throw new RangeError('Argument "query" must be present.');
 
-    Object.defineProperty(unresolvedTrack, unresolvedTrackSymbol, {
+    let unresolvedTrack: Partial<UnresolvedTrack> = { requester };
+
+    if (typeof query === "string") unresolvedTrack.title = query;
+    else unresolvedTrack = { ...unresolvedTrack, ...query }
+
+    Object.defineProperty(unresolvedTrack, UNRESOLVED_TRACK_SYMBOL, {
       value: true
     });
 
-    return unresolvedTrack;
+    return unresolvedTrack as UnresolvedTrack;
   }
 }
 
@@ -166,6 +222,15 @@ const structures = {
   Queue: require("./Queue").Queue,
   Node: require("./Node").Node,
 };
+
+export interface UnresolvedQuery {
+  /** The title of the unresolved track. */
+  title: string;
+  /** The artist of the unresolved track. If provided it will have a more precise search. */
+  artist?: string;
+  /** The duration of the unresolved track. If provided it will have a more precise search. */
+  duration?: number;
+}
 
 export type Sizes =
   | "0"

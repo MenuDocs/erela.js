@@ -18,7 +18,7 @@ import {
   WebSocketClosedEvent,
 } from "./Utils";
 
-const template = JSON.stringify(["event", "guildId", "op", "sessionId"]);
+const TEMPLATE = JSON.stringify(["event", "guildId", "op", "sessionId"]);
 
 function check(options: ManagerOptions) {
   if (!options) throw new TypeError("ManagerOptions must not be empty.");
@@ -236,7 +236,7 @@ export class Manager extends EventEmitter {
       plugins: [],
       nodes: [{ identifier: "default", host: "localhost" }],
       shards: 1,
-      autoPlay: false,
+      autoPlay: true,
       ...options,
     };
 
@@ -446,7 +446,7 @@ export class Manager extends EventEmitter {
     }
 
     player.voiceState = state;
-    if (JSON.stringify(Object.keys(state).sort()) === template)
+    if (JSON.stringify(Object.keys(state).sort()) === TEMPLATE)
       player.node.send(state);
   }
 }

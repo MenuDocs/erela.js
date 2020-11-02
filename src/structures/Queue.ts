@@ -9,14 +9,15 @@ export class Queue extends Array<Track | UnresolvedTrack> {
   /** The total duration of the queue. */
   public get duration(): number {
     const current = this.current?.duration ?? 0;
-    return this.map((track: Track) => track.duration).reduce(
-      (acc: number, cur: number) => acc + cur,
-      current
-    );
+    return this
+      .reduce(
+        (acc: number, cur: Track) => acc + (cur.duration || 0),
+        current
+      );
   }
 
   /** The total size of tracks in the queue including the current track. */
-  public get total(): number {
+  public get totalSize(): number {
     return this.length + (this.current ? 1 : 0);
   }
 

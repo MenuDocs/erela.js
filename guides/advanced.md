@@ -48,10 +48,18 @@ This is useful for supporting other sources without sending dozens of requests t
 ```javascript
 const { TrackUtils } = require("erela.js");
 
+// Basic way using just a query.
 const unresolvedTrack = TrackUtils.buildUnresolved("Never gonna give you up - Rick Astley", message.author.tag);
 
-player.queue.add(unresolvedTrack);
+// Advanced way using the title, artist, and duration for a precise search.
+const unresolvedTrack = TrackUtils.buildUnresolved({
+  title: "Never gonna give you up",
+  artist: "Rick Astley",
+  duration: 213000
+}, message.author.tag);
 
+player.queue.add(unresolvedTrack);
+// Or.
 player.play(unresolvedTrack);
 ```
 

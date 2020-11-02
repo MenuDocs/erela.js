@@ -52,8 +52,6 @@ const nodes = [
 client.manager = new Manager({
   // The nodes to connect to, optional if using default lavalink options
   nodes,
-  // Automatically play the next track
-  autoPlay: true,
   // Method to send voice data to Discord
   send: (id, payload) => {
     const guild = client.guilds.cache.get(id);
