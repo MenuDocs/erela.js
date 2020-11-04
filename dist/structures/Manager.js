@@ -157,7 +157,8 @@ class Manager extends events_1.EventEmitter {
             if (result.loadType === "PLAYLIST_LOADED") {
                 result.playlist = {
                     name: res.data.playlistInfo.name,
-                    selectedTrack: Utils_1.TrackUtils.build(res.data.tracks[res.data.playlistInfo.selectedTrack], requester),
+                    selectedTrack: res.data.playlistInfo.selectedTrack === -1 ? null :
+                        Utils_1.TrackUtils.build(res.data.tracks[res.data.playlistInfo.selectedTrack], requester),
                     duration: result.tracks
                         .reduce((acc, cur) => acc + (cur.duration || 0), 0),
                 };

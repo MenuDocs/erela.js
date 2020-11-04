@@ -169,6 +169,8 @@ You can find more examples in the _[examples](./examples)_ folder.
 
 You can use plugins below to extend Erela.js' features easily.
 
+Note: These are the only ones shown before being published, check the GitHub repository for a complete list.
+
 - [erela.js-spotify](https://github.com/Solaris9/erela.js-spotify) - Converts a Spotify URL into a UnresolvedTrack to play later.
 
 
