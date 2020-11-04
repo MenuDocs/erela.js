@@ -1,4 +1,4 @@
-import { Manager, Query, SearchResult } from "./Manager";
+import { Manager, SearchQuery, SearchResult } from "./Manager";
 import { Node } from "./Node";
 import { Queue } from "./Queue";
 import { Sizes, State, VoiceState } from "./Utils";
@@ -59,7 +59,7 @@ export declare class Player {
      * @param query
      * @param requester
      */
-    search(query: string | Query, requester?: unknown): Promise<SearchResult>;
+    search(query: string | SearchQuery, requester?: unknown): Promise<SearchResult>;
     /**
      * Sets the players equalizer band on-top of the existing ones.
      * @param bands
@@ -174,8 +174,8 @@ export interface Track {
 export interface UnresolvedTrack extends Partial<Track> {
     /** The title to search against. */
     title: string;
-    /** The artist to search against. */
-    artist?: string;
+    /** The author to search against. */
+    author?: string;
     /** The duration to search within 1500 milliseconds of the results from YouTube. */
     duration?: number;
 }

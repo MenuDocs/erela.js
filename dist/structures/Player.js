@@ -216,7 +216,7 @@ class Player {
                     : {};
             if (Utils_1.TrackUtils.isUnresolvedTrack(this.queue.current)) {
                 try {
-                    this.queue.current = yield Utils_1.getClosestTrack(this.manager, this.queue.current);
+                    this.queue.current = yield Utils_1.TrackUtils.getClosestTrack(this.manager, this.queue.current);
                 }
                 catch (error) {
                     this.manager.emit("trackError", this, this.queue.current, error);

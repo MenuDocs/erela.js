@@ -82,11 +82,8 @@ client.manager = new Manager({
       host: "localhost", // Optional if Lavalink is local
       port: 2333, // Optional if Lavalink is set to default
       password: "youshallnotpass", // Optional if Lavalink is set to default
-      secure: false, // Uses HTTPS and WSS if enabled
     },
   ],
-  // Auto plays tracks after one ends, defaults to "false".
-  autoPlay: true,
   // A send method to send data to the Discord WebSocket using your library.
   // Getting the shard for the guild and sending the data to the WebSocket.
   send(id, payload) {
@@ -94,15 +91,18 @@ client.manager = new Manager({
     if (guild) guild.shard.send(payload);
   },
 })
-  .on("nodeConnect", () => console.log("New node connected"))
-  .on("nodeError", (node, error) => console.log(`Node error: ${error.message}`))
+  .on("nodeConnect", node => console.log(`Node ${node.options.identifier} connected`))
+  .on("nodeError", (node, error) => console.log(`Node ${node.options.identifier} had an error: ${error.message}`))
   .on("trackStart", (player, track) => {
     client.channels.cache
       .get(player.textChannel)
       .send(`Now playing: ${track.title}`);
   })
   .on("queueEnd", (player) => {
-    client.channels.cache.get(player.textChannel).send("Queue has ended.");
+    client.channels.cache
+      .get(player.textChannel)
+      .send("Queue has ended.");
+
     player.destroy();
   });
 
@@ -145,14 +145,14 @@ client.on("message", async (message) => {
 
     // Plays the player (plays the first track in the queue).
     // The if statement is needed else it will play the current track again
-    if (!player.playing && !player.paused && !player.queue.length)
+    if (!player.playing && !player.paused && !player.queue.size)
       player.play();
 
     // For playlists you'll have to use slightly different if statement
     if (
       !player.playing &&
       !player.paused &&
-      player.queue.size === res.tracks.length
+      player.queue.totalSize === res.tracks.length
     )
       player.play();
   }
@@ -164,6 +164,13 @@ client.login("your token");
 **Note**: Discord.js is used in this example, but it does work with other libraries with the same example but with your library functions.
 
 You can find more examples in the _[examples](./examples)_ folder.
+
+## Plugins
+
+You can use plugins below to extend Erela.js' features easily.
+
+- [erela.js-spotify](https://github.com/Solaris9/erela.js-spotify) - Converts a Spotify URL into a UnresolvedTrack to play later.
+
 
 ## Contributors
 
@@ -178,7 +185,7 @@ You can find more examples in the _[examples](./examples)_ folder.
 - Contributor
 - Github: [@Anish-Shobith](https://github.com/Anish-Shobith)
 
-👤 **Chroventer**
+👤 **ayntee**
 
 - Contributor
-- Github: [@chroventer](https://github.com/chroventer)
+- Github: [@ayntee](https://github.com/ayntee)

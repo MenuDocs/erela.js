@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Plugin = exports.Structure = exports.TrackUtils = exports.getClosestTrack = void 0;
+exports.Plugin = exports.Structure = exports.TrackUtils = void 0;
 const TRACK_SYMBOL = Symbol("track"), UNRESOLVED_TRACK_SYMBOL = Symbol("unresolved"), SIZES = [
     "0",
     "1",
@@ -21,38 +21,6 @@ const TRACK_SYMBOL = Symbol("track"), UNRESOLVED_TRACK_SYMBOL = Symbol("unresolv
     "maxresdefault",
 ];
 const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-/** @hidden */
-function getClosestTrack(manager, unresolvedTrack) {
-    var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!TrackUtils.isUnresolvedTrack(unresolvedTrack))
-            throw new RangeError("Provided track is not a UnresolvedTrack.");
-        const query = [unresolvedTrack.artist, unresolvedTrack.title].filter(str => !!str).join(" - ");
-        const res = yield manager.search(query, unresolvedTrack.requester);
-        if (res.loadType !== "SEARCH_RESULT")
-            throw (_a = res.exception) !== null && _a !== void 0 ? _a : {
-                message: "No tracks found.",
-                severity: "COMMON",
-            };
-        if (unresolvedTrack.artist) {
-            const channelNames = [unresolvedTrack.artist, `${unresolvedTrack.artist} - Topic`];
-            const originalAudio = res.tracks.find(track => {
-                return (channelNames.some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.author)) ||
-                    new RegExp(`^${escapeRegExp(unresolvedTrack.title)}$`, "i").test(track.title));
-            });
-            if (originalAudio)
-                return originalAudio;
-        }
-        if (unresolvedTrack.duration) {
-            const sameDuration = res.tracks.find(track => (track.duration >= (unresolvedTrack.duration - 1500)) &&
-                (track.duration <= (unresolvedTrack.duration + 1500)));
-            if (sameDuration)
-                return sameDuration;
-        }
-        return res.tracks[0];
-    });
-}
-exports.getClosestTrack = getClosestTrack;
 class TrackUtils {
     static setTrackPartial(partial) {
         if (!Array.isArray(partial) || !partial.every(str => typeof str === "string"))
@@ -160,6 +128,36 @@ class TrackUtils {
             value: true
         });
         return unresolvedTrack;
+    }
+    static getClosestTrack(manager, unresolvedTrack) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!TrackUtils.isUnresolvedTrack(unresolvedTrack))
+                throw new RangeError("Provided track is not a UnresolvedTrack.");
+            const query = [unresolvedTrack.author, unresolvedTrack.title].filter(str => !!str).join(" - ");
+            const res = yield manager.search(query, unresolvedTrack.requester);
+            if (res.loadType !== "SEARCH_RESULT")
+                throw (_a = res.exception) !== null && _a !== void 0 ? _a : {
+                    message: "No tracks found.",
+                    severity: "COMMON",
+                };
+            if (unresolvedTrack.author) {
+                const channelNames = [unresolvedTrack.author, `${unresolvedTrack.author} - Topic`];
+                const originalAudio = res.tracks.find(track => {
+                    return (channelNames.some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.author)) ||
+                        new RegExp(`^${escapeRegExp(unresolvedTrack.title)}$`, "i").test(track.title));
+                });
+                if (originalAudio)
+                    return originalAudio;
+            }
+            if (unresolvedTrack.duration) {
+                const sameDuration = res.tracks.find(track => (track.duration >= (unresolvedTrack.duration - 1500)) &&
+                    (track.duration <= (unresolvedTrack.duration + 1500)));
+                if (sameDuration)
+                    return sameDuration;
+            }
+            return res.tracks[0];
+        });
     }
 }
 exports.TrackUtils = TrackUtils;

@@ -2,8 +2,6 @@ import { Manager } from "./Manager";
 import { Node, NodeStats } from "./Node";
 import { Player, Track, UnresolvedTrack } from "./Player";
 import { Queue } from "./Queue";
-/** @hidden */
-export declare function getClosestTrack(manager: Manager, unresolvedTrack: UnresolvedTrack): Promise<Track>;
 export declare abstract class TrackUtils {
     static trackPartial: string[] | null;
     static setTrackPartial(partial: string[]): void;
@@ -34,6 +32,7 @@ export declare abstract class TrackUtils {
      * @param requester
      */
     static buildUnresolved(query: string | UnresolvedQuery, requester?: unknown): UnresolvedTrack;
+    static getClosestTrack(manager: Manager, unresolvedTrack: UnresolvedTrack): Promise<Track>;
 }
 export declare abstract class Structure {
     /**
@@ -54,8 +53,8 @@ export declare class Plugin {
 export interface UnresolvedQuery {
     /** The title of the unresolved track. */
     title: string;
-    /** The artist of the unresolved track. If provided it will have a more precise search. */
-    artist?: string;
+    /** The author of the unresolved track. If provided it will have a more precise search. */
+    author?: string;
     /** The duration of the unresolved track. If provided it will have a more precise search. */
     duration?: number;
 }

@@ -118,7 +118,7 @@ export declare class Manager extends EventEmitter {
      * @param requester
      * @returns The search result.
      */
-    search(query: string | Query, requester?: unknown): Promise<SearchResult>;
+    search(query: string | SearchQuery, requester?: unknown): Promise<SearchResult>;
     /**
      * Decodes the base64 encoded tracks and returns a TrackData array.
      * @param tracks
@@ -180,7 +180,7 @@ export interface ManagerOptions {
      */
     send(id: string, payload: Payload): void;
 }
-export interface Query {
+export interface SearchQuery {
     /** The source to search from. */
     source?: "youtube" | "soundcloud";
     /** The query to search for. */

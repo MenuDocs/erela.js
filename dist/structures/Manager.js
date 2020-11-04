@@ -140,6 +140,8 @@ class Manager extends events_1.EventEmitter {
             const res = yield axios_1.default.get(url, {
                 headers: { Authorization: node.options.password },
                 params: { identifier: search },
+                timeout: 10000,
+                timeoutErrorMessage: `Node ${node.options.identifier} search timed out.`,
             }).catch((err) => {
                 return reject(err);
             });
