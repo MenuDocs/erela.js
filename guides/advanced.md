@@ -51,10 +51,10 @@ const { TrackUtils } = require("erela.js");
 // Basic way using just a query.
 const unresolvedTrack = TrackUtils.buildUnresolved("Never gonna give you up - Rick Astley", message.author.tag);
 
-// Advanced way using the title, artist, and duration for a precise search.
+// Advanced way using the title, author, and duration for a precise search.
 const unresolvedTrack = TrackUtils.buildUnresolved({
   title: "Never gonna give you up",
-  artist: "Rick Astley",
+  author: "Rick Astley",
   duration: 213000
 }, message.author.tag);
 
