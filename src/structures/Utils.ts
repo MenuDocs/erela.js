@@ -19,47 +19,6 @@ const TRACK_SYMBOL = Symbol("track"),
 
 const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-/** @hidden */
-export async function getClosestTrack(
-  manager: Manager,
-  unresolvedTrack: UnresolvedTrack
-): Promise<Track> {
-  if (!TrackUtils.isUnresolvedTrack(unresolvedTrack))
-    throw new RangeError("Provided track is not a UnresolvedTrack.");
-
-  const query = [unresolvedTrack.artist, unresolvedTrack.title].filter(str => !!str).join(" - ");
-  const res = await manager.search(query, unresolvedTrack.requester);
-
-  if (res.loadType !== "SEARCH_RESULT") throw res.exception ?? {
-    message: "No tracks found.",
-    severity: "COMMON",
-  };
-
-  if (unresolvedTrack.artist) {
-    const channelNames = [unresolvedTrack.artist, `${unresolvedTrack.artist} - Topic`];
-
-    const originalAudio = res.tracks.find(track => {
-      return (
-        channelNames.some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.author)) ||
-        new RegExp(`^${escapeRegExp(unresolvedTrack.title)}$`, "i").test(track.title)
-      );
-    });
-
-    if (originalAudio) return originalAudio;
-  }
-
-  if (unresolvedTrack.duration) {
-    const sameDuration = res.tracks.find(track =>
-      (track.duration >= (unresolvedTrack.duration - 1500)) &&
-      (track.duration <= (unresolvedTrack.duration + 1500))
-    );
-
-    if (sameDuration) return sameDuration;
-  }
-
-  return res.tracks[0];
-}
-
 export abstract class TrackUtils {
   static trackPartial: string[] | null = null;
 
@@ -182,6 +141,46 @@ export abstract class TrackUtils {
 
     return unresolvedTrack as UnresolvedTrack;
   }
+
+  static async getClosestTrack(
+    manager: Manager,
+    unresolvedTrack: UnresolvedTrack
+  ): Promise<Track> {
+    if (!TrackUtils.isUnresolvedTrack(unresolvedTrack))
+      throw new RangeError("Provided track is not a UnresolvedTrack.");
+
+    const query = [unresolvedTrack.author, unresolvedTrack.title].filter(str => !!str).join(" - ");
+    const res = await manager.search(query, unresolvedTrack.requester);
+
+    if (res.loadType !== "SEARCH_RESULT") throw res.exception ?? {
+      message: "No tracks found.",
+      severity: "COMMON",
+    };
+
+    if (unresolvedTrack.author) {
+      const channelNames = [unresolvedTrack.author, `${unresolvedTrack.author} - Topic`];
+
+      const originalAudio = res.tracks.find(track => {
+        return (
+          channelNames.some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.author)) ||
+          new RegExp(`^${escapeRegExp(unresolvedTrack.title)}$`, "i").test(track.title)
+        );
+      });
+
+      if (originalAudio) return originalAudio;
+    }
+
+    if (unresolvedTrack.duration) {
+      const sameDuration = res.tracks.find(track =>
+        (track.duration >= (unresolvedTrack.duration - 1500)) &&
+        (track.duration <= (unresolvedTrack.duration + 1500))
+      );
+
+      if (sameDuration) return sameDuration;
+    }
+
+    return res.tracks[0];
+  }
 }
 
 export abstract class Structure {
@@ -226,8 +225,8 @@ const structures = {
 export interface UnresolvedQuery {
   /** The title of the unresolved track. */
   title: string;
-  /** The artist of the unresolved track. If provided it will have a more precise search. */
-  artist?: string;
+  /** The author of the unresolved track. If provided it will have a more precise search. */
+  author?: string;
   /** The duration of the unresolved track. If provided it will have a more precise search. */
   duration?: number;
 }

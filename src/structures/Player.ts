@@ -1,7 +1,7 @@
-import { Manager, Query, SearchResult } from "./Manager";
+import { Manager, SearchQuery, SearchResult } from "./Manager";
 import { Node } from "./Node";
 import { Queue } from "./Queue";
-import { getClosestTrack, Sizes, State, Structure, TrackUtils, VoiceState } from "./Utils";
+import { Sizes, State, Structure, TrackUtils, VoiceState } from "./Utils";
 
 function check(options: PlayerOptions) {
   if (!options) throw new TypeError("PlayerOptions must not be empty.");
@@ -134,7 +134,7 @@ export class Player {
    * @param requester
    */
   public search(
-    query: string | Query,
+    query: string | SearchQuery,
     requester?: unknown
   ): Promise<SearchResult> {
     return this.manager.search(query, requester);
@@ -294,7 +294,7 @@ export class Player {
 
     if (TrackUtils.isUnresolvedTrack(this.queue.current)) {
       try {
-        this.queue.current = await getClosestTrack(this.manager, this.queue.current);
+        this.queue.current = await TrackUtils.getClosestTrack(this.manager, this.queue.current);
       } catch (error) {
         this.manager.emit("trackError", this, this.queue.current, error);
         if (this.queue[0]) return this.play(this.queue[0]);
@@ -475,8 +475,8 @@ export interface Track {
 export interface UnresolvedTrack extends Partial<Track> {
   /** The title to search against. */
   title: string;
-  /** The artist to search against. */
-  artist?: string;
+  /** The author to search against. */
+  author?: string;
   /** The duration to search within 1500 milliseconds of the results from YouTube. */
   duration?: number;
 }

@@ -286,7 +286,7 @@ export class Manager extends EventEmitter {
    * @returns The search result.
    */
   public search(
-    query: string | Query,
+    query: string | SearchQuery,
     requester?: unknown
   ): Promise<SearchResult> {
     return new Promise(async (resolve, reject) => {
@@ -298,8 +298,8 @@ export class Manager extends EventEmitter {
         youtube: "yt",
       };
 
-      const source = sources[(query as Query).source ?? "youtube"];
-      let search = (query as Query).query || (query as string);
+      const source = sources[(query as SearchQuery).source ?? "youtube"];
+      let search = (query as SearchQuery).query || (query as string);
 
       if (!/^https?:\/\//.test(search)) {
         search = `${source}search:${search}`;
@@ -312,6 +312,8 @@ export class Manager extends EventEmitter {
       const res = await Axios.get<LavalinkResult>(url, {
         headers: { Authorization: node.options.password },
         params: { identifier: search },
+        timeout: 10000,
+        timeoutErrorMessage: `Node ${node.options.identifier} search timed out.`,
       }).catch((err) => {
         return reject(err);
       });
@@ -484,7 +486,7 @@ export interface ManagerOptions {
   send(id: string, payload: Payload): void;
 }
 
-export interface Query {
+export interface SearchQuery {
   /** The source to search from. */
   source?: "youtube" | "soundcloud";
   /** The query to search for. */
