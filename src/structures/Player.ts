@@ -294,7 +294,7 @@ export class Player {
 
     if (TrackUtils.isUnresolvedTrack(this.queue.current)) {
       try {
-        this.queue.current = await TrackUtils.getClosestTrack(this.manager, this.queue.current);
+        this.queue.current = await TrackUtils.getClosestTrack(this.queue.current as UnresolvedTrack);
       } catch (error) {
         this.manager.emit("trackError", this, this.queue.current, error);
         if (this.queue[0]) return this.play(this.queue[0]);
@@ -479,6 +479,8 @@ export interface UnresolvedTrack extends Partial<Track> {
   author?: string;
   /** The duration to search within 1500 milliseconds of the results from YouTube. */
   duration?: number;
+  /** Resolves into a Track. */
+  resolve(): Promise<void>;
 }
 
 export interface PlayOptions {

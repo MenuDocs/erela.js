@@ -274,6 +274,7 @@ export class Manager extends EventEmitter {
 
     for (const node of this.nodes.values()) node.connect();
     Structure.get("Player").init(this);
+    TrackUtils.init(this);
 
     this.initiated = true;
     return this;

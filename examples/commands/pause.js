@@ -11,7 +11,7 @@ Or copy the code inside the run function as its simply the message and arguments
 module.exports = {
   name: "pause",
   run: (message) => {
-    const player = message.client.manager.players.get(message.guild.id);
+    const player = message.client.manager.get(message.guild.id);
     if (!player) return message.reply("there is no player for this guild.");
 
     const { channel } = message.member.voice;

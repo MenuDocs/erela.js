@@ -13,11 +13,12 @@ const { MessageEmbed } = require("discord.js");
 module.exports = {
   name: "queue",
   run: (message, args) => {
-    const player = message.client.manager.players.get(message.guild.id);
+    const player = message.client.manager.get(message.guild.id);
     if (!player) return message.reply("there is no player for this guild.");
 
     const queue = player.queue;
-    const embed = new MessageEmbed().setAuthor(`Queue for ${message.guild.name}`);
+    const embed = new MessageEmbed()
+      .setAuthor(`Queue for ${message.guild.name}`);
 
     // change for the amount of tracks per page
     const multiple = 10;

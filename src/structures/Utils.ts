@@ -21,6 +21,12 @@ const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g,
 
 export abstract class TrackUtils {
   static trackPartial: string[] | null = null;
+  private static manager: Manager;
+
+  /** @hidden */
+  public static init(manager: Manager): void {
+    this.manager = manager;
+  }
 
   static setTrackPartial(partial: string[]): void {
     if (!Array.isArray(partial) || !partial.every(str => typeof str === "string"))
@@ -76,7 +82,7 @@ export abstract class TrackUtils {
    * @param data
    * @param requester
    */
-  static build(data: TrackData, requester?: unknown): Track | undefined {
+  static build(data: TrackData, requester?: unknown): Track {
     if (typeof data === "undefined")
       throw new RangeError('Argument "data" must be present.');
 
@@ -112,12 +118,13 @@ export abstract class TrackUtils {
       }
 
       Object.defineProperty(track, TRACK_SYMBOL, {
+        configurable: true,
         value: true
       });
 
       return track;
-    } catch {
-      return undefined;
+    } catch (error) {
+      throw new RangeError(`Argument "data" is not a valid track: ${error.message}`);
     }
   }
 
@@ -130,12 +137,20 @@ export abstract class TrackUtils {
     if (typeof query === "undefined")
       throw new RangeError('Argument "query" must be present.');
 
-    let unresolvedTrack: Partial<UnresolvedTrack> = { requester };
+    let unresolvedTrack: Partial<UnresolvedTrack> = {
+      requester,
+      async resolve(): Promise<void> {
+        const resolved = await TrackUtils.getClosestTrack(this)
+        Object.getOwnPropertyNames(this).forEach(prop => delete this[prop]);
+        Object.assign(this, resolved);
+      }
+    };
 
     if (typeof query === "string") unresolvedTrack.title = query;
     else unresolvedTrack = { ...unresolvedTrack, ...query }
 
     Object.defineProperty(unresolvedTrack, UNRESOLVED_TRACK_SYMBOL, {
+      configurable: true,
       value: true
     });
 
@@ -143,14 +158,13 @@ export abstract class TrackUtils {
   }
 
   static async getClosestTrack(
-    manager: Manager,
     unresolvedTrack: UnresolvedTrack
   ): Promise<Track> {
     if (!TrackUtils.isUnresolvedTrack(unresolvedTrack))
       throw new RangeError("Provided track is not a UnresolvedTrack.");
 
     const query = [unresolvedTrack.author, unresolvedTrack.title].filter(str => !!str).join(" - ");
-    const res = await manager.search(query, unresolvedTrack.requester);
+    const res = await TrackUtils.manager.search(query, unresolvedTrack.requester);
 
     if (res.loadType !== "SEARCH_RESULT") throw res.exception ?? {
       message: "No tracks found.",

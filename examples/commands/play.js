@@ -22,7 +22,7 @@ module.exports = {
       textChannel: message.channel.id,
     });
 
-    player.connect();
+    if (player.state !== "CONNECTED") player.connect();
 
     const search = args.join(' ');
     let res;
@@ -44,12 +44,12 @@ module.exports = {
       case 'TRACK_LOADED':
         player.queue.add(res.tracks[0]);
 
-        if (!player.playing && !player.paused && !player.queue.length) player.play();
+        if (!player.playing && !player.paused && !player.queue.size) player.play();
         return message.reply(`enqueuing \`${res.tracks[0].title}\`.`);
       case 'PLAYLIST_LOADED':
         player.queue.add(res.tracks);
 
-        if (!player.playing && !player.paused && player.queue.size === res.tracks.length) player.play();
+        if (!player.playing && !player.paused && player.queue.totalSize === res.tracks.length) player.play();
         return message.reply(`enqueuing playlist \`${res.playlist.name}\` with ${res.tracks.length} tracks.`);
       case 'SEARCH_RESULT':
         let max = 5, collected, filter = (m) => m.author.id === message.author.id && /^(\d+|end)$/i.test(m.content);
@@ -82,7 +82,7 @@ module.exports = {
         const track = res.tracks[index];
         player.queue.add(track);
 
-        if (!player.playing && !player.paused && !player.queue.length) player.play();
+        if (!player.playing && !player.paused && !player.queue.size) player.play();
         return message.reply(`enqueuing \`${track.title}\`.`);
     }
   },
