@@ -178,6 +178,8 @@ export interface UnresolvedTrack extends Partial<Track> {
     author?: string;
     /** The duration to search within 1500 milliseconds of the results from YouTube. */
     duration?: number;
+    /** Resolves into a Track. */
+    resolve(): Promise<void>;
 }
 export interface PlayOptions {
     /** The position to start the track. */

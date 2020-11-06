@@ -22,6 +22,10 @@ const TRACK_SYMBOL = Symbol("track"), UNRESOLVED_TRACK_SYMBOL = Symbol("unresolv
 ];
 const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 class TrackUtils {
+    /** @hidden */
+    static init(manager) {
+        this.manager = manager;
+    }
     static setTrackPartial(partial) {
         if (!Array.isArray(partial) || !partial.every(str => typeof str === "string"))
             throw new Error("Provided partial is not an array or not a string array.");
@@ -103,12 +107,13 @@ class TrackUtils {
                 }
             }
             Object.defineProperty(track, TRACK_SYMBOL, {
+                configurable: true,
                 value: true
             });
             return track;
         }
-        catch (_a) {
-            return undefined;
+        catch (error) {
+            throw new RangeError(`Argument "data" is not a valid track: ${error.message}`);
         }
     }
     /**
@@ -119,23 +124,33 @@ class TrackUtils {
     static buildUnresolved(query, requester) {
         if (typeof query === "undefined")
             throw new RangeError('Argument "query" must be present.');
-        let unresolvedTrack = { requester };
+        let unresolvedTrack = {
+            requester,
+            resolve() {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const resolved = yield TrackUtils.getClosestTrack(this);
+                    Object.getOwnPropertyNames(this).forEach(prop => delete this[prop]);
+                    Object.assign(this, resolved);
+                });
+            }
+        };
         if (typeof query === "string")
             unresolvedTrack.title = query;
         else
             unresolvedTrack = Object.assign(Object.assign({}, unresolvedTrack), query);
         Object.defineProperty(unresolvedTrack, UNRESOLVED_TRACK_SYMBOL, {
+            configurable: true,
             value: true
         });
         return unresolvedTrack;
     }
-    static getClosestTrack(manager, unresolvedTrack) {
+    static getClosestTrack(unresolvedTrack) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             if (!TrackUtils.isUnresolvedTrack(unresolvedTrack))
                 throw new RangeError("Provided track is not a UnresolvedTrack.");
             const query = [unresolvedTrack.author, unresolvedTrack.title].filter(str => !!str).join(" - ");
-            const res = yield manager.search(query, unresolvedTrack.requester);
+            const res = yield TrackUtils.manager.search(query, unresolvedTrack.requester);
             if (res.loadType !== "SEARCH_RESULT")
                 throw (_a = res.exception) !== null && _a !== void 0 ? _a : {
                     message: "No tracks found.",

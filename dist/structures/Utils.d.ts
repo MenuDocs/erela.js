@@ -4,6 +4,9 @@ import { Player, Track, UnresolvedTrack } from "./Player";
 import { Queue } from "./Queue";
 export declare abstract class TrackUtils {
     static trackPartial: string[] | null;
+    private static manager;
+    /** @hidden */
+    static init(manager: Manager): void;
     static setTrackPartial(partial: string[]): void;
     /**
      * Checks if the provided argument is a valid Track or UnresolvedTrack, if provided an array then every element will be checked.
@@ -25,14 +28,14 @@ export declare abstract class TrackUtils {
      * @param data
      * @param requester
      */
-    static build(data: TrackData, requester?: unknown): Track | undefined;
+    static build(data: TrackData, requester?: unknown): Track;
     /**
      * Builds a UnresolvedTrack to be resolved before being played  .
      * @param query
      * @param requester
      */
     static buildUnresolved(query: string | UnresolvedQuery, requester?: unknown): UnresolvedTrack;
-    static getClosestTrack(manager: Manager, unresolvedTrack: UnresolvedTrack): Promise<Track>;
+    static getClosestTrack(unresolvedTrack: UnresolvedTrack): Promise<Track>;
 }
 export declare abstract class Structure {
     /**

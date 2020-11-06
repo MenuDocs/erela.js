@@ -112,6 +112,7 @@ class Manager extends events_1.EventEmitter {
         for (const node of this.nodes.values())
             node.connect();
         Utils_1.Structure.get("Player").init(this);
+        Utils_1.TrackUtils.init(this);
         this.initiated = true;
         return this;
     }
