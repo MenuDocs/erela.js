@@ -20,7 +20,9 @@ module.exports = {
 
       if (!player.queue.current) return message.reply("there is no music playing.")
 
+      const { title } = player.queue.current;
+
       player.stop();
-      return message.reply("the song was skipped.")
+      return message.reply(`${title} was skipped.`)
     }
   }
