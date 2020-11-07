@@ -130,7 +130,7 @@ client.on("message", async message => {
     player.queue.add(res.tracks[0]);
   
     // Checks if the client should play the track if it's the first one added
-    if (!player.playing && !player.paused && !player.queue.length) player.play()
+    if (!player.playing && !player.paused && !player.queue.size) player.play()
 
     return message.reply(`enqueuing ${res.tracks[0].title}.`);
   }
