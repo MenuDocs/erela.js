@@ -57,6 +57,9 @@ class Manager extends events_1.EventEmitter {
         this.nodes = new collection_1.default();
         this.initiated = false;
         check(options);
+        Utils_1.Structure.get("Player").init(this);
+        Utils_1.Structure.get("Node").init(this);
+        Utils_1.TrackUtils.init(this);
         if (options.trackPartial) {
             Utils_1.TrackUtils.setTrackPartial(options.trackPartial);
             delete options.trackPartial;
@@ -70,10 +73,8 @@ class Manager extends events_1.EventEmitter {
             }
         }
         if (this.options.nodes) {
-            for (const nodeOptions of this.options.nodes) {
-                const node = new (Utils_1.Structure.get("Node"))(this, nodeOptions);
-                this.nodes.set(node.options.identifier, node);
-            }
+            for (const nodeOptions of this.options.nodes)
+                new (Utils_1.Structure.get("Node"))(nodeOptions);
         }
     }
     /** Returns the least used Nodes. */
@@ -111,8 +112,6 @@ class Manager extends events_1.EventEmitter {
             throw new Error('"clientId" is not set. Pass it in Manager#init() or as a option in the constructor.');
         for (const node of this.nodes.values())
             node.connect();
-        Utils_1.Structure.get("Player").init(this);
-        Utils_1.TrackUtils.init(this);
         this.initiated = true;
         return this;
     }
@@ -227,6 +226,27 @@ class Manager extends events_1.EventEmitter {
      */
     destroy(guild) {
         this.players.delete(guild);
+    }
+    /**
+     * Creates a node or returns one if it already exists.
+     * @param options
+     */
+    createNode(options) {
+        if (this.nodes.has(options.identifier || options.host)) {
+            return this.nodes.get(options.identifier || options.host);
+        }
+        return new (Utils_1.Structure.get("Node"))(options);
+    }
+    /**
+     * Destroys a node if it exists.
+     * @param identifier
+     */
+    destroyNode(identifier) {
+        const node = this.nodes.get(identifier);
+        if (!node)
+            return;
+        node.destroy();
+        this.nodes.delete(identifier);
     }
     /**
      * Sends voice data to the Lavalink server.

@@ -145,6 +145,16 @@ export declare class Manager extends EventEmitter {
      */
     destroy(guild: string): void;
     /**
+     * Creates a node or returns one if it already exists.
+     * @param options
+     */
+    createNode(options: NodeOptions): Node;
+    /**
+     * Destroys a node if it exists.
+     * @param identifier
+     */
+    destroyNode(identifier: string): void;
+    /**
      * Sends voice data to the Lavalink server.
      * @param data
      */

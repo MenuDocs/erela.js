@@ -4,7 +4,6 @@ import { Manager } from "./Manager";
 import { Player, Track, UnresolvedTrack } from "./Player";
 import { PlayerEvent, PlayerEvents, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from "./Utils";
 export declare class Node {
-    manager: Manager;
     options: NodeOptions;
     /** The socket for the node. */
     socket: WebSocket | null;
@@ -12,19 +11,22 @@ export declare class Node {
     calls: number;
     /** The stats for the node. */
     stats: NodeStats;
+    manager: Manager;
+    private static _manager;
     private reconnectTimeout?;
     private reconnectAttempts;
     /** Returns if connected to the Node. */
     get connected(): boolean;
+    /** @hidden */
+    static init(manager: Manager): void;
     /**
      * Creates an instance of Node.
-     * @param manager
      * @param options
      */
-    constructor(manager: Manager, options: NodeOptions);
+    constructor(options: NodeOptions);
     /** Connects to the Node. */
     connect(): void;
-    /** Destroys the Node. */
+    /** Destroys the Node and all players connected with it. */
     destroy(): void;
     /**
      * Sends data to the Node.

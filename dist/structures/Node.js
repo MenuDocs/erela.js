@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Node = void 0;
 /* eslint-disable no-case-declarations */
 const ws_1 = __importDefault(require("ws"));
+const Utils_1 = require("./Utils");
 function check(options) {
     if (!options)
         throw new TypeError("NodeOptions must not be empty.");
@@ -35,17 +36,22 @@ function check(options) {
 class Node {
     /**
      * Creates an instance of Node.
-     * @param manager
      * @param options
      */
-    constructor(manager, options) {
-        this.manager = manager;
+    constructor(options) {
         this.options = options;
         /** The socket for the node. */
         this.socket = null;
         /** The amount of rest calls the node has made. */
         this.calls = 0;
         this.reconnectAttempts = 1;
+        if (!this.manager)
+            this.manager = Utils_1.Structure.get("Node")._manager;
+        if (!this.manager)
+            throw new RangeError("Manager has not been initiated.");
+        if (this.manager.nodes.has(options.identifier || options.host)) {
+            return this.manager.nodes.get(options.identifier || options.host);
+        }
         check(options);
         this.options = Object.assign({ port: 2333, password: "youshallnotpass", secure: false, retryAmount: 5, retryDelay: 30e3 }, options);
         this.options.identifier = options.identifier || options.host;
@@ -70,6 +76,7 @@ class Node {
                 deficit: 0,
             },
         };
+        this.manager.nodes.set(this.options.identifier, this);
         this.manager.emit("nodeCreate", this);
     }
     /** Returns if connected to the Node. */
@@ -77,6 +84,10 @@ class Node {
         if (!this.socket)
             return false;
         return this.socket.readyState === ws_1.default.OPEN;
+    }
+    /** @hidden */
+    static init(manager) {
+        this._manager = manager;
     }
     /** Connects to the Node. */
     connect() {
@@ -93,16 +104,20 @@ class Node {
         this.socket.on("message", this.message.bind(this));
         this.socket.on("error", this.error.bind(this));
     }
-    /** Destroys the Node. */
+    /** Destroys the Node and all players connected with it. */
     destroy() {
         if (!this.connected)
             return;
+        const players = this.manager.players.filter(p => p.node == this);
+        if (players.size)
+            players.forEach(p => p.destroy());
         this.socket.close(1000, "destroy");
         this.socket.removeAllListeners();
         this.socket = null;
         this.reconnectAttempts = 1;
+        clearTimeout(this.reconnectTimeout);
         this.manager.emit("nodeDestroy", this);
-        return clearTimeout(this.reconnectTimeout);
+        this.manager.destroyNode(this.options.identifier);
     }
     /**
      * Sends data to the Node.
