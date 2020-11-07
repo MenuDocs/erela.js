@@ -15,7 +15,7 @@ const Discord = require("discord.js")
 module.exports = {
      name: "reloadmusic",
 
-    run: async (bot, message, args) => {
+    run: async (client, message, args) => {
 
       //embed
         const embed = new Discord.MessageEmbed()
@@ -33,11 +33,11 @@ module.exports = {
         try {
           delete require.cache[require.resolve(`./${commandName}.js`)] //fetch and delete the command cache using discord's delete require.cache property
           
-          bot.commands.delete(commandName) //delete the commmand from the collection too, to avoid clustering of the data
+          client.commands.delete(commandName) //delete the commmand from the collection too, to avoid clustering of the data
 
           const pull = require(`./${commandName}.js`) //assign the name of the command to be re pulled
 
-          bot.commands.set(pull.name, pull) //set the command again in the collection to enable it for usage
+          client.commands.set(pull.name, pull) //set the command again in the collection to enable it for usage
 
           message.channel.send(`Successfully reloaded: \`${commandName}\``) //after reloading , send a success message
         }
