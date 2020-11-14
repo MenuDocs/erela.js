@@ -2,6 +2,11 @@
 title: Basics
 displayHeaders: true
 sidebarDepth: 1
+meta:
+   - name: og:title
+     content: Guide for basic usage.
+   - name: og:description
+     content: This walks you through the basics of using Erela.JS including how to install Erela.JS, creating an instance of Manager with options and events, and a simple play command.
 ---
 
 ## Installation

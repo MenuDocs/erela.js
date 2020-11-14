@@ -1,5 +1,5 @@
 <div align = "center">
-    <img src = "https://projects.solaris.codes/erelajs/images/transparent_logo.png">
+    <img src = "https://solaris.codes/projects/erelajs/images/transparent_logo.png">
     <hr>
     <br>
     <a href="https://discord.gg/D6FXw55">
@@ -16,21 +16,21 @@
 
 <br>
 
-<a href="https://github.com/WarHammer414/erela.js">
-<img src="https://img.shields.io/github/stars/WarHammer414/erela.js?color=333&logo=github&style=for-the-badge" alt="Github stars">
+<a href="https://github.com/Solaris9/erela.js">
+<img src="https://img.shields.io/github/stars/Solaris9/erela.js?color=333&logo=github&style=for-the-badge" alt="Github stars">
 </a>
 
-<a href="https://github.com/WarHammer414/erela.js/blob/master/LICENSE">
-<img src="https://img.shields.io/github/license/WarHammer414/erela.js?color=6e5494&logo=github&style=for-the-badge" alt="License">
+<a href="https://github.com/Solaris9/erela.js/blob/master/LICENSE">
+<img src="https://img.shields.io/github/license/Solaris9/erela.js?color=6e5494&logo=github&style=for-the-badge" alt="License">
 </a>
 <hr>
 </div>
 
 ## Documentation & Guides
 
-- [Documentation](http://projects.solaris.codes/erelajs/docs/gettingstarted.html "Erela.js Documentation")
+- [Documentation](http://solaris.codes/projects/erelajs/docs/gettingstarted.html "Erela.js Documentation")
 
-- [Guides](http://projects.solaris.codes/erelajs/guides/introduction.html "Erela.js Guides")
+- [Guides](http://solaris.codes/projects/erelajs/guides/introduction.html "Erela.js Guides")
 
 ## Prerequisites
 

@@ -2,10 +2,13 @@
 title: Updating
 displayHeaders: true
 sidebarDepth: 1
+meta:
+   - name: og:title
+     content: Guide for updating Erela.JS from older versions.
 ---
 
 ::: tip
-Anything not specified means it was not changed or was forgotten to be added here.
+Anything not specified means it was not changed or forgotten to be added here. Feel free to send a PR with the changed item.
 :::
 
 ## ErelaClient

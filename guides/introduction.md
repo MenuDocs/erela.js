@@ -2,6 +2,11 @@
 title: Introduction
 displayHeaders: true
 sidebarDepth: 1
+meta:
+   - name: og:title
+     content: Introduction to Erela.JS.
+   - name: og:description
+     content: Explains what Erela.JS is, how to contribute to it, and some extra resources.
 ---
 
 ## Contributing
