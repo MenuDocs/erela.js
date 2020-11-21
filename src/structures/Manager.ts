@@ -227,6 +227,10 @@ export class Manager extends EventEmitter {
 
     check(options);
 
+    Structure.get("Player").init(this);
+    Structure.get("Node").init(this);
+    TrackUtils.init(this);
+
     if (options.trackPartial) {
       TrackUtils.setTrackPartial(options.trackPartial);
       delete options.trackPartial;
@@ -249,10 +253,8 @@ export class Manager extends EventEmitter {
     }
 
     if (this.options.nodes) {
-      for (const nodeOptions of this.options.nodes) {
-        const node = new (Structure.get("Node"))(this, nodeOptions);
-        this.nodes.set(node.options.identifier, node);
-      }
+      for (const nodeOptions of this.options.nodes)
+        new (Structure.get("Node"))(nodeOptions);
     }
   }
 
@@ -273,8 +275,6 @@ export class Manager extends EventEmitter {
       );
 
     for (const node of this.nodes.values()) node.connect();
-    Structure.get("Player").init(this);
-    TrackUtils.init(this);
 
     this.initiated = true;
     return this;
@@ -419,6 +419,29 @@ export class Manager extends EventEmitter {
    */
   public destroy(guild: string): void {
     this.players.delete(guild);
+  }
+
+  /**
+   * Creates a node or returns one if it already exists.
+   * @param options
+   */
+  public createNode(options: NodeOptions): Node {
+    if (this.nodes.has(options.identifier || options.host)) {
+      return this.nodes.get(options.identifier || options.host);
+    }
+
+    return new (Structure.get("Node"))(options);
+  }
+
+  /**
+   * Destroys a node if it exists.
+   * @param identifier
+   */
+  public destroyNode(identifier: string): void {
+    const node = this.nodes.get(identifier);
+    if (!node) return;
+    node.destroy()
+    this.nodes.delete(identifier)
   }
 
   /**

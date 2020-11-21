@@ -5,6 +5,7 @@ import { Player, Track, UnresolvedTrack } from "./Player";
 import {
   PlayerEvent,
   PlayerEvents,
+  Structure,
   TrackEndEvent,
   TrackExceptionEvent,
   TrackStartEvent,
@@ -66,6 +67,8 @@ export class Node {
   public calls = 0;
   /** The stats for the node. */
   public stats: NodeStats;
+  public manager: Manager
+  private static _manager: Manager;
   private reconnectTimeout?: NodeJS.Timeout;
   private reconnectAttempts = 1;
 
@@ -75,12 +78,23 @@ export class Node {
     return this.socket.readyState === WebSocket.OPEN;
   }
 
+  /** @hidden */
+  public static init(manager: Manager): void {
+    this._manager = manager;
+  }
+
   /**
    * Creates an instance of Node.
-   * @param manager
    * @param options
    */
-  constructor(public manager: Manager, public options: NodeOptions) {
+  constructor(public options: NodeOptions) {
+    if (!this.manager) this.manager = Structure.get("Node")._manager;
+    if (!this.manager) throw new RangeError("Manager has not been initiated.");
+
+    if (this.manager.nodes.has(options.identifier || options.host)) {
+      return this.manager.nodes.get(options.identifier || options.host);
+    }
+
     check(options);
 
     this.options = {
@@ -115,6 +129,7 @@ export class Node {
       },
     };
 
+    this.manager.nodes.set(this.options.identifier, this);
     this.manager.emit("nodeCreate", this);
   }
 
@@ -140,15 +155,22 @@ export class Node {
     this.socket.on("error", this.error.bind(this));
   }
 
-  /** Destroys the Node. */
+  /** Destroys the Node and all players connected with it. */
   public destroy(): void {
     if (!this.connected) return;
+
+    const players = this.manager.players.filter(p => p.node == this);
+    if (players.size) players.forEach(p => p.destroy());
+
     this.socket.close(1000, "destroy");
     this.socket.removeAllListeners();
     this.socket = null;
+
     this.reconnectAttempts = 1;
+    clearTimeout(this.reconnectTimeout);
+
     this.manager.emit("nodeDestroy", this);
-    return clearTimeout(this.reconnectTimeout);
+    this.manager.destroyNode(this.options.identifier);
   }
 
   /**

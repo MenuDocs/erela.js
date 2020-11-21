@@ -2,6 +2,11 @@
 title: Advanced
 displayHeaders: true
 sidebarDepth: 1
+meta:
+   - name: og:title
+     content: Guide for advanced usage.
+   - name: og:description
+     content: Set player data, track partials, create UnresolvedTrack, plugins and extend classes.
 ---
 
 ## Player data

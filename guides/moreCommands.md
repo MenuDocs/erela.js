@@ -2,6 +2,11 @@
 title: More Commands
 displayHeaders: true
 sidebarDepth: 1
+meta:
+   - name: og:title
+     content: More command examples.
+   - name: og:description
+     content: Shows how to make simple command system and example commands.
 ---
 
 

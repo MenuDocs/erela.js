@@ -2,6 +2,11 @@
 title: Basics
 displayHeaders: true
 sidebarDepth: 1
+meta:
+   - name: og:title
+     content: Guide for basic usage.
+   - name: og:description
+     content: This walks you through the basics of using Erela.JS including how to install Erela.JS, creating an instance of Manager with options and events, and a simple play command.
 ---
 
 ## Installation
@@ -130,7 +135,7 @@ client.on("message", async message => {
     player.queue.add(res.tracks[0]);
   
     // Checks if the client should play the track if it's the first one added
-    if (!player.playing && !player.paused && !player.queue.length) player.play()
+    if (!player.playing && !player.paused && !player.queue.size) player.play()
 
     return message.reply(`enqueuing ${res.tracks[0].title}.`);
   }
