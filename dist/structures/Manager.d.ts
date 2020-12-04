@@ -57,7 +57,7 @@ export interface Manager {
      * Emitted when a player queue ends.
      * @event Manager#queueEnd
      */
-    on(event: "queueEnd", listener: (player: Player) => void): this;
+    on(event: "queueEnd", listener: (player: Player, track: Track | UnresolvedTrack, payload: TrackEndEvent) => void): this;
     /**
      * Emitted when a player is moved to a new voice channel.
      * @event Manager#playerMove
@@ -89,7 +89,10 @@ export interface Manager {
      */
     on(event: "socketClosed", listener: (player: Player, payload: WebSocketClosedEvent) => void): this;
 }
-/** @noInheritDoc */
+/**
+ * The main hub for interacting with Lavalink and using Erela.JS,
+ * @noInheritDoc
+ */
 export declare class Manager extends EventEmitter {
     /** The map of players. */
     readonly players: Collection<string, Player>;

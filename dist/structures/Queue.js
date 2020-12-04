@@ -11,6 +11,8 @@ class Queue extends Array {
         super(...arguments);
         /** The current track */
         this.current = null;
+        /** The previous track */
+        this.previous = null;
     }
     /** The total duration of the queue. */
     get duration() {

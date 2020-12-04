@@ -116,8 +116,8 @@ export declare class Player {
      * @param repeat
      */
     setQueueRepeat(repeat: boolean): this;
-    /** Stops the current track. */
-    stop(): this;
+    /** Stops the current track, optionally give an amount to skip to, e.g 5 would play the 5th song. */
+    stop(amount?: number): this;
     /**
      * Pauses the current track.
      * @param pause

@@ -37,6 +37,7 @@ export declare abstract class TrackUtils {
     static buildUnresolved(query: string | UnresolvedQuery, requester?: unknown): UnresolvedTrack;
     static getClosestTrack(unresolvedTrack: UnresolvedTrack): Promise<Track>;
 }
+/** Gets or extends structures to extend the built in, or already extended, classes to add more functionality. */
 export declare abstract class Structure {
     /**
      * Extends a class.
@@ -52,6 +53,7 @@ export declare abstract class Structure {
 }
 export declare class Plugin {
     load(manager: Manager): void;
+    unload(manager: Manager): void;
 }
 export interface UnresolvedQuery {
     /** The title of the unresolved track. */

@@ -43,7 +43,10 @@ function check(options) {
         !Array.isArray(options.trackPartial))
         throw new TypeError('Manager option "trackPartial" must be a string array.');
 }
-/** @noInheritDoc */
+/**
+ * The main hub for interacting with Lavalink and using Erela.JS,
+ * @noInheritDoc
+ */
 class Manager extends events_1.EventEmitter {
     /**
      * Initiates the Manager class.

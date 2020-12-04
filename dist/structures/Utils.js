@@ -10,7 +10,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Plugin = exports.Structure = exports.TrackUtils = void 0;
-const TRACK_SYMBOL = Symbol("track"), UNRESOLVED_TRACK_SYMBOL = Symbol("unresolved"), SIZES = [
+/** @hidden */
+const TRACK_SYMBOL = Symbol("track"), 
+/** @hidden */
+UNRESOLVED_TRACK_SYMBOL = Symbol("unresolved"), SIZES = [
     "0",
     "1",
     "2",
@@ -20,6 +23,7 @@ const TRACK_SYMBOL = Symbol("track"), UNRESOLVED_TRACK_SYMBOL = Symbol("unresolv
     "hqdefault",
     "maxresdefault",
 ];
+/** @hidden */
 const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 class TrackUtils {
     /** @hidden */
@@ -147,6 +151,8 @@ class TrackUtils {
     static getClosestTrack(unresolvedTrack) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            if (!TrackUtils.manager)
+                throw new RangeError("Manager has not been initiated.");
             if (!TrackUtils.isUnresolvedTrack(unresolvedTrack))
                 throw new RangeError("Provided track is not a UnresolvedTrack.");
             const query = [unresolvedTrack.author, unresolvedTrack.title].filter(str => !!str).join(" - ");
@@ -177,6 +183,7 @@ class TrackUtils {
 }
 exports.TrackUtils = TrackUtils;
 TrackUtils.trackPartial = null;
+/** Gets or extends structures to extend the built in, or already extended, classes to add more functionality. */
 class Structure {
     /**
      * Extends a class.
@@ -203,8 +210,8 @@ class Structure {
 }
 exports.Structure = Structure;
 class Plugin {
-    load(manager) {
-    }
+    load(manager) { }
+    unload(manager) { }
 }
 exports.Plugin = Plugin;
 const structures = {

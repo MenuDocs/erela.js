@@ -41,6 +41,7 @@ export declare class Node {
     protected handleEvent(payload: PlayerEvent & PlayerEvents): void;
     protected trackStart(player: Player, track: Track, payload: TrackStartEvent): void;
     protected trackEnd(player: Player, track: Track, payload: TrackEndEvent): void;
+    protected queueEnd(player: Player, track: Track, payload: TrackEndEvent): void;
     protected trackStuck(player: Player, track: Track, payload: TrackStuckEvent): void;
     protected trackError(player: Player, track: Track | UnresolvedTrack, payload: TrackExceptionEvent): void;
     protected socketClosed(player: Player, payload: WebSocketClosedEvent): void;

@@ -116,9 +116,11 @@ class Player {
      * @param bands
      */
     setEQ(...bands) {
-        if (bands.length &&
-            !bands.every((band) => JSON.stringify(Object.keys(band).sort()) === '["band","gain"]'))
-            throw new TypeError("Channel must be a non-empty string.");
+        // Hacky support for providing an array
+        if (Array.isArray(bands[0]))
+            bands = bands[0];
+        if (!bands.length || !bands.every((band) => JSON.stringify(Object.keys(band).sort()) === '["band","gain"]'))
+            throw new TypeError("Bands must be a non-empty object array containing 'band' and 'gain' properties.");
         for (const { band, gain } of bands)
             this.bands[band] = gain;
         this.node.send({
@@ -205,6 +207,8 @@ class Player {
         return __awaiter(this, void 0, void 0, function* () {
             if (typeof optionsOrTrack !== "undefined" &&
                 Utils_1.TrackUtils.validate(optionsOrTrack)) {
+                if (this.queue.current)
+                    this.queue.previous = this.queue.current;
                 this.queue.current = optionsOrTrack;
             }
             if (!this.queue.current)
@@ -282,8 +286,13 @@ class Player {
         }
         return this;
     }
-    /** Stops the current track. */
-    stop() {
+    /** Stops the current track, optionally give an amount to skip to, e.g 5 would play the 5th song. */
+    stop(amount) {
+        if (typeof amount === "number" && amount > 1) {
+            if (amount > this.queue.length)
+                throw new RangeError("Cannot skip more than the queue length.");
+            this.queue.splice(0, amount - 1);
+        }
         this.node.send({
             op: "stop",
             guildId: this.guild,
