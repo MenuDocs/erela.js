@@ -29,6 +29,9 @@ export class Queue extends Array<Track | UnresolvedTrack> {
   /** The current track */
   public current: Track | UnresolvedTrack | null = null;
 
+  /** The previous track */
+  public previous: Track | UnresolvedTrack | null = null;
+
   /**
    * Adds a track to the queue.
    * @param track

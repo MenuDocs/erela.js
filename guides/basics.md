@@ -123,6 +123,8 @@ client.on("message", async message => {
       return message.reply(`there was an error while searching: ${err.message}`);
     }
 
+    if (res.loadType === "NO_MATCHES") return message.reply("there was no tracks found with that query.");
+
     // Create the player 
     const player = client.manager.create({
       guild: message.guild.id,

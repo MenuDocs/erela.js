@@ -4,19 +4,22 @@ import { Node, NodeStats } from "./Node";
 import { Player, Track, UnresolvedTrack } from "./Player";
 import { Queue } from "./Queue";
 
+/** @hidden */
 const TRACK_SYMBOL = Symbol("track"),
+  /** @hidden */
   UNRESOLVED_TRACK_SYMBOL = Symbol("unresolved"),
   SIZES = [
-  "0",
-  "1",
-  "2",
-  "3",
-  "default",
-  "mqdefault",
-  "hqdefault",
-  "maxresdefault",
-];
+    "0",
+    "1",
+    "2",
+    "3",
+    "default",
+    "mqdefault",
+    "hqdefault",
+    "maxresdefault",
+  ];
 
+/** @hidden */
 const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export abstract class TrackUtils {
@@ -64,7 +67,7 @@ export abstract class TrackUtils {
   static isUnresolvedTrack(track: unknown): boolean {
     if (typeof track === "undefined")
       throw new RangeError("Provided argument must be present.");
-    return track[UNRESOLVED_TRACK_SYMBOL]  === true;
+    return track[UNRESOLVED_TRACK_SYMBOL] === true;
   }
 
   /**
@@ -74,7 +77,7 @@ export abstract class TrackUtils {
   static isTrack(track: unknown): boolean {
     if (typeof track === "undefined")
       throw new RangeError("Provided argument must be present.");
-    return track[TRACK_SYMBOL]  === true;
+    return track[TRACK_SYMBOL] === true;
   }
 
   /**
@@ -160,6 +163,8 @@ export abstract class TrackUtils {
   static async getClosestTrack(
     unresolvedTrack: UnresolvedTrack
   ): Promise<Track> {
+    if (!TrackUtils.manager) throw new RangeError("Manager has not been initiated.");
+
     if (!TrackUtils.isUnresolvedTrack(unresolvedTrack))
       throw new RangeError("Provided track is not a UnresolvedTrack.");
 
@@ -197,6 +202,7 @@ export abstract class TrackUtils {
   }
 }
 
+/** Gets or extends structures to extend the built in, or already extended, classes to add more functionality. */
 export abstract class Structure {
   /**
    * Extends a class.
@@ -207,8 +213,7 @@ export abstract class Structure {
     name: K,
     extender: (target: Extendable[K]) => T
   ): T {
-    if (!structures[name])
-      throw new TypeError(`"${name} is not a valid structure`);
+    if (!structures[name]) throw new TypeError(`"${name} is not a valid structure`);
     const extended = extender(structures[name]);
     structures[name] = extended;
     return extended;
@@ -226,8 +231,9 @@ export abstract class Structure {
 }
 
 export class Plugin {
-  public load(manager: Manager): void {
-  }
+  public load(manager: Manager): void {}
+
+  public unload(manager: Manager): void {}
 }
 
 const structures = {
