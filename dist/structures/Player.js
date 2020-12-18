@@ -133,7 +133,12 @@ class Player {
     /** Clears the equalizer bands. */
     clearEQ() {
         this.bands = new Array(15).fill(0.0);
-        return this.setEQ();
+        this.node.send({
+            op: "equalizer",
+            guildId: this.guild,
+            bands: this.bands.map((gain, band) => ({ band, gain })),
+        });
+        return this;
     }
     /** Connect to the voice channel. */
     connect() {
