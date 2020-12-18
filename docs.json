@@ -1,0 +1,28 @@
+[
+  {
+    "name": "Guides",
+    "path": "guides",
+    "files": [
+      {
+        "name": "Introduction",
+        "path": "introduction.md"
+      },
+      {
+        "name": "Basics",
+        "path": "basics.md"
+      },
+      {
+        "name": "Advanced",
+        "path": "advanced.md"
+      },
+      {
+        "name": "More Commands",
+        "path": "moreCommands.md"
+      },
+      {
+        "name": "Updating",
+        "path": "updating.md"
+      }
+    ]
+  }
+]
