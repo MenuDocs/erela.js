@@ -88,16 +88,24 @@ export class Queue extends Array<Track | UnresolvedTrack> {
   public remove(startOrPosition = 0, end?: number): (Track | UnresolvedTrack)[] {
     if (typeof end !== "undefined") {
       if (isNaN(Number(startOrPosition))) {
-        throw new RangeError(`Missing "start" parameter.`);
+        throw new RangeError('Parameter "start" must be a non-empty number.');
       } else if (isNaN(Number(end))) {
-        throw new RangeError(`Missing "end" parameter.`);
+        throw new RangeError('Parameter "end" must be a non-empty number.');
       } else if (startOrPosition >= end) {
-        throw new RangeError("Start can not be bigger than end.");
+        throw new RangeError('Parameter "start" must be a non-empty number smaller than "end".');
       } else if (startOrPosition >= this.length) {
-        throw new RangeError(`Start can not be bigger than ${this.length}.`);
+        throw new RangeError(`Parameter "start" must be a non-empty number smaller than ${this.length}.`);
       }
 
       return this.splice(startOrPosition, end - startOrPosition);
+    }
+
+    if (isNaN(Number(startOrPosition))) {
+      throw new RangeError('Parameter "position" must be a non-empty number.');
+    } else if (startOrPosition < 0) {
+      throw new RangeError('Parameter "position" must be a non-empty number 0 or bigger.');
+    } else if (startOrPosition >= this.length) {
+      throw new RangeError(`Parameter "position" must be a non-empty number smaller than ${this.length}.`);
     }
 
     return this.splice(startOrPosition, 1);
