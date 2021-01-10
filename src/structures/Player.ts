@@ -56,7 +56,7 @@ export class Player {
   public playing = false;
   /** Whether the player is paused. */
   public paused = false;
-  /** Whether the player is playing. */
+  /** The volume the player is at. */
   public volume: number;
   /** The Node for the Player. */
   public node: Node;
