@@ -171,7 +171,7 @@ export abstract class TrackUtils {
     const query = [unresolvedTrack.author, unresolvedTrack.title].filter(str => !!str).join(" - ");
     const res = await TrackUtils.manager.search(query, unresolvedTrack.requester);
 
-    if (res.loadType !== "SEARCH_RESULT") throw res.exception ?? {
+    if (!["SEARCH_RESULT", "TRACK_LOADED"].includes(res.loadType)) throw res.exception ?? {
       message: "No tracks found.",
       severity: "COMMON",
     };
