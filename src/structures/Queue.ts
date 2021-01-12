@@ -115,4 +115,19 @@ export class Queue extends Array<Track | UnresolvedTrack> {
       [this[i], this[j]] = [this[j], this[i]];
     }
   }
+
+  /** Remove duplicates from the queue. */
+  public removeDuplicates(): void {
+    if (this.totalSize == 0)
+      throw new RangeError(`The queue must not be empty`);
+    else if (this.totalSize < 2)
+      throw new RangeError(`The queue must contain more than one song`);
+    const tracks = this.reduce((accumulator, currentValue) => {
+      if (!accumulator.find(obj => obj["title"] === currentValue["title"]))
+        accumulator.push(currentValue);
+      return accumulator;
+    }, []);
+    this.clear();
+    this.add(tracks);
+  }
 }
