@@ -85,7 +85,7 @@ export abstract class TrackUtils {
   * @param track
   * @param queue
   */
-  static isUnique(track: unknown, queue: unknown): boolean {
+  static isUnique(track: unknown, queue: Queue): boolean {
     if (typeof track === "undefined")
       throw new RangeError("Provided argument (track) must be present.");
     if (typeof queue === "undefined")
@@ -107,7 +107,7 @@ export abstract class TrackUtils {
   * @param track
   * @param queue
   */
-  static getUnique(track: unknown, queue: unknown): Track[] {
+  static getUnique(track: unknown, queue: Queue): Track[] {
     if (!Array.isArray(track))
       throw new RangeError('Track must be "Track[]", not "Track".');
     return track.filter(track => !queue.find(ext => TrackUtils.isUnresolvedTrack(track) ? track.title === ext.title : track.identifier === ext.identifier));
