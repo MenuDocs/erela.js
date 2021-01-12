@@ -145,13 +145,14 @@ export class Player {
    * @param bands
    */
   public setEQ(...bands: EqualizerBand[]): this {
-    if (
-      bands.length &&
-      !bands.every(
+    // Hacky support for providing an array
+    if (Array.isArray(bands[0])) bands = bands[0] as unknown as EqualizerBand[]
+
+    if (!bands.length || !bands.every(
         (band) => JSON.stringify(Object.keys(band).sort()) === '["band","gain"]'
       )
     )
-      throw new TypeError("Channel must be a non-empty string.");
+      throw new TypeError("Bands must be a non-empty object array containing 'band' and 'gain' properties.");
 
     for (const { band, gain } of bands) this.bands[band] = gain;
 
@@ -167,7 +168,14 @@ export class Player {
   /** Clears the equalizer bands. */
   public clearEQ(): this {
     this.bands = new Array(15).fill(0.0);
-    return this.setEQ();
+
+    this.node.send({
+      op: "equalizer",
+      guildId: this.guild,
+      bands: this.bands.map((gain, band) => ({ band, gain })),
+    });
+
+    return this;
   }
 
   /** Connect to the voice channel. */
@@ -279,6 +287,7 @@ export class Player {
       typeof optionsOrTrack !== "undefined" &&
       TrackUtils.validate(optionsOrTrack)
     ) {
+      if (this.queue.current) this.queue.previous = this.queue.current;
       this.queue.current = optionsOrTrack as Track;
     }
 
@@ -373,8 +382,13 @@ export class Player {
     return this;
   }
 
-  /** Stops the current track. */
-  public stop(): this {
+  /** Stops the current track, optionally give an amount to skip to, e.g 5 would play the 5th song. */
+  public stop(amount?: number): this {
+    if (typeof amount === "number" && amount > 1) {
+      if (amount > this.queue.length) throw new RangeError("Cannot skip more than the queue length.");
+      this.queue.splice(0, amount - 1);
+    }
+
     this.node.send({
       op: "stop",
       guildId: this.guild,
@@ -390,6 +404,9 @@ export class Player {
   public pause(pause: boolean): this {
     if (typeof pause !== "boolean")
       throw new RangeError('Pause can only be "true" or "false".');
+
+    // If already paused or the queue is empty do nothing https://github.com/Solaris9/erela.js/issues/58
+    if (this.paused === pause || !this.queue.totalSize) return this;
 
     this.playing = !pause;
     this.paused = pause;

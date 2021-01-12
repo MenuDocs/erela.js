@@ -274,11 +274,8 @@ export class Node {
     } else if (payload.type === "WebSocketClosedEvent") {
       this.socketClosed(player, payload);
     } else {
-      this.manager.emit(
-        "nodeError",
-        this,
-        new Error(`Node#event unknown event '${type}'.`)
-      );
+      const error = new Error(`Node#event unknown event '${type}'.`);
+      this.manager.emit("nodeError", this, error);
     }
   }
 
@@ -289,28 +286,74 @@ export class Node {
   }
 
   protected trackEnd(player: Player, track: Track, payload: TrackEndEvent): void {
+    // If a track had an error while starting
+    if (["LOAD_FAILED", "CLEAN_UP"].includes(payload.reason)) {
+      player.queue.previous = player.queue.current;
+      player.queue.current = player.queue.shift();
+
+      if (!player.queue.current) return this.queueEnd(player, track, payload);
+
+      this.manager.emit("trackEnd", player, track, payload);
+      if (this.manager.options.autoPlay) player.play();
+      return;
+    }
+
+    // If a track was forcibly played
     if (payload.reason === "REPLACED") {
       this.manager.emit("trackEnd", player, track, payload);
-    } else if (track && player.trackRepeat) {
-      this.manager.emit("trackEnd", player, track, payload);
-      if (this.manager.options.autoPlay) player.play();
-    } else if (track && player.queueRepeat) {
-      player.queue.add(track);
-      player.queue.current = player.queue.shift();
-      this.manager.emit("trackEnd", player, track, payload);
-      if (this.manager.options.autoPlay) player.play();
-    } else if (!player.queue.length) {
-      player.queue.current = null;
-      player.playing = false;
-      // this.manager.emit("trackEnd", player, track, payload);
-      // if (["FINISHED", "STOPPED"].includes(payload.reason)) {
-        this.manager.emit("queueEnd", player);
-      // }
-    } else if (player.queue.length) {
-      player.queue.current = player.queue.shift();
-      this.manager.emit("trackEnd", player, track, payload);
-      if (this.manager.options.autoPlay) player.play();
+      return;
     }
+
+    // If a track ended and is track repeating
+    if (track && player.trackRepeat) {
+      if (payload.reason === "STOPPED") {
+        player.queue.previous = player.queue.current;
+        player.queue.current = player.queue.shift();
+      }
+
+      if (!player.queue.current) return this.queueEnd(player, track, payload);
+
+      this.manager.emit("trackEnd", player, track, payload);
+      if (this.manager.options.autoPlay) player.play();
+      return;
+    }
+
+    // If a track ended and is track repeating
+    if (track && player.queueRepeat) {
+      player.queue.previous = player.queue.current;
+
+      if (payload.reason === "STOPPED") {
+        player.queue.current = player.queue.shift();
+        if (!player.queue.current) return this.queueEnd(player, track, payload);
+      } else {
+        player.queue.add(player.queue.current);
+        player.queue.current = player.queue.shift();
+      }
+
+      this.manager.emit("trackEnd", player, track, payload);
+      if (this.manager.options.autoPlay) player.play();
+      return;
+    }
+
+    // If there is another song in the queue
+    if (player.queue.length) {
+      player.queue.previous = player.queue.current;
+      player.queue.current = player.queue.shift();
+
+      this.manager.emit("trackEnd", player, track, payload);
+      if (this.manager.options.autoPlay) player.play();
+      return;
+    }
+
+    // If there are no songs in the queue
+    if (!player.queue.length) return this.queueEnd(player, track, payload);
+  }
+
+
+  protected queueEnd(player: Player, track: Track, payload: TrackEndEvent): void {
+    player.queue.current = null;
+    player.playing = false;
+    this.manager.emit("queueEnd", player, track, payload);
   }
 
   protected trackStuck(player: Player, track: Track, payload: TrackStuckEvent): void {
