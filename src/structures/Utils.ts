@@ -85,7 +85,7 @@ export abstract class TrackUtils {
   * @param track
   * @param queue
   */
-  static isUnique(track: unknown, queue: Queue): boolean {
+  static isUnique(track: Track, queue: Queue): boolean {
     if (typeof track === "undefined")
       throw new RangeError("Provided argument (track) must be present.");
     if (typeof queue === "undefined")
