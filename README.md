@@ -2,8 +2,8 @@
     <img src = "https://solaris.codes/projects/erelajs/images/transparent_logo.png">
     <hr>
     <br>
-    <a href="https://discord.gg/D6FXw55">
-<img src="https://img.shields.io/discord/653436871858454538?color=7289DA&label=Support&logo=discord&style=for-the-badge" alt="Discord">
+    <a href="https://discord.gg/menudocs">
+<img src="https://img.shields.io/discord/416512197590777857?color=7289DA&label=Support&logo=discord&style=for-the-badge" alt="Discord">
 </a>
 
 <a href="https://www.npmjs.com/package/erela.js">
@@ -16,15 +16,17 @@
 
 <br>
 
-<a href="https://github.com/Solaris9/erela.js">
-<img src="https://img.shields.io/github/stars/Solaris9/erela.js?color=333&logo=github&style=for-the-badge" alt="Github stars">
+<a href="https://github.com/MenuDocs/erela.js">
+<img src="https://img.shields.io/github/stars/MenuDocs/erela.js?color=333&logo=github&style=for-the-badge" alt="Github stars">
 </a>
 
-<a href="https://github.com/Solaris9/erela.js/blob/master/LICENSE">
-<img src="https://img.shields.io/github/license/Solaris9/erela.js?color=6e5494&logo=github&style=for-the-badge" alt="License">
+<a href="https://github.com/MenuDocs/erela.js/blob/master/LICENSE">
+<img src="https://img.shields.io/github/license/MenuDocs/erela.js?color=6e5494&logo=github&style=for-the-badge" alt="License">
 </a>
 <hr>
 </div>
+
+> Erela was transferred to MenuDocs because I no longer wish to work with Discord related development, it will still be updated in the future.
 
 ## Documentation & Guides
 
@@ -72,7 +74,7 @@ You can use plugins below to extend Erela.js' features easily.
 
 Note: These are the only ones shown before being published, check the GitHub repository for a complete list.
 
-- [erela.js-spotify](https://github.com/Solaris9/erela.js-spotify) - Converts a Spotify URL into a UnresolvedTrack to play later.
+- [erela.js-spotify](https://github.com/MenuDocs/erela.js-spotify) - Converts a Spotify URL into a UnresolvedTrack to play later.
 
 
 ## Contributors
