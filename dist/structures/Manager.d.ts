@@ -62,7 +62,7 @@ export interface Manager {
      * Emitted when a player is moved to a new voice channel.
      * @event Manager#playerMove
      */
-    on(event: "playerMove", listener: (player: Player, oldChannel: string, newChannel: string) => void): this;
+    on(event: "playerMove", listener: (player: Player, initChannel: string, newChannel: string) => void): this;
     /**
      * Emitted when a track starts.
      * @event Manager#trackStart

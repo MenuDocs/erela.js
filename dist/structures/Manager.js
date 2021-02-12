@@ -274,7 +274,8 @@ class Manager extends events_1.EventEmitter {
             state.sessionId = data.d.session_id;
             if (player.voiceChannel !== data.d.channel_id) {
                 this.emit("playerMove", player, player.voiceChannel, data.d.channel_id);
-                player.voiceChannel = data.d.channel_id;
+                data.d.channel_id = player.voiceChannel;
+                player.pause(true);
             }
         }
         player.voiceState = state;
