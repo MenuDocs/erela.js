@@ -140,7 +140,7 @@ export interface Manager {
    */
   on(
     event: "playerMove",
-    listener: (player: Player, oldChannel: string, newChannel: string) => void
+    listener: (player: Player, initChannel: string, newChannel: string) => void
   ): this;
 
   /**
@@ -478,7 +478,8 @@ export class Manager extends EventEmitter {
       state.sessionId = data.d.session_id;
       if (player.voiceChannel !== data.d.channel_id) {
         this.emit("playerMove", player, player.voiceChannel, data.d.channel_id);
-        player.voiceChannel = data.d.channel_id;
+        data.d.channel_id = player.voiceChannel;
+        player.pause(true);
       }
     }
 
