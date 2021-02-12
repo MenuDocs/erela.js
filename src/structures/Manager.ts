@@ -140,7 +140,7 @@ export interface Manager {
    */
   on(
     event: "playerMove",
-    listener: (player: Player, oldChannel: string, newChannel: string) => void
+    listener: (player: Player, initChannel: string, newChannel: string) => void
   ): this;
 
   /**
