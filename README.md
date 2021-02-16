@@ -26,7 +26,7 @@
 <hr>
 </div>
 
-> Erela was transferred to MenuDocs because I no longer wish to work with Discord related development, it will still be updated in the future.
+> Erela was transferred to MenuDocs, because I no longer wish to work with Discord related development. It will from now on be maintained by [MenuDocs](https://github.com). ~ @Solaris9
 
 ## Documentation & Guides
 
