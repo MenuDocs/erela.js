@@ -36,8 +36,9 @@ JavaScript reference/docs: <https://developer.mozilla.org/en-US/docs/Web/JavaScr
 A page with Node.JS resources: <https://node.org> \
 Node.JS docs: <https://nodejs.org/en/docs/> (Main page: <https://nodejs.org/en/>)
 
-### Discord and Discord.JS
+### Discord
 
 Discord API Docs: <https://discord.com/developers/docs/intro> \
 Discord Applications: <https://discord.com/developers/applications> \
-Discord.JS Docs: <https://discord.js.org/#/>
+Discord.JS Docs: <https://discord.js.org/#/> \
+Eris Docs: <https://abal.moe/Eris/docs>

@@ -24,10 +24,15 @@
     "discord.js",
     "eris"
   ],
-  "author": "Solaris (https://github.com/Solaris9)",
+  "author": "MenuDocs (https://github.com/MenuDocs)",
+  "contributors": [
+    "Solaris9",
+    "Anish-Shobith",
+    "ayntee"
+  ],
   "license": "Apache-2.0",
-  "repository": "Solaris9/erela.js",
-  "bugs": "https://github.com/Solaris9/erela.js",
+  "repository": "MenuDocs/erela.js",
+  "bugs": "https://github.com/MenuDocs/erela.js",
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/node": "^14.6.0",
@@ -63,5 +68,5 @@
       "plugin:@typescript-eslint/recommended"
     ]
   },
-  "homepage": "https://github.com/Solaris9/erela.js#readme"
+  "homepage": "https://github.com/MenuDocs/erela.js#readme"
 }
