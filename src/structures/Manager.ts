@@ -232,7 +232,7 @@ export class Manager extends EventEmitter {
      * Returns the Node in same region as server.
      * @param region
      */
-    public nearestNode(region): Node {
+    public nearestNode(region: string): Node {
         const nodes = this.nodes
             .filter((node) => {
                 if (!node.options.region)
@@ -255,7 +255,7 @@ export class Manager extends EventEmitter {
      * Returns the least system load Nodes from provided Nodes.
      * @param nodes
      */
-    public leastLoadNodesByRegion(nodes): Collection<string, Node> {
+    public leastLoadNodesByRegion(nodes: Collection<string, Node>): Collection<string, Node> {
         return nodes
             .filter((node) => node.connected)
             .sort((a, b) => {
