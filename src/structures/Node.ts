@@ -58,6 +58,11 @@ function check(options: NodeOptions) {
     typeof options.retryDelay !== "number"
   )
     throw new TypeError('Node option "retryDelay" must be a number.');
+  
+  if (typeof options.region !== "undefined" && 
+      ((typeof options.region !== "string" || 
+        !/.+/.test(options.region)) && (!Array.isArray(options.region) || options.region.length === 0 || !/.+/.test(options.region[0]))))
+    throw new TypeError('Node option "region" must be a non-empty string or array.');
 }
 
 export class Node {
@@ -390,6 +395,8 @@ export interface NodeOptions {
   retryAmount?: number;
   /** The retryDelay for the node. */
   retryDelay?: number;
+  /** Regions for which the node can be used */
+  region?: string | string[];
 }
 
 export interface NodeStats {
