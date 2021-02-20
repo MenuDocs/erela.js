@@ -228,8 +228,49 @@ export class Manager extends EventEmitter {
       });
   }
 
-  /**
-   * Initiates the Manager class.
+    /**
+     * Returns the Node in same region as server.
+     * @param region
+     */
+    public nearestNode(region: string): Node {
+        const nodes = this.nodes
+            .filter((node) => {
+                if (!node.options.region)
+                    return node.connected
+                else if (Array.isArray(node.options.region))
+                    return node.connected && node.options.region.includes(region)
+                else
+                    return node.connected && node.options.region.toLowerCase() == region.toLowerCase()
+            });
+
+        if (!nodes)
+            return null;
+        else if (nodes.size === 1)
+            return nodes.first();
+        else if (nodes.size > 1)
+            return this.leastLoadNodesByRegion(nodes).first();
+    }
+
+    /**
+     * Returns the least system load Nodes from provided Nodes.
+     * @param nodes
+     */
+    public leastLoadNodesByRegion(nodes: Collection<string, Node>): Collection<string, Node> {
+        return nodes
+            .filter((node) => node.connected)
+            .sort((a, b) => {
+                const aload = a.stats.cpu
+                    ? (a.stats.cpu.systemLoad / a.stats.cpu.cores) * 100
+                    : 0;
+                const bload = b.stats.cpu
+                    ? (b.stats.cpu.systemLoad / b.stats.cpu.cores) * 100
+                    : 0;
+                return aload - bload;
+            });
+    }
+
+    /**
+     * Initiates the Manager class.
    * @param options
    */
   constructor(options: ManagerOptions) {
