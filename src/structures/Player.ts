@@ -10,6 +10,9 @@ function check(options: PlayerOptions) {
     throw new TypeError(
       'Player option "guild" must be present and be a non-empty string.'
     );
+  
+  if (options.region && !/^\d+$/.test(options.region))
+    throw new TypeError('Player option "region" must be a non-empty string.');
 
   if (options.textChannel && !/^\d+$/.test(options.textChannel))
     throw new TypeError(
@@ -62,6 +65,8 @@ export class Player {
   public node: Node;
   /** The guild the player. */
   public guild: string;
+  /** The region of Discord server. */
+  public region: string | null = null;
   /** The voice channel for the player. */
   public voiceChannel: string | null = null;
   /** The text channel for the player. */
@@ -119,7 +124,9 @@ export class Player {
     if (options.textChannel) this.textChannel = options.textChannel;
 
     const node = this.manager.nodes.get(options.node);
-    this.node = node || this.manager.leastLoadNodes.first();
+    if (node) this.node = node
+    else if (options.region) this.node = this.manager.nearestNode(options.region);
+    if (!this.node) this.node = this.manager.leastLoadNodes.first()
 
     if (!this.node) throw new RangeError("No available nodes.");
 
@@ -448,6 +455,8 @@ export class Player {
 export interface PlayerOptions {
   /** The guild the Player belongs to. */
   guild: string;
+  /** The region of Discord server. */
+  region?: string;
   /** The text channel the Player belongs to. */
   textChannel: string;
   /** The voice channel the Player belongs to. */
