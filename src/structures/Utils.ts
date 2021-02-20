@@ -79,34 +79,6 @@ export abstract class TrackUtils {
       throw new RangeError("Provided argument must be present.");
     return track[TRACK_SYMBOL] === true;
   }
-  
-  /**
-  * Checks if the provided track is unique.
-  * @param track
-  * @param queue
-  */
-  static isUnique(track: Track, queue: Queue): boolean {
-    if (typeof track === "undefined")
-      throw new RangeError("Provided argument (track) must be present.");
-    if (typeof queue === "undefined")
-      throw new RangeError("Provided argument (queue) must be present.");
-    if (Array.isArray(track))
-      throw new RangeError('Track must be a "Track", not "Track[]".');
-    if (queue.size == 0)
-      return true;
-    return queue.filter(p => TrackUtils.isUnresolvedTrack(track) || TrackUtils.isUnresolvedTrack(p) ? track.title === p.title : track.identifier === p.identifier).length === 0;
-  }
-  
-  /**
-  * Returns only unique tracks.
-  * @param track
-  * @param queue
-  */
-  static getUnique(track: unknown, queue: Queue): Track[] {
-    if (!Array.isArray(track))
-      throw new RangeError('Track must be "Track[]", not "Track".');
-    return track.filter(track => !queue.find(ext => TrackUtils.isUnresolvedTrack(track) || TrackUtils.isUnresolvedTrack(ext) ? track.title === ext.title : track.identifier === ext.identifier));
-  }
 
   /**
    * Builds a Track from the raw data from Lavalink and a optional requester.
