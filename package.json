@@ -38,7 +38,6 @@
     "@types/ws": "^6.0.4",
     "@typescript-eslint/eslint-plugin": "^3.10.1",
     "@typescript-eslint/parser": "^3.10.1",
-    "discord.js": "^12.5.1",
     "dts-bundle": "^0.7.3",
     "eslint": "^7.7.0",
     "tslint": "^5.20.1",
