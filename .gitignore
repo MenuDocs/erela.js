@@ -3,6 +3,7 @@ node_modules
 dist
 .idea
 typings
+test
 
 # files
 package-lock.json
