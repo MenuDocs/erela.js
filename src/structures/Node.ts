@@ -150,6 +150,7 @@ export class Node {
       Authorization: this.options.password,
       "Num-Shards": String(this.manager.options.shards),
       "User-Id": this.manager.options.clientId,
+      "Client-Name": this.manager.options.clientName,
     };
 
     this.socket = new WebSocket(

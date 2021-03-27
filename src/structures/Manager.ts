@@ -60,6 +60,12 @@ function check(options: ManagerOptions) {
     !Array.isArray(options.trackPartial)
   )
     throw new TypeError('Manager option "trackPartial" must be a string array.');
+
+  if (
+    typeof options.clientName !== "undefined" &&
+    typeof options.clientName !== "string"
+  )
+    throw new TypeError('Manager option "clientName" must be a string.');
 }
 
 export interface Manager {
@@ -250,6 +256,7 @@ export class Manager extends EventEmitter {
       nodes: [{ identifier: "default", host: "localhost" }],
       shards: 1,
       autoPlay: true,
+      clientName: "erela.js",
       ...options,
     };
 
@@ -482,6 +489,8 @@ export interface ManagerOptions {
   nodes?: NodeOptions[];
   /** The client ID to use. */
   clientId?: string;
+  /** Value to use for the `Client-Name` header. */
+  clientName?: string;
   /** The shard count. */
   shards?: number;
   /** A array of plugins to use. */
