@@ -6,6 +6,7 @@
     "declaration": true,
     "outDir": "./dist",
     "rootDir": "./src",
+    "skipLibCheck": true,
 
     /* Strict Type-Checking Options */
     // "strict": true,

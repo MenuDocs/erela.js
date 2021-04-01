@@ -1,6 +1,5 @@
 /* eslint-disable no-async-promise-executor */
 import Collection from "@discordjs/collection";
-import Axios from "axios";
 import { EventEmitter } from "events";
 import { Node, NodeOptions } from "./Node";
 import { Player, PlayerOptions, Track, UnresolvedTrack } from "./Player";
@@ -61,6 +60,12 @@ function check(options: ManagerOptions) {
     !Array.isArray(options.trackPartial)
   )
     throw new TypeError('Manager option "trackPartial" must be a string array.');
+
+  if (
+    typeof options.clientName !== "undefined" &&
+    typeof options.clientName !== "string"
+  )
+    throw new TypeError('Manager option "clientName" must be a string.');
 }
 
 export interface Manager {
@@ -251,6 +256,7 @@ export class Manager extends EventEmitter {
       nodes: [{ identifier: "default", host: "localhost" }],
       shards: 1,
       autoPlay: true,
+      clientName: "erela.js",
       ...options,
     };
 
@@ -316,39 +322,30 @@ export class Manager extends EventEmitter {
         search = `${source}search:${search}`;
       }
 
-      const url = `http${node.options.secure ? "s" : ""}://${
-        node.options.host
-      }:${node.options.port}/loadtracks`;
+      const res = await node.makeRequest<LavalinkResult>(`/loadtracks?identifier=${encodeURIComponent(search)}`, r => {
+        if (node.options.requestTimeout) {
+          r.timeout(node.options.requestTimeout)
+        }
+      }).catch(err => reject(err));
 
-      const res = await Axios.get<LavalinkResult>(url, {
-        headers: { Authorization: node.options.password },
-        params: { identifier: search },
-        timeout: 10000,
-        timeoutErrorMessage: `Node ${node.options.identifier} search timed out.`,
-      }).catch((err) => {
-        return reject(err);
-      });
-
-      node.calls++;
-
-      if (!res || !res.data) {
+      if (!res) {
         return reject(new Error("Query not found."));
       }
 
       const result: SearchResult = {
-        loadType: res.data.loadType,
-        exception: res.data.exception ?? null,
-        tracks: res.data.tracks.map((track: TrackData) =>
+        loadType: res.loadType,
+        exception: res.exception ?? null,
+        tracks: res.tracks.map((track: TrackData) =>
           TrackUtils.build(track, requester)
         ),
       };
 
       if (result.loadType === "PLAYLIST_LOADED") {
         result.playlist = {
-          name: res.data.playlistInfo.name,
-          selectedTrack: res.data.playlistInfo.selectedTrack === -1 ? null :
+          name: res.playlistInfo.name,
+          selectedTrack: res.playlistInfo.selectedTrack === -1 ? null :
             TrackUtils.build(
-              res.data.tracks[res.data.playlistInfo.selectedTrack],
+              res.tracks[res.playlistInfo.selectedTrack],
               requester
             ),
           duration: result.tracks
@@ -368,23 +365,16 @@ export class Manager extends EventEmitter {
     return new Promise(async (resolve, reject) => {
       const node = this.nodes.first();
       if (!node) throw new Error("No available nodes.");
-      const url = `http${node.options.secure ? "s" : ""}://${
-        node.options.host
-      }:${node.options.port}/decodetracks`;
 
-      const res = await Axios.post<TrackData[]>(url, tracks, {
-        headers: { Authorization: node.options.password },
-      }).catch((err) => {
-        return reject(err);
-      });
+      const res = await node.makeRequest<TrackData[]>(`/decodetracks`, r => r
+        .body(tracks, "json"))
+        .catch(err => reject(err));
 
-      node.calls++;
-
-      if (!res || !res.data) {
+      if (!res) {
         return reject(new Error("No data returned from query."));
       }
 
-      return resolve(res.data);
+      return resolve(res);
     });
   }
 
@@ -392,15 +382,9 @@ export class Manager extends EventEmitter {
    * Decodes the base64 encoded track and returns a TrackData.
    * @param track
    */
-  public decodeTrack(track: string): Promise<TrackData> {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const res = await this.decodeTracks([track]);
-        return resolve(res[0]);
-      } catch (e) {
-        return reject(e);
-      }
-    });
+  public async decodeTrack(track: string): Promise<TrackData> {
+    const res = await this.decodeTracks([ track ]);
+    return res[0];
   }
 
   /**
@@ -505,6 +489,8 @@ export interface ManagerOptions {
   nodes?: NodeOptions[];
   /** The client ID to use. */
   clientId?: string;
+  /** Value to use for the `Client-Name` header. */
+  clientName?: string;
   /** The shard count. */
   shards?: number;
   /** A array of plugins to use. */
@@ -513,7 +499,6 @@ export interface ManagerOptions {
   autoPlay?: boolean;
   /** An array of track properties to keep. `track` will always be present. */
   trackPartial?: string[];
-
   /**
    * Function to send data to the websocket.
    * @param id

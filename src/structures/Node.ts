@@ -1,5 +1,6 @@
 /* eslint-disable no-case-declarations */
 import WebSocket from "ws";
+import fetch from "petitio";
 import { Manager } from "./Manager";
 import { Player, Track, UnresolvedTrack } from "./Player";
 import {
@@ -12,6 +13,8 @@ import {
   TrackStuckEvent,
   WebSocketClosedEvent,
 } from "./Utils";
+
+import type { PetitioRequest } from "petitio/dist/lib/PetitioRequest";
 
 function check(options: NodeOptions) {
   if (!options) throw new TypeError("NodeOptions must not be empty.");
@@ -58,6 +61,12 @@ function check(options: NodeOptions) {
     typeof options.retryDelay !== "number"
   )
     throw new TypeError('Node option "retryDelay" must be a number.');
+
+  if (
+    typeof options.requestTimeout !== "undefined" &&
+    typeof options.requestTimeout !== "number"
+  )
+    throw new TypeError('Node option "requestTimeout" must be a number.');
 }
 
 export class Node {
@@ -141,6 +150,7 @@ export class Node {
       Authorization: this.options.password,
       "Num-Shards": String(this.manager.options.shards),
       "User-Id": this.manager.options.clientId,
+      "Client-Name": this.manager.options.clientName,
     };
 
     this.socket = new WebSocket(
@@ -171,6 +181,26 @@ export class Node {
 
     this.manager.emit("nodeDestroy", this);
     this.manager.destroyNode(this.options.identifier);
+  }
+
+  /**
+   * Makes an API call to the Node
+   * @param endpoint The endpoint that we will make the call to
+   * @param modify Used to modify the request before being sent
+   * @returns The returned data
+   */
+  public async makeRequest<T>(endpoint: string, modify?: ModifyRequest): Promise<T> {
+    endpoint = endpoint.replace(/^\//gm, "");
+
+    const request = fetch(`http${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}/${endpoint}`)
+      .header("Authorization", this.options.password);
+
+    if (modify) {
+      await modify(request);
+    }
+
+    this.calls++;
+    return await request.json();
   }
 
   /**
@@ -375,6 +405,9 @@ export class Node {
   }
 }
 
+/** Modifies any outgoing REST requests. */
+export type ModifyRequest = (request: PetitioRequest) => any | Promise<any>;
+
 export interface NodeOptions {
   /** The host for the node. */
   host: string;
@@ -390,6 +423,8 @@ export interface NodeOptions {
   retryAmount?: number;
   /** The retryDelay for the node. */
   retryDelay?: number;
+  /** The timeout used for api calls */
+  requestTimeout?: number;
 }
 
 export interface NodeStats {
