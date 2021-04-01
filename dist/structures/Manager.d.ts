@@ -178,6 +178,8 @@ export interface ManagerOptions {
     nodes?: NodeOptions[];
     /** The client ID to use. */
     clientId?: string;
+    /** Value to use for the `Client-Name` header. */
+    clientName?: string;
     /** The shard count. */
     shards?: number;
     /** A array of plugins to use. */

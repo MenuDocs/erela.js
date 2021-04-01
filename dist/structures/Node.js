@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -6,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Node = void 0;
 /* eslint-disable no-case-declarations */
 const ws_1 = __importDefault(require("ws"));
+const petitio_1 = __importDefault(require("petitio"));
 const Utils_1 = require("./Utils");
 function check(options) {
     if (!options)
@@ -32,6 +42,9 @@ function check(options) {
     if (typeof options.retryDelay !== "undefined" &&
         typeof options.retryDelay !== "number")
         throw new TypeError('Node option "retryDelay" must be a number.');
+    if (typeof options.requestTimeout !== "undefined" &&
+        typeof options.requestTimeout !== "number")
+        throw new TypeError('Node option "requestTimeout" must be a number.');
 }
 class Node {
     /**
@@ -97,6 +110,7 @@ class Node {
             Authorization: this.options.password,
             "Num-Shards": String(this.manager.options.shards),
             "User-Id": this.manager.options.clientId,
+            "Client-Name": this.manager.options.clientName,
         };
         this.socket = new ws_1.default(`ws${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}/`, { headers });
         this.socket.on("open", this.open.bind(this));
@@ -118,6 +132,24 @@ class Node {
         clearTimeout(this.reconnectTimeout);
         this.manager.emit("nodeDestroy", this);
         this.manager.destroyNode(this.options.identifier);
+    }
+    /**
+     * Makes an API call to the Node
+     * @param endpoint The endpoint that we will make the call to
+     * @param modify Used to modify the request before being sent
+     * @returns The returned data
+     */
+    makeRequest(endpoint, modify) {
+        return __awaiter(this, void 0, void 0, function* () {
+            endpoint = endpoint.replace(/^\//gm, "");
+            const request = petitio_1.default(`http${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}/${endpoint}`)
+                .header("Authorization", this.options.password);
+            if (modify) {
+                yield modify(request);
+            }
+            this.calls++;
+            return yield request.json();
+        });
     }
     /**
      * Sends data to the Node.

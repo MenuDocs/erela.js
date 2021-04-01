@@ -34,7 +34,6 @@
   "repository": "MenuDocs/erela.js",
   "bugs": "https://github.com/MenuDocs/erela.js",
   "devDependencies": {
-    "@types/axios": "^0.14.0",
     "@types/node": "^14.6.0",
     "@types/ws": "^6.0.4",
     "@typescript-eslint/eslint-plugin": "^3.10.1",
@@ -48,7 +47,7 @@
   },
   "dependencies": {
     "@discordjs/collection": "^0.1.6",
-    "axios": "^0.21.0",
+    "petitio": "^1.1.0",
     "ws": "^7.3.1"
   },
   "eslintConfig": {

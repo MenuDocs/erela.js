@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Manager = void 0;
 /* eslint-disable no-async-promise-executor */
 const collection_1 = __importDefault(require("@discordjs/collection"));
-const axios_1 = __importDefault(require("axios"));
 const events_1 = require("events");
 const Utils_1 = require("./Utils");
 const TEMPLATE = JSON.stringify(["event", "guildId", "op", "sessionId"]);
@@ -42,6 +41,9 @@ function check(options) {
     if (typeof options.trackPartial !== "undefined" &&
         !Array.isArray(options.trackPartial))
         throw new TypeError('Manager option "trackPartial" must be a string array.');
+    if (typeof options.clientName !== "undefined" &&
+        typeof options.clientName !== "string")
+        throw new TypeError('Manager option "clientName" must be a string.');
 }
 /**
  * The main hub for interacting with Lavalink and using Erela.JS,
@@ -67,7 +69,7 @@ class Manager extends events_1.EventEmitter {
             Utils_1.TrackUtils.setTrackPartial(options.trackPartial);
             delete options.trackPartial;
         }
-        this.options = Object.assign({ plugins: [], nodes: [{ identifier: "default", host: "localhost" }], shards: 1, autoPlay: true }, options);
+        this.options = Object.assign({ plugins: [], nodes: [{ identifier: "default", host: "localhost" }], shards: 1, autoPlay: true, clientName: "erela.js" }, options);
         if (this.options.plugins) {
             for (const [index, plugin] of this.options.plugins.entries()) {
                 if (!(plugin instanceof Utils_1.Plugin))
@@ -139,29 +141,24 @@ class Manager extends events_1.EventEmitter {
             if (!/^https?:\/\//.test(search)) {
                 search = `${source}search:${search}`;
             }
-            const url = `http${node.options.secure ? "s" : ""}://${node.options.host}:${node.options.port}/loadtracks`;
-            const res = yield axios_1.default.get(url, {
-                headers: { Authorization: node.options.password },
-                params: { identifier: search },
-                timeout: 10000,
-                timeoutErrorMessage: `Node ${node.options.identifier} search timed out.`,
-            }).catch((err) => {
-                return reject(err);
-            });
-            node.calls++;
-            if (!res || !res.data) {
+            const res = yield node.makeRequest(`/loadtracks?identifier=${encodeURIComponent(search)}`, r => {
+                if (node.options.requestTimeout) {
+                    r.timeout(node.options.requestTimeout);
+                }
+            }).catch(err => reject(err));
+            if (!res) {
                 return reject(new Error("Query not found."));
             }
             const result = {
-                loadType: res.data.loadType,
-                exception: (_b = res.data.exception) !== null && _b !== void 0 ? _b : null,
-                tracks: res.data.tracks.map((track) => Utils_1.TrackUtils.build(track, requester)),
+                loadType: res.loadType,
+                exception: (_b = res.exception) !== null && _b !== void 0 ? _b : null,
+                tracks: res.tracks.map((track) => Utils_1.TrackUtils.build(track, requester)),
             };
             if (result.loadType === "PLAYLIST_LOADED") {
                 result.playlist = {
-                    name: res.data.playlistInfo.name,
-                    selectedTrack: res.data.playlistInfo.selectedTrack === -1 ? null :
-                        Utils_1.TrackUtils.build(res.data.tracks[res.data.playlistInfo.selectedTrack], requester),
+                    name: res.playlistInfo.name,
+                    selectedTrack: res.playlistInfo.selectedTrack === -1 ? null :
+                        Utils_1.TrackUtils.build(res.tracks[res.playlistInfo.selectedTrack], requester),
                     duration: result.tracks
                         .reduce((acc, cur) => acc + (cur.duration || 0), 0),
                 };
@@ -178,17 +175,13 @@ class Manager extends events_1.EventEmitter {
             const node = this.nodes.first();
             if (!node)
                 throw new Error("No available nodes.");
-            const url = `http${node.options.secure ? "s" : ""}://${node.options.host}:${node.options.port}/decodetracks`;
-            const res = yield axios_1.default.post(url, tracks, {
-                headers: { Authorization: node.options.password },
-            }).catch((err) => {
-                return reject(err);
-            });
-            node.calls++;
-            if (!res || !res.data) {
+            const res = yield node.makeRequest(`/decodetracks`, r => r
+                .body(tracks, "json"))
+                .catch(err => reject(err));
+            if (!res) {
                 return reject(new Error("No data returned from query."));
             }
-            return resolve(res.data);
+            return resolve(res);
         }));
     }
     /**
@@ -196,15 +189,10 @@ class Manager extends events_1.EventEmitter {
      * @param track
      */
     decodeTrack(track) {
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                const res = yield this.decodeTracks([track]);
-                return resolve(res[0]);
-            }
-            catch (e) {
-                return reject(e);
-            }
-        }));
+        return __awaiter(this, void 0, void 0, function* () {
+            const res = yield this.decodeTracks([track]);
+            return res[0];
+        });
     }
     /**
      * Creates a player or returns one if it already exists.

@@ -3,6 +3,7 @@ import WebSocket from "ws";
 import { Manager } from "./Manager";
 import { Player, Track, UnresolvedTrack } from "./Player";
 import { PlayerEvent, PlayerEvents, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from "./Utils";
+import type { PetitioRequest } from "petitio/dist/lib/PetitioRequest";
 export declare class Node {
     options: NodeOptions;
     /** The socket for the node. */
@@ -29,6 +30,13 @@ export declare class Node {
     /** Destroys the Node and all players connected with it. */
     destroy(): void;
     /**
+     * Makes an API call to the Node
+     * @param endpoint The endpoint that we will make the call to
+     * @param modify Used to modify the request before being sent
+     * @returns The returned data
+     */
+    makeRequest<T>(endpoint: string, modify?: ModifyRequest): Promise<T>;
+    /**
      * Sends data to the Node.
      * @param data
      */
@@ -46,6 +54,8 @@ export declare class Node {
     protected trackError(player: Player, track: Track | UnresolvedTrack, payload: TrackExceptionEvent): void;
     protected socketClosed(player: Player, payload: WebSocketClosedEvent): void;
 }
+/** Modifies any outgoing REST requests. */
+export declare type ModifyRequest = (request: PetitioRequest) => any | Promise<any>;
 export interface NodeOptions {
     /** The host for the node. */
     host: string;
@@ -61,6 +71,8 @@ export interface NodeOptions {
     retryAmount?: number;
     /** The retryDelay for the node. */
     retryDelay?: number;
+    /** The timeout used for api calls */
+    requestTimeout?: number;
 }
 export interface NodeStats {
     /** The amount of players on the node. */
