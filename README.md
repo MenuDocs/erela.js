@@ -46,17 +46,19 @@
 
 ## Installation
 
-**NPM** :
+##### **NPM**
 
 ```bash
 npm install erela.js
 ```
 
-**Yarn** :
+##### **Yarn**
 
 ```bash
 yarn add erela.js
 ```
+
+**Note**: _Node **v14** is required!_
 
 ## Getting Started
 
