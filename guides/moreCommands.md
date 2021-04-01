@@ -96,7 +96,7 @@ Now start your bot and run `!ping`, you should see the bot reply with `@User, Po
 
 ## More Commands
 
-A music bot with only a ping command isn't really that great, so I've created some basic commands you can find in the [examples folder](https://github.com/Solaris9/erela.js/tree/HEAD/examples).
+A music bot with only a ping command isn't really that great, so I've created some basic commands you can find in the [examples folder](https://github.com/MenuDocs/erela.js/tree/HEAD/examples).
 
 Those aren't the only commands you can have. You can make some clear the queue, remove tracks, skip the current track and even more!
 

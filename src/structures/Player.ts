@@ -405,7 +405,7 @@ export class Player {
     if (typeof pause !== "boolean")
       throw new RangeError('Pause can only be "true" or "false".');
 
-    // If already paused or the queue is empty do nothing https://github.com/Solaris9/erela.js/issues/58
+    // If already paused or the queue is empty do nothing https://github.com/MenuDocs/erela.js/issues/58
     if (this.paused === pause || !this.queue.totalSize) return this;
 
     this.playing = !pause;
