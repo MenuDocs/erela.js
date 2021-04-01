@@ -56,5 +56,5 @@ jobs:
           git push origin $TARGET_BRANCH
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: Solaris9
+          GITHUB_ACTOR: MenuDocs
           GITHUB_EMAIL: ${{ secrets.EMAIL }}
