@@ -32,10 +32,11 @@ export declare class Node {
     /**
      * Makes an API call to the Node
      * @param endpoint The endpoint that we will make the call to
+     * @param method Method type to use (POST, GET)
      * @param modify Used to modify the request before being sent
      * @returns The returned data
      */
-    makeRequest<T>(endpoint: string, modify?: ModifyRequest): Promise<T>;
+    makeRequest<T>(endpoint: string, method: string, modify?: ModifyRequest): Promise<T>;
     /**
      * Sends data to the Node.
      * @param data
