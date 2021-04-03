@@ -190,7 +190,7 @@ export class Node {
    * @param modify Used to modify the request before being sent
    * @returns The returned data
    */
-  public async makeRequest<T>(endpoint: string, method: string, modify?: ModifyRequest): Promise<T> {
+  public async makeRequest<T>(endpoint: string, method: HTTPMethod, modify?: ModifyRequest): Promise<T> {
     endpoint = endpoint.replace(/^\//gm, "");
 
     const request = fetch(`http${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}/${endpoint}`)
