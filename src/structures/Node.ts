@@ -186,14 +186,15 @@ export class Node {
   /**
    * Makes an API call to the Node
    * @param endpoint The endpoint that we will make the call to
+   * @param method Method type to use (POST, GET)
    * @param modify Used to modify the request before being sent
    * @returns The returned data
    */
-  public async makeRequest<T>(endpoint: string, modify?: ModifyRequest): Promise<T> {
+  public async makeRequest<T>(endpoint: string, method: string, modify?: ModifyRequest): Promise<T> {
     endpoint = endpoint.replace(/^\//gm, "");
 
     const request = fetch(`http${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}/${endpoint}`)
-      .header("Authorization", this.options.password);
+      .header("Authorization", this.options.password).method(method);
 
     if (modify) {
       await modify(request);
