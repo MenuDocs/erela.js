@@ -136,14 +136,15 @@ class Node {
     /**
      * Makes an API call to the Node
      * @param endpoint The endpoint that we will make the call to
+     * @param method Method type to use (POST, GET)
      * @param modify Used to modify the request before being sent
      * @returns The returned data
      */
-    makeRequest(endpoint, modify) {
+    makeRequest(endpoint, method, modify) {
         return __awaiter(this, void 0, void 0, function* () {
             endpoint = endpoint.replace(/^\//gm, "");
             const request = petitio_1.default(`http${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}/${endpoint}`)
-                .header("Authorization", this.options.password);
+                .header("Authorization", this.options.password).method(method);
             if (modify) {
                 yield modify(request);
             }
