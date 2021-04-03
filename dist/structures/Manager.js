@@ -176,6 +176,7 @@ class Manager extends events_1.EventEmitter {
             if (!node)
                 throw new Error("No available nodes.");
             const res = yield node.makeRequest(`/decodetracks`, r => r
+                .method("POST")
                 .body(tracks, "json"))
                 .catch(err => reject(err));
             if (!res) {
