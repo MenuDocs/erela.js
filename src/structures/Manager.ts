@@ -367,6 +367,7 @@ export class Manager extends EventEmitter {
       if (!node) throw new Error("No available nodes.");
 
       const res = await node.makeRequest<TrackData[]>(`/decodetracks`, r => r
+        .method("POST")
         .body(tracks, "json"))
         .catch(err => reject(err));
 
