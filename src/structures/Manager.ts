@@ -322,7 +322,7 @@ export class Manager extends EventEmitter {
         search = `${source}search:${search}`;
       }
 
-      const res = await node.makeRequest<LavalinkResult>(`/loadtracks?identifier=${encodeURIComponent(search)}`, r => {
+      const res = await node.makeRequest<LavalinkResult>(`/loadtracks?identifier=${encodeURIComponent(search)}`, "GET", r => {
         if (node.options.requestTimeout) {
           r.timeout(node.options.requestTimeout)
         }
@@ -366,7 +366,7 @@ export class Manager extends EventEmitter {
       const node = this.nodes.first();
       if (!node) throw new Error("No available nodes.");
 
-      const res = await node.makeRequest<TrackData[]>(`/decodetracks`, r => r
+      const res = await node.makeRequest<TrackData[]>(`/decodetracks`, "POST", r => r
         .body(tracks, "json"))
         .catch(err => reject(err));
 
