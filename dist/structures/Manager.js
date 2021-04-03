@@ -141,7 +141,7 @@ class Manager extends events_1.EventEmitter {
             if (!/^https?:\/\//.test(search)) {
                 search = `${source}search:${search}`;
             }
-            const res = yield node.makeRequest(`/loadtracks?identifier=${encodeURIComponent(search)}`, r => {
+            const res = yield node.makeRequest(`/loadtracks?identifier=${encodeURIComponent(search)}`, 'GET', r => {
                 if (node.options.requestTimeout) {
                     r.timeout(node.options.requestTimeout);
                 }
@@ -175,7 +175,7 @@ class Manager extends events_1.EventEmitter {
             const node = this.nodes.first();
             if (!node)
                 throw new Error("No available nodes.");
-            const res = yield node.makeRequest(`/decodetracks`, r => r
+            const res = yield node.makeRequest(`/decodetracks`, 'POST', r => r
                 .body(tracks, "json"))
                 .catch(err => reject(err));
             if (!res) {
