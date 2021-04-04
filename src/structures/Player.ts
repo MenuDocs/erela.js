@@ -151,10 +151,10 @@ export class Player {
    * @param name
    */
   async setNode(name: string) {
-    if(!name) throw Error('Please specify node name.')
-    const node = this.manager.nodes.get(name)
+    if (this.node.options.identifier === name) return this; 
+    const node = this.manager.nodes.get(name) 
+    if(!node) throw Error('Please specify valid node name.')
     if(!node.connected) throw Error('The node is not connected');
-    if (this.node.options.identifier === name) return this;  
     const options = {
       op: "play",
       guildId: this.guild,
@@ -164,6 +164,7 @@ export class Player {
     this.node = node;
     await this.node.send(this.voiceState)
     await this.node.send(options)
+    return this;
   }
   /**
    * Sets the players equalizer band on-top of the existing ones.
