@@ -56,6 +56,11 @@ function check(options: ManagerOptions) {
     throw new TypeError('Manager option "autoPlay" must be a boolean.');
 
   if (
+    typeof options.replayOnDc !== "undefined" &&
+    typeof options.replayOnDc !== "boolean"
+  ) 
+    throw new TypeError('Manager option "replayOnDc" must be a boolean.')
+  if (
     typeof options.trackPartial !== "undefined" &&
     !Array.isArray(options.trackPartial)
   )
