@@ -491,8 +491,8 @@ export interface ManagerOptions {
   clientId?: string;
   /** Value to use for the `Client-Name` header. */
   clientName?: string;
-  /** Auto replay whenever node disconnect */
-  ReplayOnDc?: boolean;
+  /** Auto replay whenever the node disconnect */
+  replayOnDc?: boolean;
   /** The shard count. */
   shards?: number;
   /** A array of plugins to use. */
