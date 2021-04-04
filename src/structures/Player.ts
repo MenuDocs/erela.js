@@ -126,6 +126,13 @@ export class Player {
     this.manager.players.set(options.guild, this);
     this.manager.emit("playerCreate", this);
     this.setVolume(options.volume ?? 100);
+    this.manager.on('nodeDisconnect', (node) => {
+      if(this.manager.options.ReplayOnDc && this.manager.nodes.size > 1) {
+        for(const players of [...this.manager.players.filter(x => x.node === node).values()]) {
+          players.movePlayer(this.manager.leastUsedNodes.first().options.identifier)
+        }
+      }
+    })
   }
 
   /**
@@ -139,7 +146,29 @@ export class Player {
   ): Promise<SearchResult> {
     return this.manager.search(query, requester);
   }
+  /**
+   * Move the player to another connected node
+   * @param name
+   */
+  async movePlayer(name: string) {
+    const node = this.manager.nodes.get(name)
+    if(!node.connected) throw Error('The node is not connected');
+    if (!name || node.options.identifier === this.node.options.identifier) return this;  
+    const options = {
+      op: "play",
+      guildId: this.guild,
+      track: this.queue.current.track,
+      startTime: this.position,
+    };
 
+    if (typeof options.track !== "string") {
+      options.track = (options.track as Track).track;
+    }
+    this.node = node;
+    this.manager.players.set(this.guild, this)
+    await this.node.send({ op: "voiceUpdate", guildId: this.voiceState.guildId, sessionId: this.voiceState.sessionId, event: { token: this.voiceState.event.token, endpoint: this.voiceState.event.endpoint } })
+    await this.node.send(options)
+  }
   /**
    * Sets the players equalizer band on-top of the existing ones.
    * @param bands
@@ -147,7 +176,7 @@ export class Player {
   public setEQ(...bands: EqualizerBand[]): this {
     // Hacky support for providing an array
     if (Array.isArray(bands[0])) bands = bands[0] as unknown as EqualizerBand[]
-
+ 
     if (!bands.length || !bands.every(
         (band) => JSON.stringify(Object.keys(band).sort()) === '["band","gain"]'
       )
