@@ -127,7 +127,7 @@ export class Player {
     this.manager.emit("playerCreate", this);
     this.setVolume(options.volume ?? 100);
     this.manager.on('nodeDisconnect', (node) => {
-      if(this.manager.options.ReplayOnDc && this.manager.nodes.size > 1) {
+      if(this.manager.options.replayOnDc && this.manager.nodes.size > 1) {
         for(const players of [...this.manager.players.filter(x => x.node === node).values()]) {
           players.movePlayer(this.manager.leastUsedNodes.first().options.identifier)
         }
