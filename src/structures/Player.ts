@@ -150,23 +150,19 @@ export class Player {
    * Move the player to another connected node
    * @param name
    */
-  async movePlayer(name: string) {
+  async setNode(name: string) {
+    if(!name) throw Error('Please specify node name.')
     const node = this.manager.nodes.get(name)
     if(!node.connected) throw Error('The node is not connected');
-    if (!name || node.options.identifier === this.node.options.identifier) return this;  
+    if (this.node.options.identifier === name) return this;  
     const options = {
       op: "play",
       guildId: this.guild,
       track: this.queue.current.track,
       startTime: this.position,
     };
-
-    if (typeof options.track !== "string") {
-      options.track = (options.track as Track).track;
-    }
     this.node = node;
-    this.manager.players.set(this.guild, this)
-    await this.node.send({ op: "voiceUpdate", guildId: this.voiceState.guildId, sessionId: this.voiceState.sessionId, event: { token: this.voiceState.event.token, endpoint: this.voiceState.event.endpoint } })
+    await this.node.send(this.voiceState)
     await this.node.send(options)
   }
   /**
