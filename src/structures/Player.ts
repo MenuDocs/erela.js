@@ -129,7 +129,7 @@ export class Player {
     this.manager.on('nodeDisconnect', (node) => {
       if(this.manager.options.replayOnDc && this.manager.nodes.size > 1) {
         for(const players of [...this.manager.players.filter(x => x.node === node).values()]) {
-          players.movePlayer(this.manager.leastUsedNodes.first().options.identifier)
+          players.setNode(this.manager.leastUsedNodes.first().options.identifier)
         }
       }
     })
