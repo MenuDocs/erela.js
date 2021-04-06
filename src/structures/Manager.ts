@@ -132,6 +132,11 @@ export interface Manager {
   on(event: "playerDestroy", listener: (player: Player) => void): this;
 
   /**
+   * Emitted when replayOnDc is error
+   * @event Manager#replayError 
+   */
+  on(event: "replayError", Listener: (player: Player, error: Error) => void): this;
+  /**
    * Emitted when a player queue ends.
    * @event Manager#queueEnd
    */

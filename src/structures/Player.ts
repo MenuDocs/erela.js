@@ -126,14 +126,18 @@ export class Player {
     this.manager.players.set(options.guild, this);
     this.manager.emit("playerCreate", this);
     this.setVolume(options.volume ?? 100);
-    this.manager.on('nodeDisconnect', (node) => {
-      if(this.manager.options.replayOnDc && this.manager.nodes.size > 1) {
-        for(const players of [...this.manager.players.filter(x => x.node === node).values()]) {
-          players.setNode(this.manager.leastUsedNodes.first().options.identifier)
-        }
+    if(this.manager.options.replayOnDc && this.manager.nodes.filter(x => x.connected).size > 1) {
+      try {
+        this.manager.on('nodeDisconnect', async (node) => {
+          for(const players of [...this.manager.players.filter(x => x.node === node).values()]) {
+           await players.setNode(this.manager.leastUsedNodes.first().options.identifier)
+          }
+        })
+      } catch (error) {
+        this.manager.emit('replayError', this, error)
       }
-    })
   }
+}
 
   /**
    * Same as Manager#search() but a shortcut on the player itself.
@@ -153,7 +157,7 @@ export class Player {
   async setNode(name: string) {
     if (this.node.options.identifier === name) return this; 
     const node = this.manager.nodes.get(name) 
-    if(!node) throw Error('Please specify valid node name.')
+    if(!node) throw Error('Please specify valid node name.');
     if(!node.connected) throw Error('The node is not connected');
     const options = {
       op: "play",
