@@ -72,6 +72,7 @@ export class Player {
   public bands = new Array<number>(15).fill(0.0);
   /** The voice state object from Discord. */
   public voiceState: VoiceState = Object.assign({});
+  public spotifyUri: string;
   /** The Manager. */
   public manager: Manager;
   private static _manager: Manager;
@@ -146,13 +147,18 @@ export class Player {
    */
   public setEQ(...bands: EqualizerBand[]): this {
     // Hacky support for providing an array
-    if (Array.isArray(bands[0])) bands = bands[0] as unknown as EqualizerBand[]
+    if (Array.isArray(bands[0]))
+      bands = (bands[0] as unknown) as EqualizerBand[];
 
-    if (!bands.length || !bands.every(
+    if (
+      !bands.length ||
+      !bands.every(
         (band) => JSON.stringify(Object.keys(band).sort()) === '["band","gain"]'
       )
     )
-      throw new TypeError("Bands must be a non-empty object array containing 'band' and 'gain' properties.");
+      throw new TypeError(
+        "Bands must be a non-empty object array containing 'band' and 'gain' properties."
+      );
 
     for (const { band, gain } of bands) this.bands[band] = gain;
 
@@ -278,7 +284,10 @@ export class Player {
    * @param track
    * @param options
    */
-  public async play(track: Track | UnresolvedTrack, options: PlayOptions): Promise<void>;
+  public async play(
+    track: Track | UnresolvedTrack,
+    options: PlayOptions
+  ): Promise<void>;
   public async play(
     optionsOrTrack?: PlayOptions | Track | UnresolvedTrack,
     playOptions?: PlayOptions
@@ -303,7 +312,9 @@ export class Player {
 
     if (TrackUtils.isUnresolvedTrack(this.queue.current)) {
       try {
-        this.queue.current = await TrackUtils.getClosestTrack(this.queue.current as UnresolvedTrack);
+        this.queue.current = await TrackUtils.getClosestTrack(
+          this.queue.current as UnresolvedTrack
+        );
       } catch (error) {
         this.manager.emit("trackError", this, this.queue.current, error);
         if (this.queue[0]) return this.play(this.queue[0]);
@@ -385,7 +396,8 @@ export class Player {
   /** Stops the current track, optionally give an amount to skip to, e.g 5 would play the 5th song. */
   public stop(amount?: number): this {
     if (typeof amount === "number" && amount > 1) {
-      if (amount > this.queue.length) throw new RangeError("Cannot skip more than the queue length.");
+      if (amount > this.queue.length)
+        throw new RangeError("Cannot skip more than the queue length.");
       this.queue.splice(0, amount - 1);
     }
 
@@ -464,6 +476,8 @@ export interface PlayerOptions {
 
 /** If track partials are set some of these will be `undefined` as they were removed. */
 export interface Track {
+  /** T encoded track. */
+  spotifyUri: string | null;
   /** The base64 encoded track. */
   readonly track: string;
   /** The title of the track. */
