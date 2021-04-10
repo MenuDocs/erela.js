@@ -185,8 +185,11 @@ export abstract class TrackUtils {
           new RegExp(`^${escapeRegExp(unresolvedTrack.title)}$`, "i").test(track.title)
         );
       });
-
-      if (originalAudio) return originalAudio;
+        
+      if (originalAudio) {
+        if(unresolvedTrack.spotifyUri) originalAudio.spotifyUri = unresolvedTrack.spotifyUri
+        return originalAudio;
+      }
     }
 
     if (unresolvedTrack.duration) {
@@ -194,10 +197,13 @@ export abstract class TrackUtils {
         (track.duration >= (unresolvedTrack.duration - 1500)) &&
         (track.duration <= (unresolvedTrack.duration + 1500))
       );
-
-      if (sameDuration) return sameDuration;
+      
+      if (sameDuration) {
+        if(unresolvedTrack.spotifyUri) sameDuration.spotifyUri = unresolvedTrack.spotifyUri;
+        return sameDuration;
+      }
     }
-
+    if(unresolvedTrack.spotifyUri) res.tracks[0].spotifyUri = unresolvedTrack.spotifyUri
     return res.tracks[0];
   }
 }
