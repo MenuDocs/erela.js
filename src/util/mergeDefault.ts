@@ -1,6 +1,7 @@
 import { deepClone } from './deepClone';
 import { isObject } from './isObject';
-import type { DeepRequired } from './utilityTypes';
+
+import type { DeepRequired } from './UtilityTypes';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions, @typescript-eslint/ban-types
 type NonNullObject = {};
