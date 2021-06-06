@@ -62,7 +62,7 @@ yarn add erela.js
 
 ## Getting Started
 
-- Create an application.yml file in your working directory and copy the [example](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example "application.yml file") into the created file and edit it with your configuration.
+- Create an application.yml file in your working directory and copy the [example](https://github.com/freyacodes/Lavalink/blob/master/LavalinkServer/application.yml.example "application.yml file") into the created file and edit it with your configuration.
 
 - Run the jar file by running `java -jar Lavalink.jar` in a Terminal window.
 
