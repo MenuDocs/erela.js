@@ -1,0 +1,29 @@
+{
+	"folders": [
+		{
+			"path": ".",
+			"name": "main"
+		},
+		{
+			"path": "packages\\ffmpeg"
+		},
+		{
+			"path": "packages\\erela.js-api"
+		},
+		{
+			"path": "packages\\lavalink"
+		},
+		{
+			"path": "example"
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/.idea": true,
+			"**/node_modules": true,
+			"**/dist": true,
+			"**/typings": true,
+			"**/packages": true
+		}
+	}
+}

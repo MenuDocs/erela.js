@@ -6,6 +6,4 @@ typings
 test
 
 # files
-package-lock.json
-yarn.lock
 docs.sh

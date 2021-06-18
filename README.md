@@ -26,73 +26,58 @@
 <hr>
 </div>
 
-> Erela was transferred to MenuDocs, because I no longer wish to work with Discord related development. It will from now on be maintained by [MenuDocs](https://github.com). ~ @Solaris9
+# READ ME FIRST
+
+Erela v3 changes a LOT how Erela works and how it's used. To start it is no longer a single package but rather several and usage of Erela depends on what package is being used. Audio providers is the main breaking change where you can use either Lavalink or FFMPEG with your bot and switch at any time with some code changes. Anything from now on out may be changed
+
+## Contributors
+
+Before you want to help, understand this is a bigger project than it was before and is still in early development, help is appreciated but please only help when you 100% know what is going on
 
 ## Documentation & Guides
 
-- [Documentation](http://solaris.codes/projects/erelajs/docs/gettingstarted.html "Erela.js Documentation")
+_Out dated at this point, please use with caution_
 
-- [Guides](http://solaris.codes/projects/erelajs/guides/introduction.html "Erela.js Guides")
+## Developing
 
-## Prerequisites
+> Note: This is more of a first time setup.
 
-- Java - [Azul](https://www.azul.com/downloads/zulu-community/?architecture=x86-64-bit&package=jdk "Download Azul OpenJDK"), [Adopt](https://adoptopenjdk.net/ "Download Adopt OpenJDK") or [sdkman](https://sdkman.io/install "Download sdkman")
+> Note: I also recommend using Yarn over NPM, you can have both installed and use either one but for this project Yarn is preferred.
 
-- [Lavalink](https://ci.fredboat.com/viewLog.html?buildId=lastSuccessful&buildTypeId=Lavalink_Build&tab=artifacts&guest=1 "Download Lavalink")
+1. Fork the repository
+2. `yarn install`
+3. `yarn run lerna bootstrap`
+4. `yarn run lerna run build`
+5. `yarn run lerna run types`
+6. `yarn link` the packages you wish to test to your test folder
 
-**Note**: _Java v11 or newer is required to run the Lavalink.jar. Java v13 is recommended._ If you are using **sdkman** then _its a manager, not Java, you have to install sdkman and use sdkman to install Java_
-
-**Warning**: Java v14 has issues with Lavalink.
-
-## Installation
-
-##### **NPM**
-
-```bash
-npm install erela.js
-```
-
-##### **Yarn**
-
-```bash
-yarn add erela.js
-```
-
-**Note**: _Node **v14** is required!_
-
-## Getting Started
-
-- Create an application.yml file in your working directory and copy the [example](https://github.com/Frederikam/Lavalink/blob/master/LavalinkServer/application.yml.example "application.yml file") into the created file and edit it with your configuration.
-
-- Run the jar file by running `java -jar Lavalink.jar` in a Terminal window.
-
-## Example usage
-
-Please read the guides to start: <https://solaris.codes/projects/erelajs/guides/introduction.html>
-
-## Plugins
-
-You can use plugins below to extend Erela.js' features easily.
-
-Note: These are the only ones shown before being published, check the GitHub repository for a complete list.
-
-- [erela.js-spotify](https://github.com/MenuDocs/erela.js-spotify) - Converts a Spotify URL into a UnresolvedTrack to play later.
-
+> Note: This may not be correct as I (Solaris) am using the example bot to test.
 
 ## Contributors
 
 👤 **Solaris**
 
-- Author
-- Website: <https://solaris.codes/>
-- Github: [@Solaris9](https://github.com/Solaris9)
+-   Author
+-   Website: <https://solaris.codes/>
+-   Github: [@Solaris9](https://github.com/Solaris9)
+- > Started the project and has maintained through the different versions.
 
 👤 **Anish Shobith**
 
-- Contributor
-- Github: [@Anish-Shobith](https://github.com/Anish-Shobith)
+-   Contributor
+-   Github: [@Anish-Shobith](https://github.com/Anish-Shobith)
+- > Has helped maintained through the different versions.
+
+👤 **2D**
+
+-   Contributor
+-   Github: [@melike2d](https://github.com/melike2f)
+- > Helped with v3 audio provider and general Lavalink things.
 
 👤 **ayntee**
 
-- Contributor
-- Github: [@ayntee](https://github.com/ayntee)
+-   Contributor
+-   Github: [@ayntee](https://github.com/ayntee)
+- > Helped with v1 and v2.
+
+And the many others in the community who have helped keep Erela.JS running clean, thank you.

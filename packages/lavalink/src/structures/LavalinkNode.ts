@@ -4,7 +4,7 @@ import { container } from 'tsyringe';
 import { ConnectionEvents, OutgoingEvents, WebSocketEvents } from '../types/Events';
 import { enumerable, isObject, mergeDefault, DefaultNodeOptions, DefaultStatsOptions } from '../util';
 
-import type { Manager } from './Manager';
+import type { LavalinkManager } from './LavalinkManager';
 import type { IncomingPayload, IncomingStatsPayload } from '../types/IncomingPayloads';
 import type { OutgoingPayload } from '../types/OutgoingPayloads';
 
@@ -14,19 +14,18 @@ interface Sendable {
 	data: Buffer | string;
 }
 
-export class Node implements NodeOptions {
-
+export class LavalinkNode implements NodeOptions {
 	/**
 	 * The id of the Node.
 	 */
 	public id: NodeOptions['id'];
-	
+
 	/**
 	 * The host of the Node, this could be ip or domain.
 	 */
 	@enumerable(false)
 	public host: NodeOptions['host'];
-	
+
 	/**
 	 * The password to the Node.
 	 */
@@ -40,10 +39,9 @@ export class Node implements NodeOptions {
 	public port: NodeOptions['port'];
 
 	/**
-     * The interval that the node will try to reconnect to lavalink at in milliseconds
-     */
+	 * The interval that the node will try to reconnect to lavalink at in milliseconds
+	 */
 	public reconnectInterval: NodeOptions['reconnectInterval'];
-
 
 	/**
 	 * The statistics of this Node.
@@ -66,8 +64,13 @@ export class Node implements NodeOptions {
 	public ws: WebSocket | null = null;
 
 	/**
-     * The reconnect timeout
-     */
+	 * The amount of search requests this node has made.
+	 */
+	public calls = 0;
+
+	/**
+	 * The reconnect timeout
+	 */
 	#reconnect?: NodeJS.Timeout;
 
 	/**
@@ -78,36 +81,37 @@ export class Node implements NodeOptions {
 	/**
 	 * The bound callback function for `wsSend`.
 	 */
-	#send: Node['wsSend'];
+	#send: LavalinkNode['wsSend'];
 	/**
 	 * The bound callback function for `onOpen`.
 	 */
-	#open: Node['onOpen'];
+	#open: LavalinkNode['onOpen'];
 
 	/**
 	 * The bound callback function for `onClose`.
 	 */
-	#close: Node['onClose'];
+	#close: LavalinkNode['onClose'];
 
 	/**
 	 * The bound callback function for `onMessage`.
 	 */
-	#message: Node['onMessage'];
+	#message: LavalinkNode['onMessage'];
 
 	/**
 	 * The bound callback function for `onError`.
 	 */
-	#error: Node['onError'];
+	#error: LavalinkNode['onError'];
 
 	/**
 	 * The base of the connection to lavalink.
 	 * @param options The options of the Node {@link NodeOptions} 
 	 */
-    public constructor(options: Partial<NodeOptions>) {
+	public constructor(options: Partial<NodeOptions>) {
 		if (!isObject(options)) throw TypeError('The node options should be of type object!');
 		mergeDefault(DefaultNodeOptions as Required<NodeOptions>, options);
 		mergeDefault(DefaultStatsOptions as Required<Omit<IncomingStatsPayload, 'op'>>, this.stats);
-		this.id = options.id;
+
+		this.id = options.id ?? options.host;
 		this.host = options.host;
 		this.port = options.port;
 		this.password = options.password;
@@ -120,19 +124,18 @@ export class Node implements NodeOptions {
 		this.#close = this.onClose.bind(this);
 		this.#message = this.onMessage.bind(this);
 		this.#error = this.onError.bind(this);
-
-    }
+	}
 
 	/**
-	 * The manager assoicated to this Node.
+	 * The manager associated to this Node.
 	 */
-    public get manager(): Manager {
-        return container.resolve<Manager>('Manager');
-    }
+	public get manager(): LavalinkManager {
+		return container.resolve<LavalinkManager>('LavalinkManager');
+	}
 
 	/**
-     * Whether or not the node is connected
-     */
+	 * Whether or not the node is connected
+	 */
 	public get connected(): boolean {
 		if (!this.ws) return false;
 		return this.ws.readyState === WebSocket.OPEN;
@@ -145,11 +148,11 @@ export class Node implements NodeOptions {
 	 */
 	public send(payload: OutgoingPayload): Promise<void> {
 		if (!this.ws) return Promise.reject(new Error('The client has not been initialized.'));
-	
+
 		return new Promise((resolve, reject) => {
 			const encoded = JSON.stringify(payload);
 			const send = { resolve, reject, data: encoded };
-	
+
 			if (this.ws.readyState === WebSocket.OPEN) this.wsSend(send);
 			else this.#queue.push(send);
 		});
@@ -162,15 +165,15 @@ export class Node implements NodeOptions {
 	 */
 	public async close(code?: number, data?: string): Promise<boolean> {
 		if (!this.ws) return false;
-	
+
 		this.ws.off(WebSocketEvents.CLOSE, this.#close);
-	
+
 		this.ws.close(code, data);
-	
+
 		this.manager.emit(ConnectionEvents.CLOSE, ...(await once(this.ws, WebSocketEvents.CLOSE)));
 		this.ws.removeAllListeners();
 		this.ws = null;
-	
+
 		return true;
 	}
 
@@ -191,7 +194,7 @@ export class Node implements NodeOptions {
 		if (this.resumeKey) headers['Resume-Key'] = this.resumeKey;
 
 
-		const ws = new WebSocket(`ws://${this.host}:${this.port}/`, { headers });
+		this.ws = new WebSocket(`ws://${this.host}:${this.port}/`, { headers });
 		this._registerWSEventListeners();
 
 		return new Promise<void>((resolve, reject) => {
@@ -216,14 +219,14 @@ export class Node implements NodeOptions {
 			}
 
 			function cleanup() {
-				ws.off(WebSocketEvents.OPEN, onOpen);
-				ws.off(WebSocketEvents.ERROR, onError);
-				ws.off(WebSocketEvents.CLOSE, onClose);
+				self.ws.off(WebSocketEvents.OPEN, onOpen);
+				self.ws.off(WebSocketEvents.ERROR, onError);
+				self.ws.off(WebSocketEvents.CLOSE, onClose);
 			}
 
-			ws.on(WebSocketEvents.OPEN, onOpen);
-			ws.on(WebSocketEvents.ERROR, onError);
-			ws.on(WebSocketEvents.CLOSE, onClose);
+			self.ws.on(WebSocketEvents.OPEN, onOpen);
+			self.ws.on(WebSocketEvents.ERROR, onError);
+			self.ws.on(WebSocketEvents.CLOSE, onClose);
 		});
 	}
 
@@ -233,7 +236,7 @@ export class Node implements NodeOptions {
 	 * This is useful for avoiding accidental leaks.
 	 * @param key The key to send when resuming the session. Set to `null` or leave unset to disable resuming.
 	 */
-     public configureResuming(timeout = this.resumeTimeout, key: string | null = null): Promise<void> {
+	public configureResuming(timeout = this.resumeTimeout, key: string | null = null): Promise<void> {
 		this.resumeKey = key;
 
 		return this.send({
@@ -288,19 +291,19 @@ export class Node implements NodeOptions {
 			return;
 		}
 
-		if ('guildId' in pk) this.manager.players.get(pk.guildId)?.emit(pk.op, pk);
+		if ('guildId' in pk) this.manager.emit(pk.op, pk);
 
 		this.manager.emit(pk.op, pk);
 	}
 
 	private _reconnect() {
 		this.#reconnect = setTimeout(() => {
-            this.ws.removeAllListeners();
-            this.ws = null;
+			this.ws.removeAllListeners();
+			this.ws = null;
 
-            this.manager.emit('reconnecting', this);
-            this.connect();
-        }, this.reconnectInterval);
+			this.manager.emit('reconnecting', this);
+			this.connect();
+		}, this.reconnectInterval);
 	}
 
 	private async _flush() {
@@ -313,7 +316,7 @@ export class Node implements NodeOptions {
 /**
  * The options for the node.
  */
- export interface NodeOptions {
+export interface NodeOptions {
 
 	/**
 	 * Id of the node.
@@ -360,25 +363,21 @@ export class Node implements NodeOptions {
 	 */
 	resumeKey?: string;
 
-    /**
-     * The resume timeout
+	/**
+	 * The resume timeout
 	 * @example
 	 * ```json
 	 * 120
 	 * ```
-     */
+	 */
 	resumeTimeout: number;
 
-    /**
-     * The interval that the node will try to reconnect to lavalink at in milliseconds.
+	/**
+	 * The interval that the node will try to reconnect to lavalink at in milliseconds.
 	 * @example
 	 * ```json
 	 * 10000
 	 * ```
-     */
+	 */
 	reconnectInterval: number;
-
 }
-
-
-

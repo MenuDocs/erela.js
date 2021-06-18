@@ -4,12 +4,9 @@
     "target": "es6",
     "module": "commonjs",
     "declaration": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "esModuleInterop": true
-  },
-  "exclude": ["node_modules", "dist"]
+  }
 }

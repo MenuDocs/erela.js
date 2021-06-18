@@ -119,7 +119,7 @@ export interface IncomingEventTrackStuckPayload extends IIncomingEvent {
 }
 
 export interface IncomingEventWebSocketClosedPayload extends IIncomingEvent {
-	type: Events.WEBSOCKET_CLOSEDEVENT;
+	type: Events.WEBSOCKET_CLOSED_EVENT;
 
 	/**
 	 * The closing error code from the websocket.

@@ -1,0 +1,12 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "discord.js-light": "^3.5.11",
+    "erela.js-api": "0.0.1",
+    "lavalink-erela.js-provider": "2.3.3"
+  }
+}

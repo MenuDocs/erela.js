@@ -6,13 +6,13 @@ export enum IncomingEvents {
     TRACK_END_EVENT = 'TrackEndEvent',
     TRACK_EXCEPTION_EVENT = 'TrackExceptionEvent',
     TRACK_STUCK_EVENT = 'TrackStuckEvent',
-    WEBSOCKET_CLOSEDEVENT = 'WebSocketClosedEvent'
+    WEBSOCKET_CLOSED_EVENT = 'WebSocketClosedEvent'
 }
 
 export enum OutgoingEvents {
     DESTROY = 'destroy',
     STOP = 'stop',
-    SEEk = 'seek',
+    SEEK = 'seek',
     PAUSE = 'pause',
     PLAY = 'play',
     VOICE_UPDATE = 'voiceUpdate',

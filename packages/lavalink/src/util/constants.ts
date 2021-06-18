@@ -1,4 +1,4 @@
-import type { NodeOptions } from "../structures/Node";
+import type { NodeOptions } from "../structures/LavalinkNode";
 import type { IncomingStatsPayload } from "../types/IncomingPayloads";
 
 export const DefaultNodeOptions: Omit<NodeOptions, 'id'> = {

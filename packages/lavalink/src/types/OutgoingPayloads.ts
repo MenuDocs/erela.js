@@ -31,7 +31,7 @@ export interface OutgoingStopPayload extends BaseOutgoingPayload {
 }
 
 export interface OutgoingSeekPayload extends BaseOutgoingPayload {
-	op: Events.SEEk;
+	op: Events.SEEK;
 
 	/**
 	 * The offset in milliseconds to play the current track from.
