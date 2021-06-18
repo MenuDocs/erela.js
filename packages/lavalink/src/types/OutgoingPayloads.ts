@@ -192,6 +192,16 @@ export interface OutgoingFilterPayload extends BaseOutgoingPayload {
 	 * {@link https://en.wikipedia.org/wiki/Panning_(audio) Audio Panning}.
 	 */
 	rotation?: RotationOptions;
+
+	/**
+	 * The channel mix options.
+	 */
+	channelMix?: ChannelMixOptions;
+
+	/**
+	 * The low pass options.
+	 */
+	lowPass?: LowPassOptions;
 }
 
 /**
@@ -325,4 +335,47 @@ export interface RotationOptions {
 	 * @default 2.0
 	 */
 	rotationHz?: number;
+}
+
+/**
+ * Mixes both channels (left and right), with a configurable factor on how much each channel affects the other.
+ * With the defaults, both channels are kept independent from each other.
+ * @note Setting all factors to 0.5 means both channels get the same audio.
+ * @note This is not available in Lavalink v3.3.
+ */
+ export interface ChannelMixOptions {
+	/**
+	 * The left-to-left mix, modifies the volume in the left channel.
+	 * @default 1.0
+	 */
+	leftToLeft: number;
+
+	/**
+	 * The left-to-right mix, modifies how much of the left channel goes to the right one.
+	 * @default 0.0
+	 */
+	leftToRight: number;
+
+	/**
+	 * The right-to-left mix, modifies how much of the right channel goes to the left one.
+	 * @default 0.0
+	 */
+	rightToLeft: number;
+
+	/**
+	 * The right-to-right mix, modifies the volume in the right channel.
+	 * @default 1.0
+	 */
+	rightToRight: number;
+}
+
+/**
+ * Supresses high frequencies given a frequency.
+ * @note This is not available in Lavalink v3.3.
+ */
+export interface LowPassOptions {
+	/**
+	 * The amount of smoothing done.
+	 */
+	smoothing: number;
 }
