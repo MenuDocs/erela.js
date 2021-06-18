@@ -39,19 +39,16 @@ export interface PlayerOptions {
 /**
  * The base Player.
  */
-export interface Player<
-    PO extends PlayerOptions = PlayerOptions,
-    MO extends ManagerOptions = ManagerOptions
-> {
+export interface Player<O extends PlayerOptions = PlayerOptions> {
     /**
      * The options for this Player.
      */
-    readonly options: PO;
+    readonly options: O;
 
     /**
      * The manager
      */
-    readonly manager: Manager<MO>
+    readonly manager: Manager
 
     /**
      * The guild this Player is bound to.

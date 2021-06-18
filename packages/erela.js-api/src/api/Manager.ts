@@ -15,20 +15,16 @@ export interface ManagerOptions {
 /**
  * The base Manager
  */
-export interface Manager<
-    MO extends ManagerOptions = ManagerOptions,
-    PO extends PlayerOptions = PlayerOptions,
-    P extends Player<PO> = Player<PO>
-    > extends EventEmitter {
+export interface Manager extends EventEmitter {
     /**
      * The options provided to this manager. 
      */
-    readonly options: MO;
+    readonly options: ManagerOptions;
 
     /**
      * All the players that were created by this manager.
      */
-    readonly players: Collection<string, P>;
+    readonly players: Collection<string, Player>;
 
     /**
      * Adds a plugin
@@ -45,17 +41,17 @@ export interface Manager<
     /**
      * Creates a Player with the provided Guild ID, `textChannel` and `voiceChannel` must be bound later.
      */
-    create(guild: string): P;
+    create(guild: string): Player;
 
     // /**
     //  * Creates a Player with the provided Guild and Voice channel ID, `textChannel` must be bound later.
     //  */
-    // create(guild: string, channel: string): P;
+    // create(guild: string, channel: string): Player;
 
     /**
      * Creates a Player with the provided player options.
      */
-    create(options: PlayerOptions): P;
+    create(options: PlayerOptions): Player;
 
     /**
      * Destroys a Player using the Guild ID.
@@ -65,5 +61,5 @@ export interface Manager<
     /**
      * Destroys a Player using the Player instance.
      */
-    destroy(player: P): void;
+    destroy(player: Player): void;
 }

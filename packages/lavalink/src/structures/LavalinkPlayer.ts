@@ -5,9 +5,13 @@ import { LavalinkNode } from "./LavalinkNode";
 import { OutgoingEvents } from "../types/Events" 
 import { OutgoingPlayPayload } from "../types/OutgoingPayloads";
 
+export interface LavalinkPlayerOptions extends PlayerOptions {
+    node?: string;
+}
+
 export class LavalinkPlayer implements Player {
     node: LavalinkNode;
-    options: PlayerOptions;
+    options: LavalinkPlayerOptions;
     guild: string;
     textChannel?: string;
     voiceChannel?: string;
@@ -18,8 +22,8 @@ export class LavalinkPlayer implements Player {
     state?: State;
     voiceState: any = {};
 
-    public constructor(options: Partial<PlayerOptions>) {
-        this.options = options as PlayerOptions;
+    public constructor(options: Partial<LavalinkPlayerOptions>) {
+        this.options = options as LavalinkPlayerOptions;
 
         this.guild = options.guild;
         this.textChannel = options.textChannel ?? null;

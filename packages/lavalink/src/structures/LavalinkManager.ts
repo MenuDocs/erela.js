@@ -16,9 +16,8 @@ export interface LavalinkManagerOptions extends ManagerOptions {
 const TEMPLATE = JSON.stringify(["event", "guildId", "op", "sessionId"]);
 
 export class LavalinkManager extends EventEmitter implements Manager {
-
     /**
-     * The user id of the bot this Manager is managing
+     * The Manager version.
      */
     public version: string = require("../../package.json").version;
 
@@ -28,9 +27,9 @@ export class LavalinkManager extends EventEmitter implements Manager {
     public user!: string;
 
     /**
-     * The amount of shards the bot has, by default its 1
+     * The amount of shards the bot has, by default it's 1
      */
-    public shardCount: number;
+    public shardCount = 1;
 
     /**
      * The Nodes associated to this Manager.
@@ -88,10 +87,8 @@ export class LavalinkManager extends EventEmitter implements Manager {
     }
     public async init(user: string): Promise<void> {
         this.user = user;
-
-        const nodes: Promise<void>[] = []
-        for (const node of this.nodes.values()) nodes.push(node.connect());
-        await Promise.all(nodes)
+        
+        await Promise.all(this.nodes.map(node => node.connect()))
     }
 
     use(plugin: Plugin): void;

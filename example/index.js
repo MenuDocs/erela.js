@@ -5,49 +5,48 @@ const { readdirSync } = require('fs');
 const { Erela } = require('erela.js-api');
 const { LavalinkManager } = require('lavalink-erela.js-provider');
 
-const client = new Client();
-client.commands = new Collection();
+// import 'reflect-metadata';
 
-const files = readdirSync('./commands').filter((file) => file.endsWith('.js'));
+// import { Client, Collection } from 'discord.js';
+// import { readdirSync } from 'fs';
+// import { Erela } from 'erela.js-api';
+// import { LavalinkManager } from 'lavalink-erela.js-provider';
 
-for (const file of files) {
-    const command = require(`./commands/${file}`);
-    client.commands.set(command.name, command);
-}
+// declare module "discord.js" {
+//     export interface Client {
+//         commands: Collection<string, NodeJS.Dict<any>>
+//         manager: LavalinkManager
+//     }
+// }
+
 async function main() {
-    /** @type {import("lavalink-erela.js-provider/structures/LavalinkManager").LavalinkManager} */
+    const client = new Client();
+    // client.commands = new Collection();
+    
+    // const files = readdirSync('./commands').filter((file) => file.endsWith('.js'));
+    
+    // for (const file of files) {
+    //     const command = require(`./commands/${file}`);
+    //     client.commands.set(command.name, command);
+    // }
 
+    /** @type {import("erela.js-api").Manager} */
+    /** @type {import("lavalink-erela.js-provider").LavalinkManager} */
     const manager = await Erela.create({
         nodes: [
             {
                 host: 'localhost',
-                retryDelay: 5000,
+                password: "youshallnotpass",
+                port: 2333
             },
         ],
-        send: (id, payload) => {
+        send: async (id, payload) => {
             const guild = client.guilds.cache.get(id);
             if (guild) guild.shard.send(payload);
         },
     });
 
-    manager
-        .on('nodeConnect', (node) => console.log(`Node "${node.options.identifier}" connected.`))
-        .on('nodeError', (node, error) =>
-            console.log(`Node "${node.options.identifier}" encountered an error: ${error.message}.`)
-        )
-        .on('trackStart', (player, track) => {
-            const channel = client.channels.cache.get(player.textChannel);
-            channel.send(`Now playing: \`${track.title}\`, requested by \`${track.requester.tag}\`.`);
-        })
-        .on('queueEnd', (player) => {
-            const channel = client.channels.cache.get(player.textChannel);
-            channel.send('Queue has ended.');
-            player.destroy();
-        });
-
     client.once('ready', () => {
-        // client.manager.init(client.user.id);
-
         manager.init(client.user.id);
         console.log(`Logged in as ${client.user.tag}`);
     });
@@ -57,15 +56,6 @@ async function main() {
     client.on('message', async (message) => {
         if (!message.content.startsWith('!') || !message.guild || message.author.bot) return;
         const [name, ...args] = message.content.slice(1).split(/\s+/g);
-
-        // const command = client.commands.get(name);
-        // if (!command) return;
-
-        // try {
-        //   command.run(message, args);
-        // } catch (err) {
-        //   message.reply(`an error occurred while running the command: ${err.message}`);
-        // }
 
         if (name === 'play') {
             const player = manager.create(message.guild.id);
