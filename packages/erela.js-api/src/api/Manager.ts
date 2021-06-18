@@ -15,15 +15,11 @@ export interface ManagerOptions {
 /**
  * The base Manager
  */
-export interface Manager<
-    MO extends ManagerOptions = ManagerOptions,
-    PO extends PlayerOptions = PlayerOptions,
-    P extends Player<PO> = Player<PO>
-    > extends EventEmitter {
+export interface Manager<O extends ManagerOptions = ManagerOptions, P extends Player = Player> extends EventEmitter {
     /**
      * The options provided to this manager. 
      */
-    readonly options: MO;
+    readonly options: O;
 
     /**
      * All the players that were created by this manager.
