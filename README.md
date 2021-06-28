@@ -26,58 +26,61 @@
 <hr>
 </div>
 
-# READ ME FIRST
+# Erela.JS
 
-Erela v3 changes a LOT how Erela works and how it's used. To start it is no longer a single package but rather several and usage of Erela depends on what package is being used. Audio providers is the main breaking change where you can use either Lavalink or FFMPEG with your bot and switch at any time with some code changes. Anything from now on out may be changed
+This package is the Erela.JS API that providers implement. By itself this does nothing but it's required by any Erela.JS provider to function.
 
-## Contributors
+## How it works
 
-Before you want to help, understand this is a bigger project than it was before and is still in early development, help is appreciated but please only help when you 100% know what is going on
+Providers are simply different audio players (lavalink, ffmpeg) using the Erela.JS standard. Please view the specific [provider](#providers) to learn how to install it.
 
-## Documentation & Guides
+## Providers
 
-_Out dated at this point, please use with caution_
+You can use providers below to play audio to a voice channel with that audio processor.
 
-## Developing
+- [lavalink](https://github.com/Erelajs/lavalink)
+- [ffmpeg](https://github.com/Erelajs/ffmpeg)
 
-> Note: This is more of a first time setup.
+## Creating your own provider
 
-> Note: I also recommend using Yarn over NPM, you can have both installed and use either one but for this project Yarn is preferred.
+[Please click here to find out more about creating your own providers.](./pages/providers)
 
-1. Fork the repository
-2. `yarn install`
-3. `yarn run lerna bootstrap`
-4. `yarn run lerna run build`
-5. `yarn run lerna run types`
-6. `yarn link` the packages you wish to test to your test folder
+## Plugins
 
-> Note: This may not be correct as I (Solaris) am using the example bot to test.
+You can use plugins below to extend Erela.js' features easily.
+
+> Note: There are two kinds of plugins, *generic* and *provider*, one will work with any Erela provider and the other may only work with a specific provider.
+> Note: These are the only ones shown before being published, check the GitHub repository for a complete list.
+
+- [erela.js-spotify](https://github.com/Erelajs/spotify) - Allows you to search songs on Spotify to play using YouTube.
+
+## Creating your own plugins
+
+[Please click here to find out more about creating your own plugins.](./pages/plugins)
 
 ## Contributors
 
 👤 **Solaris**
 
--   Author
--   Website: <https://solaris.codes/>
--   Github: [@Solaris9](https://github.com/Solaris9)
-- > Started the project and has maintained through the different versions.
-
-👤 **Anish Shobith**
-
--   Contributor
--   Github: [@Anish-Shobith](https://github.com/Anish-Shobith)
-- > Has helped maintained through the different versions.
+- Author
+- Website: <https://solaris.codes/>
+- Github: [@Solaris9](https://github.com/Solaris9)
+- > Started Erela.JS and has managed it through the many versions.
 
 👤 **2D**
 
--   Contributor
--   Github: [@melike2d](https://github.com/melike2f)
-- > Helped with v3 audio provider and general Lavalink things.
+- Contributor
+- Github: [@melike2d](https://github.com/melike2d)
+- > Helped with V3 and the providers idea.
+
+👤 **Anish Shobith**
+
+- Contributor
+- Github: [@Anish-Shobith](https://github.com/Anish-Shobith)
+- > Helped with Erela.JS through the many versions.
 
 👤 **ayntee**
 
--   Contributor
--   Github: [@ayntee](https://github.com/ayntee)
-- > Helped with v1 and v2.
-
-And the many others in the community who have helped keep Erela.JS running clean, thank you.
+- Contributor
+- Github: [@ayntee](https://github.com/ayntee)
+- > Helped with Erela.JS V1 and V2.

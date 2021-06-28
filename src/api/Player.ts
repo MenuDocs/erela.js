@@ -1,5 +1,4 @@
-import { State } from "../impl/State";
-import { Manager, ManagerOptions } from "./Manager";
+import { Manager } from "./Manager";
 
 /**
  * The base PlayerOptions.
@@ -84,11 +83,6 @@ export interface Player<O extends PlayerOptions = PlayerOptions> {
      * The volume the player is playing at.
      */
     volume?: number | null;
-    
-    /**
-     * The state the player is in.
-     */
-    state?: State | null;
 
     /**
      * Connects to the specified voice channel or the one provided as an option.

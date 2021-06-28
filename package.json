@@ -1,35 +1,20 @@
 {
   "name": "erela.js",
-  "description": "An easy to use audio client for Node.JS",
-  "workspaces": [
-    "./packages/*",
-    "./example"
-  ],
+  "version": "0.0.0",
+  "description": "An easy to use Discord audio client for Node.JS supporting Lavalink and FFMPEG. .",
+  "main": "dist/index.js",
+  "repository": "https://github.com/erelajs/erela.js",
   "author": "MenuDocs (https://github.com/MenuDocs)",
-  "contributors": [
-    "Solaris9",
-    "Anish-Shobith",
-    "ayntee"
-  ],
   "license": "Apache-2.0",
-  "repository": "MenuDocs/erela.js",
-  "bugs": "https://github.com/MenuDocs/erela.js",
+  "types": "./typings/index.d.ts",
   "scripts": {
-    "lint": "eslint packages --ext .ts",
-    "lint:fix": "yarn lint --fix"
-  },
-  "private": true,
-  "devDependencies": {
-    "@types/node": "^15.12.2",
-    "@typescript-eslint/eslint-plugin": "^4.26.1",
-    "@typescript-eslint/parser": "^4.26.1",
-    "dts-bundle": "^0.7.3",
-    "eslint": "^7.28.0",
-    "lerna": "^4.0.0",
-    "rimraf": "^3.0.2",
-    "typescript": "^4.3.2"
+    "build": "tsc",
+    "types": "dts-bundle --removeSource --name erela.js --main ./dist --out ../typings/index.d.ts --baseDir ./dist"
   },
   "dependencies": {
-    "reflect-metadata": "^0.1.13"
+    "@discordjs/collection": "^0.1.6"
+  },
+  "devDependencies": {
+    "@types/node": "^15.12.2"
   }
 }
