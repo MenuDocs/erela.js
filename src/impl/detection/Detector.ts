@@ -1,63 +1,64 @@
+/* eslint-disable valid-jsdoc */
 /**
  * Detects and finds any provider packages.
  */
-import { existsSync } from "fs";
-import { join } from "path";
+import { existsSync } from 'fs';
+import { join } from 'path';
 
-export namespace Detector {
+interface PackageJson {
+	name?: string;
+	version?: string;
+	dependencies?: Record<string, string>;
+	devDependencies?: Record<string, string>;
+	peerDependencies?: Record<string, string>;
+}
 
-    const dependencyRegex = /^(?:@(?<scope>\w+)\/)?(?<dependency>.+)$/mi;
-    const providerFormat = "erela.js-provider";
+const dependencyRegex = /^(?:@(?<scope>\w+)\/)?(?<dependency>.+)$/mi;
+const providerFormat = 'erela.js-provider';
 
-    /**
-     * Finds and returns the root package.json.
-     */
-    export function getProjectPackage(): PackageJson {
-        const path = join(process.cwd(), "package.json");
-        if (!existsSync(path)) {
-            throw new Error("Unable to find root package.json")
-        }
+export = {
+	/**
+	 * Finds and returns the root package.json.
+	 */
+	getProjectPackage(): PackageJson {
+		const path = join(process.cwd(), 'package.json');
+		if (!existsSync(path)) {
+			throw new Error('Unable to find root package.json');
+		}
 
-        return require(path);
-    }
+		return require(path);
+	},
 
-    /**
-     * Finds all providers within the root package.json, whether they are installed or not.
-     */
-    export function findProviders(): string[] {
-        const { dependencies } = getProjectPackage();
-        if (!dependencies) {
-            return [];
-        }
+	/**
+	 * Finds all providers within the root package.json, whether they are installed or not.
+	 */
+	findProviders(): string[] {
+		const { dependencies } = this.getProjectPackage();
+		if (!dependencies) {
+			return [];
+		}
 
-        const providers = Object.keys(dependencies)
-            .filter(str => dependencyRegex.test(str))
-            .map(m => dependencyRegex.exec(m)!)
-            .filter(m => followsFormat(m.groups?.scope, m.groups?.dependency));
+		const providers = Object.keys(dependencies)
+			.filter(dependencyRegex.test)
+			.map(dependencyRegex.exec)
+			.filter(this.followsFormat);
 
-        return providers.map(m => m[0]);
-    }
+		return providers.map(deps => deps[0]);
+	},
 
-    /**
-     * Whether a dependency name follows the required format.
-     *
-     * @param scope The dependency scope, or null if was none.
-     * @param dependency The dependency name
-     */
-    export function followsFormat(scope?: string, dependency?: string): boolean {
-        if (!dependency) {
-            return false;
-        }
+	/**
+	 * Whether a dependency name follows the required format.
+	 *
+	 * @param scope The dependency scope, or null if was none.
+	 * @param dependency The dependency name
+	 */
+	followsFormat(res: RegExpExecArray): boolean {
+		const { scope, dependency } = res.groups;
 
-        return scope ? dependency === providerFormat : dependency.endsWith(providerFormat);
-    }
+		if (!dependency) {
+			return false;
+		}
 
-    interface PackageJson {
-        name?: string;
-        version?: string;
-        dependencies?: NodeJS.Dict<string>;
-        devDependencies?: NodeJS.Dict<string>;
-        peerDependencies?: NodeJS.Dict<string>;
-    }
-
+		return scope ? dependency === providerFormat : dependency.endsWith(providerFormat);
+	}
 }

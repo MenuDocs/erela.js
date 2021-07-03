@@ -3,7 +3,3 @@ node_modules
 dist
 .idea
 typings
-test
-
-# files
-docs.sh

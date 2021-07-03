@@ -1,47 +1,48 @@
-import type { Player } from "./api/Player";
-import type { Manager } from "./api/Manager";
-import { Detector } from "./impl/detection/Detector";
+import type { Manager } from './api/Manager';
+import { Plugin } from './api/Plugin';
+import Detector from './impl/detection/Detector';
 
-export namespace Erela {
-	const plugins: Plugin[] = [];
+type Class<T> = {
+	// eslint-disable-next-line no-unused-vars
+	new(...args: unknown[]): T;
+}
 
-	/**
-	 * Adds a plugin that will be used when a Manager is created.
-	 * @param plugin Plugin
-	 */
-	export function use(plugin: Plugin): void {
-		plugins.push(plugin);
-	}
+const plugins: Plugin[] = [];
 
-	/**
-	 * Creates a new player manager with the supplied options.
-	 * @param options The options to supply the player manager.
-	 * @param klass The provider class to instantiate.
-	 */
-	export async function create<M extends Manager>(options?: M["options"], provider?: Class<M>): Promise<M> {
-		if (!provider) {
-			const foundProviders = Detector.findProviders();
-			if (!foundProviders.length) {
-				throw new Error("No pre-installed providers were found, install one or provide a class to instantiate");
-			}
+/**
+ * Adds a plugin that will be used when a Manager is created.
+ * @param plugin Plugin
+ */
+export function use(plugin: Plugin): void {
+	plugins.push(plugin);
+}
 
-			const foundProvider = foundProviders[0];
-
-			const exportedManager = (require(foundProvider)).manager;
-			if (!exportedManager) {
-				throw new Error(`The provider "${foundProvider}" doesn't export a Manager`);
-			}
-
-			provider = exportedManager;
+/**
+ * Creates a new player manager with the supplied options.
+ * @param options The options to supply the player manager.
+ * @param provider The provider class to instantiate.
+ */
+export async function create<M extends Manager>(options?: M['options'], provider?: Class<M>): Promise<M> {
+	if (!provider) {
+		const foundProviders = Detector.findProviders();
+		if (!foundProviders.length) {
+			throw new Error('No pre-installed providers were found, install one or provide a class to instantiate');
 		}
 
-		const manager = new provider!!(options);
-		if (plugins.length) manager.use(plugins);
+		const foundProvider = foundProviders[0];
 
-		return manager;
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
+		const exportedManager = require(foundProvider).manager;
+		if (!exportedManager) {
+			throw new Error(`The provider "${foundProvider}" doesn't export a Manager`);
+		}
+
+		provider = exportedManager;
 	}
 
-	type Class<T> = {
-		new(...args: any): T;
-	}
+	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+	const manager = new provider!(options);
+	if (plugins.length) manager.use(plugins);
+
+	return manager;
 }
