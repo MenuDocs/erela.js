@@ -406,7 +406,7 @@ export class Node {
 }
 
 /** Modifies any outgoing REST requests. */
-export type ModifyRequest = (request: PetitioRequest) => any | Promise<any>;
+export type ModifyRequest = (request: PetitioRequest) => unknown;
 
 export interface NodeOptions {
   /** The host for the node. */
