@@ -55,7 +55,7 @@ export declare class Node {
     protected socketClosed(player: Player, payload: WebSocketClosedEvent): void;
 }
 /** Modifies any outgoing REST requests. */
-export declare type ModifyRequest = (request: PetitioRequest) => any | Promise<any>;
+export declare type ModifyRequest = (request: PetitioRequest) => unknown;
 export interface NodeOptions {
     /** The host for the node. */
     host: string;
