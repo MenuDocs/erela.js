@@ -1,5 +1,5 @@
 <div align = "center">
-    <img src = "https://solaris.codes/projects/erelajs/images/transparent_logo.png">
+    <img src = "https://solaris-site.netlify.app/projects/erelajs/images/transparent_logo.png">
     <hr>
     <br>
     <a href="https://discord.gg/menudocs">
@@ -30,9 +30,9 @@
 
 ## Documentation & Guides
 
-- [Documentation](http://solaris.codes/projects/erelajs/docs/gettingstarted.html "Erela.js Documentation")
+- [Documentation](https://solaris-site.netlify.app/projects/erelajs/docs/gettingstarted.html "Erela.js Documentation")
 
-- [Guides](http://solaris.codes/projects/erelajs/guides/introduction.html "Erela.js Guides")
+- [Guides](https://solaris-site.netlify.app/projects/erelajs/guides/introduction.html "Erela.js Guides")
 
 ## Prerequisites
 
