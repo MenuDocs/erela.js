@@ -30,7 +30,7 @@
 
 ## Documentation & Guides
 
-- [Documentation](https://solaris-site.netlify.app/projects/erelajs/docs/gettingstarted.html "Erela.js Documentation")
+- [Documentation](https://erelajs-docs.netlify.app/docs/gettingstarted.html "Erela.js Documentation")
 
 - [Guides](https://solaris-site.netlify.app/projects/erelajs/guides/introduction.html "Erela.js Guides")
 
@@ -68,7 +68,7 @@ yarn add erela.js
 
 ## Example usage
 
-Please read the guides to start: <https://solaris.codes/projects/erelajs/guides/introduction.html>
+Please read the guides to start: <https://erelajs-docs.netlify.app/docs/gettingstarted.html#example-usage>
 
 ## Plugins
 
