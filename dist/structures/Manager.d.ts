@@ -188,6 +188,8 @@ export interface ManagerOptions {
     autoPlay?: boolean;
     /** An array of track properties to keep. `track` will always be present. */
     trackPartial?: string[];
+    /** The default search platform to use, can be "youtube", "youtube music", or "soundcloud". */
+    defaultSearchPlatform?: SearchPlatform;
     /**
      * Function to send data to the websocket.
      * @param id
@@ -195,9 +197,10 @@ export interface ManagerOptions {
      */
     send(id: string, payload: Payload): void;
 }
+export declare type SearchPlatform = "youtube" | "youtube music" | "soundcloud";
 export interface SearchQuery {
     /** The source to search from. */
-    source?: "youtube" | "soundcloud";
+    source?: SearchPlatform;
     /** The query to search for. */
     query: string;
 }

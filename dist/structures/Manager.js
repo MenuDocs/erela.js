@@ -44,6 +44,9 @@ function check(options) {
     if (typeof options.clientName !== "undefined" &&
         typeof options.clientName !== "string")
         throw new TypeError('Manager option "clientName" must be a string.');
+    if (typeof options.defaultSearchPlatform !== "undefined" &&
+        typeof options.defaultSearchPlatform !== "string")
+        throw new TypeError('Manager option "defaultSearchPlatform" must be a string.');
 }
 /**
  * The main hub for interacting with Lavalink and using Erela.JS,
@@ -69,7 +72,7 @@ class Manager extends events_1.EventEmitter {
             Utils_1.TrackUtils.setTrackPartial(options.trackPartial);
             delete options.trackPartial;
         }
-        this.options = Object.assign({ plugins: [], nodes: [{ identifier: "default", host: "localhost" }], shards: 1, autoPlay: true, clientName: "erela.js" }, options);
+        this.options = Object.assign({ plugins: [], nodes: [{ identifier: "default", host: "localhost" }], shards: 1, autoPlay: true, clientName: "erela.js", defaultSearchPlatform: "youtube" }, options);
         if (this.options.plugins) {
             for (const [index, plugin] of this.options.plugins.entries()) {
                 if (!(plugin instanceof Utils_1.Plugin))
@@ -135,8 +138,9 @@ class Manager extends events_1.EventEmitter {
             const sources = {
                 soundcloud: "sc",
                 youtube: "yt",
+                "youtube music": "ytm"
             };
-            const source = sources[(_a = query.source) !== null && _a !== void 0 ? _a : "youtube"];
+            const source = sources[(_a = query.source) !== null && _a !== void 0 ? _a : this.options.defaultSearchPlatform];
             let search = query.query || query;
             if (!/^https?:\/\//.test(search)) {
                 search = `${source}search:${search}`;

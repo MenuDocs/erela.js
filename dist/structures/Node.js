@@ -142,7 +142,7 @@ class Node {
     makeRequest(endpoint, modify) {
         return __awaiter(this, void 0, void 0, function* () {
             endpoint = endpoint.replace(/^\//gm, "");
-            const request = petitio_1.default(`http${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}/${endpoint}`)
+            const request = (0, petitio_1.default)(`http${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}/${endpoint}`)
                 .header("Authorization", this.options.password);
             if (modify) {
                 yield modify(request);
