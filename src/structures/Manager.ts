@@ -66,6 +66,12 @@ function check(options: ManagerOptions) {
     typeof options.clientName !== "string"
   )
     throw new TypeError('Manager option "clientName" must be a string.');
+  
+  if (
+    typeof options.defaultSearchPlatform !== "undefined" &&
+    typeof options.defaultSearchPlatform !== "string"
+  )
+    throw new TypeError('Manager option "defaultSearchPlatform" must be a string.')
 }
 
 export interface Manager {
@@ -257,6 +263,7 @@ export class Manager extends EventEmitter {
       shards: 1,
       autoPlay: true,
       clientName: "erela.js",
+      defaultSearchPlatform: "youtube"
       ...options,
     };
 
@@ -313,9 +320,10 @@ export class Manager extends EventEmitter {
       const sources = {
         soundcloud: "sc",
         youtube: "yt",
+        "youtube music": "ytm"
       };
 
-      const source = sources[(query as SearchQuery).source ?? "youtube"];
+      const source = sources[(query as SearchQuery).source ?? this.options.defaultSearchPlatform];
       let search = (query as SearchQuery).query || (query as string);
 
       if (!/^https?:\/\//.test(search)) {
@@ -500,6 +508,8 @@ export interface ManagerOptions {
   autoPlay?: boolean;
   /** An array of track properties to keep. `track` will always be present. */
   trackPartial?: string[];
+  /** The default search platform to use, can be "youtube", "youtube music", or "soundcloud". */
+  defaultSearchPlatform?: SearchPlatform;
   /**
    * Function to send data to the websocket.
    * @param id
@@ -508,9 +518,11 @@ export interface ManagerOptions {
   send(id: string, payload: Payload): void;
 }
 
+export type SearchPlatform = "youtube" | "youtube music" | "soundcloud";
+
 export interface SearchQuery {
   /** The source to search from. */
-  source?: "youtube" | "soundcloud";
+  source?: SearchPlatform;
   /** The query to search for. */
   query: string;
 }
