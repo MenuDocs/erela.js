@@ -71,7 +71,7 @@ function check(options: ManagerOptions) {
     typeof options.defaultSearchPlatform !== "undefined" &&
     typeof options.defaultSearchPlatform !== "string"
   )
-    throw new TypeError('Manager option "defaultSearchPlatform" must be a string.')
+    throw new TypeError('Manager option "defaultSearchPlatform" must be a string.');
 }
 
 export interface Manager {
@@ -263,7 +263,7 @@ export class Manager extends EventEmitter {
       shards: 1,
       autoPlay: true,
       clientName: "erela.js",
-      defaultSearchPlatform: "youtube"
+      defaultSearchPlatform: "youtube",
       ...options,
     };
 
