@@ -1,4 +1,4 @@
-import type { Manager } from './api/Manager';
+import type { Manager, ManagerOptions } from './api/Manager';
 import { Plugin } from './api/Plugin';
 import Detector from './impl/detection/Detector';
 
@@ -22,7 +22,7 @@ export function use(plugin: Plugin): void {
  * @param options The options to supply the player manager.
  * @param provider The provider class to instantiate.
  */
-export async function create<M extends Manager>(options?: M['options'], provider?: Class<M>): Promise<M> {
+export async function create<M extends Manager, O extends ManagerOptions>(options?: O, provider?: Class<M>): Promise<M> {
 	if (!provider) {
 		const foundProviders = Detector.findProviders();
 		if (!foundProviders.length) {
@@ -42,7 +42,7 @@ export async function create<M extends Manager>(options?: M['options'], provider
 
 	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 	const manager = new provider!(options);
-	if (plugins.length) manager.use(plugins);
+	if (plugins.length) manager.use(...plugins);
 
 	return manager;
 }

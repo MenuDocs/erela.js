@@ -1,7 +1,7 @@
 {
   "name": "erela.js",
   "version": "0.0.0",
-  "description": "An easy to use Discord audio client for Node.JS supporting Lavalink and FFMPEG. .",
+  "description": "An easy to use Discord audio client for Node.JS supporting Lavalink and FFMPEG.",
   "main": "dist/index.js",
   "repository": "https://github.com/Erelajs/erela.js",
   "author": "MenuDocs (https://github.com/MenuDocs)",
