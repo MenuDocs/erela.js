@@ -322,25 +322,26 @@ export interface Extendable {
 export interface VoiceState {
   op: "voiceUpdate";
   guildId: string;
-  event: VoiceEvent;
+  event: VoiceServer;
   sessionId?: string;
 }
 
-export interface VoiceEvent {
+export interface VoiceServer {
   token: string;
   guild_id: string;
   endpoint: string;
 }
 
+export interface VoiceState {
+  guild_id: string;
+  user_id: string;
+  session_id: string;
+  channel_id: string;
+}
+
 export interface VoicePacket {
-  t?: string;
-  d: Partial<{
-    guild_id: string;
-    user_id: string;
-    session_id: string;
-    channel_id: string;
-  }> &
-    VoiceEvent;
+  t?: "VOICE_SERVER_UPDATE" | "VOICE_STATE_UPDATE";
+  d: VoiceState | VoiceServer;
 }
 
 export interface NodeMessage extends NodeStats {
