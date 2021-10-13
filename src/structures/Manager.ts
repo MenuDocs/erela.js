@@ -1,6 +1,7 @@
 /* eslint-disable no-async-promise-executor */
 import Collection from "@discordjs/collection";
 import { EventEmitter } from "events";
+import { VoiceState } from "..";
 import { Node, NodeOptions } from "./Node";
 import { Player, PlayerOptions, Track, UnresolvedTrack } from "./Player";
 import {
@@ -14,6 +15,7 @@ import {
   TrackStuckEvent,
   TrackUtils,
   VoicePacket,
+  VoiceServer,
   WebSocketClosedEvent,
 } from "./Utils";
 
@@ -451,27 +453,22 @@ export class Manager extends EventEmitter {
    * Sends voice data to the Lavalink server.
    * @param data
    */
-  public updateVoiceState(data: VoicePacket): void {
-    if (
-      !data ||
-      !["VOICE_SERVER_UPDATE", "VOICE_STATE_UPDATE"].includes(data.t || "")
-    )
-      return;
-    const player = this.players.get(data.d.guild_id) as Player;
-
+  public updateVoiceState(data: VoicePacket | VoiceServer | VoiceState): void {
+    const update: VoiceServer | VoiceState = "d" in data ? data.d : data;
+    const player = this.players.get(update.guild_id) as Player;
     if (!player) return;
-    const state = player.voiceState;
 
-    if (data.t === "VOICE_SERVER_UPDATE") {
+    const state = player.voiceState;
+    if ("token" in update) {
       state.op = "voiceUpdate";
-      state.guildId = data.d.guild_id;
-      state.event = data.d;
+      state.guildId = update.guild_id;
+      state.event = update;
     } else {
-      if (data.d.user_id !== this.options.clientId) return;
-      state.sessionId = data.d.session_id;
-      if (player.voiceChannel !== data.d.channel_id) {
-        this.emit("playerMove", player, player.voiceChannel, data.d.channel_id);
-        data.d.channel_id = player.voiceChannel;
+      if (update.user_id !== this.options.clientId) return;
+      state.sessionId = update.session_id;
+      if (player.voiceChannel !== update.channel_id) {
+        this.emit("playerMove", player, player.voiceChannel, update.channel_id);
+        update.channel_id = player.voiceChannel;
         player.pause(true);
       }
     }
