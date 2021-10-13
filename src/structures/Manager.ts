@@ -454,7 +454,11 @@ export class Manager extends EventEmitter {
    * @param data
    */
   public updateVoiceState(data: VoicePacket | VoiceServer | VoiceState): void {
+    if ("t" in data && !["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) return;
+
     const update: VoiceServer | VoiceState = "d" in data ? data.d : data;
+    if (!update || !("token" in update) && !("session_id" in update)) return;
+
     const player = this.players.get(update.guild_id) as Player;
     if (!player) return;
 
