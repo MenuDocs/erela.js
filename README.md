@@ -32,7 +32,7 @@
 
 - [Documentation](https://erelajs-docs.netlify.app/docs/gettingstarted.html "Erela.js Documentation")
 
-- [Guides](https://solaris-site.netlify.app/projects/erelajs/guides/introduction.html "Erela.js Guides")
+- [Guides](https://erelajs-docs.netlify.app/guides/introduction.html "Erela.js Guides")
 
 ## Prerequisites
 
