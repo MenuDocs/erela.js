@@ -56,11 +56,11 @@ export class Player {
   public playing = false;
   /** Whether the player is paused. */
   public paused = false;
-  /** Whether the player is playing. */
+  /** The volume for the player */
   public volume: number;
   /** The Node for the Player. */
   public node: Node;
-  /** The guild the player. */
+  /** The guild for the player. */
   public guild: string;
   /** The voice channel for the player. */
   public voiceChannel: string | null = null;
