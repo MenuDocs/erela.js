@@ -16,11 +16,11 @@ export declare class Player {
     playing: boolean;
     /** Whether the player is paused. */
     paused: boolean;
-    /** Whether the player is playing. */
+    /** The volume for the player */
     volume: number;
     /** The Node for the Player. */
     node: Node;
-    /** The guild the player. */
+    /** The guild for the player. */
     guild: string;
     /** The voice channel for the player. */
     voiceChannel: string | null;
