@@ -1,9 +1,10 @@
 /// <reference types="node" />
 import Collection from "@discordjs/collection";
 import { EventEmitter } from "events";
+import { VoiceState } from "..";
 import { Node, NodeOptions } from "./Node";
 import { Player, PlayerOptions, Track, UnresolvedTrack } from "./Player";
-import { LoadType, Plugin, TrackData, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, WebSocketClosedEvent } from "./Utils";
+import { LoadType, Plugin, TrackData, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, WebSocketClosedEvent } from "./Utils";
 export interface Manager {
     /**
      * Emitted when a Node is created.
@@ -161,7 +162,7 @@ export declare class Manager extends EventEmitter {
      * Sends voice data to the Lavalink server.
      * @param data
      */
-    updateVoiceState(data: VoicePacket): void;
+    updateVoiceState(data: VoicePacket | VoiceServer | VoiceState): void;
 }
 export interface Payload {
     /** The OP code */

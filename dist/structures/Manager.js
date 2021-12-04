@@ -249,25 +249,27 @@ class Manager extends events_1.EventEmitter {
      * @param data
      */
     updateVoiceState(data) {
-        if (!data ||
-            !["VOICE_SERVER_UPDATE", "VOICE_STATE_UPDATE"].includes(data.t || ""))
+        if ("t" in data && !["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t))
             return;
-        const player = this.players.get(data.d.guild_id);
+        const update = "d" in data ? data.d : data;
+        if (!update || !("token" in update) && !("session_id" in update))
+            return;
+        const player = this.players.get(update.guild_id);
         if (!player)
             return;
         const state = player.voiceState;
-        if (data.t === "VOICE_SERVER_UPDATE") {
+        if ("token" in update) {
             state.op = "voiceUpdate";
-            state.guildId = data.d.guild_id;
-            state.event = data.d;
+            state.guildId = update.guild_id;
+            state.event = update;
         }
         else {
-            if (data.d.user_id !== this.options.clientId)
+            if (update.user_id !== this.options.clientId)
                 return;
-            state.sessionId = data.d.session_id;
-            if (player.voiceChannel !== data.d.channel_id) {
-                this.emit("playerMove", player, player.voiceChannel, data.d.channel_id);
-                data.d.channel_id = player.voiceChannel;
+            state.sessionId = update.session_id;
+            if (player.voiceChannel !== update.channel_id) {
+                this.emit("playerMove", player, player.voiceChannel, update.channel_id);
+                update.channel_id = player.voiceChannel;
                 player.pause(true);
             }
         }

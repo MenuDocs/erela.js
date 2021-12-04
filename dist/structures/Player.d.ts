@@ -72,7 +72,7 @@ export declare class Player {
     /** Disconnect from the voice channel. */
     disconnect(): this;
     /** Destroys the player. */
-    destroy(): void;
+    destroy(disconnect?: boolean): void;
     /**
      * Sets the player voice channel.
      * @param channel

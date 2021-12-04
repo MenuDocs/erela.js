@@ -177,9 +177,11 @@ class Player {
         return this;
     }
     /** Destroys the player. */
-    destroy() {
+    destroy(disconnect = true) {
         this.state = "DESTROYING";
-        this.disconnect();
+        if (disconnect) {
+            this.disconnect();
+        }
         this.node.send({
             op: "destroy",
             guildId: this.guild,
