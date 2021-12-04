@@ -220,9 +220,11 @@ export class Player {
   }
 
   /** Destroys the player. */
-  public destroy(): void {
+  public destroy(disconnect = true): void {
     this.state = "DESTROYING";
-    this.disconnect();
+    if (disconnect) {
+      this.disconnect();
+    }
 
     this.node.send({
       op: "destroy",
