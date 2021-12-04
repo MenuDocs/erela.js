@@ -20,7 +20,8 @@ const TRACK_SYMBOL = Symbol("track"),
   ];
 
 /** @hidden */
-const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const escapeRegExp = (str: string): string =>
+  str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export abstract class TrackUtils {
   static trackPartial: string[] | null = null;
@@ -32,8 +33,13 @@ export abstract class TrackUtils {
   }
 
   static setTrackPartial(partial: string[]): void {
-    if (!Array.isArray(partial) || !partial.every(str => typeof str === "string"))
-      throw new Error("Provided partial is not an array or not a string array.");
+    if (
+      !Array.isArray(partial) ||
+      !partial.every((str) => typeof str === "string")
+    )
+      throw new Error(
+        "Provided partial is not an array or not a string array."
+      );
     if (!partial.includes("track")) partial.unshift("track");
 
     this.trackPartial = partial;
@@ -49,15 +55,16 @@ export abstract class TrackUtils {
 
     if (Array.isArray(trackOrTracks) && trackOrTracks.length) {
       for (const track of trackOrTracks) {
-        if (!(track[TRACK_SYMBOL] || track[UNRESOLVED_TRACK_SYMBOL])) return false
+        if (!(track[TRACK_SYMBOL] || track[UNRESOLVED_TRACK_SYMBOL]))
+          return false;
       }
       return true;
     }
 
     return (
-      trackOrTracks[TRACK_SYMBOL] ||
-      trackOrTracks[UNRESOLVED_TRACK_SYMBOL]
-    ) === true;
+      (trackOrTracks[TRACK_SYMBOL] ||
+        trackOrTracks[UNRESOLVED_TRACK_SYMBOL]) === true
+    );
   }
 
   /**
@@ -99,6 +106,7 @@ export abstract class TrackUtils {
         isSeekable: data.info.isSeekable,
         isStream: data.info.isStream,
         uri: data.info.uri,
+        spotifyUri: null,
         thumbnail: data.info.uri.includes("youtube")
           ? `https://img.youtube.com/vi/${data.info.identifier}/default.jpg`
           : null,
@@ -122,12 +130,14 @@ export abstract class TrackUtils {
 
       Object.defineProperty(track, TRACK_SYMBOL, {
         configurable: true,
-        value: true
+        value: true,
       });
 
       return track;
     } catch (error) {
-      throw new RangeError(`Argument "data" is not a valid track: ${error.message}`);
+      throw new RangeError(
+        `Argument "data" is not a valid track: ${error.message}`
+      );
     }
   }
 
@@ -136,25 +146,28 @@ export abstract class TrackUtils {
    * @param query
    * @param requester
    */
-  static buildUnresolved(query: string | UnresolvedQuery, requester?: unknown): UnresolvedTrack {
+  static buildUnresolved(
+    query: string | UnresolvedQuery,
+    requester?: unknown
+  ): UnresolvedTrack {
     if (typeof query === "undefined")
       throw new RangeError('Argument "query" must be present.');
 
     let unresolvedTrack: Partial<UnresolvedTrack> = {
       requester,
       async resolve(): Promise<void> {
-        const resolved = await TrackUtils.getClosestTrack(this)
-        Object.getOwnPropertyNames(this).forEach(prop => delete this[prop]);
+        const resolved = await TrackUtils.getClosestTrack(this);
+        Object.getOwnPropertyNames(this).forEach((prop) => delete this[prop]);
         Object.assign(this, resolved);
-      }
+      },
     };
 
     if (typeof query === "string") unresolvedTrack.title = query;
-    else unresolvedTrack = { ...unresolvedTrack, ...query }
+    else unresolvedTrack = { ...unresolvedTrack, ...query };
 
     Object.defineProperty(unresolvedTrack, UNRESOLVED_TRACK_SYMBOL, {
       configurable: true,
-      value: true
+      value: true,
     });
 
     return unresolvedTrack as UnresolvedTrack;
@@ -163,41 +176,67 @@ export abstract class TrackUtils {
   static async getClosestTrack(
     unresolvedTrack: UnresolvedTrack
   ): Promise<Track> {
-    if (!TrackUtils.manager) throw new RangeError("Manager has not been initiated.");
+    if (!TrackUtils.manager)
+      throw new RangeError("Manager has not been initiated.");
 
     if (!TrackUtils.isUnresolvedTrack(unresolvedTrack))
       throw new RangeError("Provided track is not a UnresolvedTrack.");
 
-    const query = [unresolvedTrack.author, unresolvedTrack.title].filter(str => !!str).join(" - ");
-    const res = await TrackUtils.manager.search(query, unresolvedTrack.requester);
+    const query = [unresolvedTrack.author, unresolvedTrack.title]
+      .filter((str) => !!str)
+      .join(" - ");
+    const res = await TrackUtils.manager.search(
+      query,
+      unresolvedTrack.requester
+    );
 
-    if (res.loadType !== "SEARCH_RESULT") throw res.exception ?? {
-      message: "No tracks found.",
-      severity: "COMMON",
-    };
+    if (res.loadType !== "SEARCH_RESULT")
+      throw (
+        res.exception ?? {
+          message: "No tracks found.",
+          severity: "COMMON",
+        }
+      );
 
     if (unresolvedTrack.author) {
-      const channelNames = [unresolvedTrack.author, `${unresolvedTrack.author} - Topic`];
+      const channelNames = [
+        unresolvedTrack.author,
+        `${unresolvedTrack.author} - Topic`,
+      ];
 
-      const originalAudio = res.tracks.find(track => {
+      const originalAudio = res.tracks.find((track) => {
         return (
-          channelNames.some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.author)) ||
-          new RegExp(`^${escapeRegExp(unresolvedTrack.title)}$`, "i").test(track.title)
+          channelNames.some((name) =>
+            new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.author)
+          ) ||
+          new RegExp(`^${escapeRegExp(unresolvedTrack.title)}$`, "i").test(
+            track.title
+          )
         );
       });
 
-      if (originalAudio) return originalAudio;
+      if (originalAudio) {
+        if (unresolvedTrack.spotifyUri)
+          originalAudio.spotifyUri = unresolvedTrack.spotifyUri;
+        return originalAudio;
+      }
     }
 
     if (unresolvedTrack.duration) {
-      const sameDuration = res.tracks.find(track =>
-        (track.duration >= (unresolvedTrack.duration - 1500)) &&
-        (track.duration <= (unresolvedTrack.duration + 1500))
+      const sameDuration = res.tracks.find(
+        (track) =>
+          track.duration >= unresolvedTrack.duration - 1500 &&
+          track.duration <= unresolvedTrack.duration + 1500
       );
 
-      if (sameDuration) return sameDuration;
+      if (sameDuration) {
+        if (unresolvedTrack.spotifyUri)
+          sameDuration.spotifyUri = unresolvedTrack.spotifyUri;
+        return sameDuration;
+      }
     }
-
+    if (unresolvedTrack.spotifyUri)
+      res.tracks[0].spotifyUri = unresolvedTrack.spotifyUri;
     return res.tracks[0];
   }
 }
@@ -213,7 +252,8 @@ export abstract class Structure {
     name: K,
     extender: (target: Extendable[K]) => T
   ): T {
-    if (!structures[name]) throw new TypeError(`"${name} is not a valid structure`);
+    if (!structures[name])
+      throw new TypeError(`"${name} is not a valid structure`);
     const extended = extender(structures[name]);
     structures[name] = extended;
     return extended;
