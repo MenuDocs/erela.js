@@ -15,7 +15,7 @@ jobs:
       - name: Use Node.js 12
         uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16
       - name: Restore CI Cache
         uses: actions/cache@v1
         with:
