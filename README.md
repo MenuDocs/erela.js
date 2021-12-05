@@ -58,7 +58,7 @@ npm install erela.js
 yarn add erela.js
 ```
 
-**Note**: _Node **v14** is required!_
+**Note**: _Node **v16** is required!_
 
 ## Getting Started
 
