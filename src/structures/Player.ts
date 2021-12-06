@@ -71,7 +71,7 @@ export class Player {
   /** The equalizer bands array. */
   public bands = new Array<number>(15).fill(0.0);
   /** The voice state object from Discord. */
-  public voiceState: VoiceState = Object.assign({});
+  public voiceState: VoiceState;
   /** The Manager. */
   public manager: Manager;
   private static _manager: Manager;
@@ -114,6 +114,7 @@ export class Player {
     check(options);
 
     this.guild = options.guild;
+    this.voiceState = Object.assign({ op: "voiceUpdate", guildId: options.guild });
 
     if (options.voiceChannel) this.voiceChannel = options.voiceChannel;
     if (options.textChannel) this.textChannel = options.textChannel;

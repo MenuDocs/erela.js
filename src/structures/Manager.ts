@@ -19,7 +19,7 @@ import {
   WebSocketClosedEvent,
 } from "./Utils";
 
-const TEMPLATE = JSON.stringify(["event", "guildId", "op", "sessionId"]);
+const REQUIRED_KEYS = ["event", "guildId", "op", "sessionId"];
 
 function check(options: ManagerOptions) {
   if (!options) throw new TypeError("ManagerOptions must not be empty.");
@@ -154,6 +154,15 @@ export interface Manager {
   on(
     event: "playerMove",
     listener: (player: Player, initChannel: string, newChannel: string) => void
+  ): this;
+
+  /**
+   * Emitted when a player is disconnect from it's current voice channel.
+   * @event Manager#playerDisconnect
+   */
+  on(
+    event: "playerDisconnect",
+    listener: (player: Player, oldChannel: string) => void
   ): this;
 
   /**
@@ -462,24 +471,35 @@ export class Manager extends EventEmitter {
     const player = this.players.get(update.guild_id) as Player;
     if (!player) return;
 
-    const state = player.voiceState;
     if ("token" in update) {
-      state.op = "voiceUpdate";
-      state.guildId = update.guild_id;
-      state.event = update;
+      /* voice server update */
+      player.voiceState.event = update;
     } else {
-      if (update.user_id !== this.options.clientId) return;
-      state.sessionId = update.session_id;
-      if (player.voiceChannel !== update.channel_id) {
-        this.emit("playerMove", player, player.voiceChannel, update.channel_id);
-        update.channel_id = player.voiceChannel;
+      /* voice state update */
+      if (update.user_id !== this.options.clientId) {
+        return;      
+      }
+
+      if (update.channel_id) {
+        if (player.voiceChannel !== update.channel_id) {
+          /* we moved voice channels. */
+          this.emit("playerMove", player, player.voiceChannel, update.channel_id);
+        }
+
+        player.voiceState.sessionId = update.session_id;
+        player.voiceChannel = update.channel_id;
+      } else {
+        /* player got disconnected. */
+        this.emit("playerDisconnect", player.bands, player.voiceChannel);
+        player.voiceChannel = null;
+        player.voiceState = Object.assign({});
         player.pause(true);
       }
     }
 
-    player.voiceState = state;
-    if (JSON.stringify(Object.keys(state).sort()) === TEMPLATE)
-      player.node.send(state);
+    if (REQUIRED_KEYS.every(key => key in player.voiceState)) {
+      player.node.send(player.voiceState);
+    }
   }
 }
 
