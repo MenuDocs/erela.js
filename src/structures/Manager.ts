@@ -157,7 +157,7 @@ export interface Manager {
   ): this;
 
   /**
-   * Emitted when a player is disconnect from it's current voice channel.
+   * Emitted when a player is disconnected from it's current voice channel.
    * @event Manager#playerDisconnect
    */
   on(
