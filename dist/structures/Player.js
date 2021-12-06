@@ -60,8 +60,6 @@ class Player {
         this.state = "DISCONNECTED";
         /** The equalizer bands array. */
         this.bands = new Array(15).fill(0.0);
-        /** The voice state object from Discord. */
-        this.voiceState = Object.assign({});
         this.data = {};
         if (!this.manager)
             this.manager = Utils_1.Structure.get("Player")._manager;
@@ -72,6 +70,7 @@ class Player {
         }
         check(options);
         this.guild = options.guild;
+        this.voiceState = Object.assign({ op: "voiceUpdate", guildId: options.guild });
         if (options.voiceChannel)
             this.voiceChannel = options.voiceChannel;
         if (options.textChannel)
