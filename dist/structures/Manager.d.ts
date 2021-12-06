@@ -65,7 +65,7 @@ export interface Manager {
      */
     on(event: "playerMove", listener: (player: Player, initChannel: string, newChannel: string) => void): this;
     /**
-     * Emitted when a player is disconnect from it's current voice channel.
+     * Emitted when a player is disconnected from it's current voice channel.
      * @event Manager#playerDisconnect
      */
     on(event: "playerDisconnect", listener: (player: Player, oldChannel: string) => void): this;
