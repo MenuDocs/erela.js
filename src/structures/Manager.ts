@@ -332,11 +332,9 @@ export class Manager extends EventEmitter {
         search = `${source}search:${search}`;
       }
 
-      const res = await node.makeRequest<LavalinkResult>(`/loadtracks?identifier=${encodeURIComponent(search)}`, r => {
-        if (node.options.requestTimeout) {
-          r.timeout(node.options.requestTimeout)
-        }
-      }).catch(err => reject(err));
+      const res = await node
+        .makeRequest<LavalinkResult>(`/loadtracks?identifier=${encodeURIComponent(search)}`)
+        .catch(err => reject(err));
 
       if (!res) {
         return reject(new Error("Query not found."));
@@ -376,9 +374,12 @@ export class Manager extends EventEmitter {
       const node = this.nodes.first();
       if (!node) throw new Error("No available nodes.");
 
-      const res = await node.makeRequest<TrackData[]>(`/decodetracks`, r => r
-        .method("POST")
-        .body(tracks, "json"))
+      const res = await node.makeRequest<TrackData[]>(`/decodetracks`, r => {
+        r.method = "POST";
+        r.body = JSON.stringify(tracks);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        r.headers!["Content-Type"] = "application/json";
+      })
         .catch(err => reject(err));
 
       if (!res) {
