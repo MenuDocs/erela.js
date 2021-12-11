@@ -490,7 +490,7 @@ export class Manager extends EventEmitter {
         player.voiceChannel = update.channel_id;
       } else {
         /* player got disconnected. */
-        this.emit("playerDisconnect", player.bands, player.voiceChannel);
+        this.emit("playerDisconnect", player, player.voiceChannel);
         player.voiceChannel = null;
         player.voiceState = Object.assign({});
         player.pause(true);
