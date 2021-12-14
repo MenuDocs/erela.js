@@ -200,7 +200,7 @@ export class Node {
    */
   public async makeRequest<T>(endpoint: string, modify?: ModifyRequest): Promise<T> {
     const options: Dispatcher.RequestOptions = {
-      path: endpoint.replace(/^\//gm, ""),
+      path:  `/${endpoint.replace(/^\//gm, "")}`,
       method: "GET",
       headers: {
         Authorization: this.options.password
