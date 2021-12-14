@@ -88,6 +88,11 @@ export class Node {
     return this.socket.readyState === WebSocket.OPEN;
   }
 
+  /** Returns the address for this node. */
+  public get address(): string {
+    return `${this.options.host}:${this.options.port}`;
+  }
+
   /** @hidden */
   public static init(manager: Manager): void {
     this._manager = manager;
@@ -148,14 +153,7 @@ export class Node {
     this.manager.nodes.set(this.options.identifier, this);
     this.manager.emit("nodeCreate", this);
   }
-
-  /** Returns the address for this node. */
-  public get address(): string {
-    const requiresPort = this.options.port === 80 || (this.options.secure && this.options.port === 443);
-
-    return `${this.options.host}${requiresPort ? `:${this.options.port}` : ""}`;
-  }
-
+  
   /** Connects to the Node. */
   public connect(): void {
     if (this.connected) return;
@@ -200,7 +198,7 @@ export class Node {
    */
   public async makeRequest<T>(endpoint: string, modify?: ModifyRequest): Promise<T> {
     const options: Dispatcher.RequestOptions = {
-      path: endpoint.replace(/^\//gm, ""),
+      path: `/${endpoint.replace(/^\//gm, "")}`,
       method: "GET",
       headers: {
         Authorization: this.options.password
