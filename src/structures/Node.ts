@@ -151,7 +151,7 @@ export class Node {
 
   /** Returns the address for this node. */
   public get address(): string {
-    const requiresPort = this.options.port === 80 || (this.options.secure && this.options.port === 443);
+    const requiresPort = this.options.port !== 80 || (this.options.secure && this.options.port === 443);
 
     return `${this.options.host}${requiresPort ? `:${this.options.port}` : ""}`;
   }
