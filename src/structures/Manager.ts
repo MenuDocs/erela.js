@@ -221,9 +221,9 @@ export interface Manager {
  */
 export class Manager extends EventEmitter {
   public static readonly DEFAULT_SOURCES: Record<SearchPlatform, string> = {
-    "youtube music": "ytmsearch:",
-    "youtube": "ytsearch:",
-    "soundcloud": "scsearch:"
+    "youtube music": "ytmsearch",
+    "youtube": "ytsearch",
+    "soundcloud": "scsearch"
   }
 
   /** The map of players. */
