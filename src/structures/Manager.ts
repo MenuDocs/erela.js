@@ -220,6 +220,12 @@ export interface Manager {
  * @noInheritDoc
  */
 export class Manager extends EventEmitter {
+  public static readonly DEFAULT_SOURCES: Record<SearchPlatform, string> = {
+    "youtube music": "ytmsearch:",
+    "youtube": "ytsearch:",
+    "soundcloud": "scsearch:"
+  }
+
   /** The map of players. */
   public readonly players = new Collection<string, Player>();
   /** The map of nodes. */
@@ -328,17 +334,12 @@ export class Manager extends EventEmitter {
       const node = this.leastUsedNodes.first();
       if (!node) throw new Error("No available nodes.");
 
-      const sources = {
-        soundcloud: "sc",
-        youtube: "yt",
-        "youtube music": "ytm"
-      };
+      const _query: SearchQuery = typeof query === "string" ? { query } : query;
+      const _source = Manager.DEFAULT_SOURCES[_query.source ?? this.options.defaultSearchPlatform] ?? _query.source;
 
-      const source = sources[(query as SearchQuery).source ?? this.options.defaultSearchPlatform];
-      let search = (query as SearchQuery).query || (query as string);
-
+      let search = _query.query;
       if (!/^https?:\/\//.test(search)) {
-        search = `${source}search:${search}`;
+        search = `${_source}:${search}`;
       }
 
       const res = await node.makeRequest<LavalinkResult>(`/loadtracks?identifier=${encodeURIComponent(search)}`, r => {
@@ -543,7 +544,7 @@ export type SearchPlatform = "youtube" | "youtube music" | "soundcloud";
 
 export interface SearchQuery {
   /** The source to search from. */
-  source?: SearchPlatform;
+  source?: SearchPlatform | string;
   /** The query to search for. */
   query: string;
 }
