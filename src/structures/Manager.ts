@@ -314,7 +314,13 @@ export class Manager extends EventEmitter {
         '"clientId" is not set. Pass it in Manager#init() or as a option in the constructor.'
       );
 
-    for (const node of this.nodes.values()) node.connect();
+    for (const node of this.nodes.values()) {
+      try {
+        node.connect();
+      } catch (err) {
+        this.emit("nodeError", node, err);
+      }
+    }
 
     this.initiated = true;
     return this;
