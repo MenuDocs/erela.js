@@ -118,8 +118,14 @@ class Manager extends events_1.EventEmitter {
             throw new Error('"clientId" set is not type of "string"');
         if (!this.options.clientId)
             throw new Error('"clientId" is not set. Pass it in Manager#init() or as a option in the constructor.');
-        for (const node of this.nodes.values())
-            node.connect();
+        for (const node of this.nodes.values()) {
+            try {
+                node.connect();
+            }
+            catch (err) {
+                this.emit("nodeError", node, err);
+            }
+        }
         this.initiated = true;
         return this;
     }
@@ -131,19 +137,15 @@ class Manager extends events_1.EventEmitter {
      */
     search(query, requester) {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
+            var _a, _b, _c;
             const node = this.leastUsedNodes.first();
             if (!node)
                 throw new Error("No available nodes.");
-            const sources = {
-                soundcloud: "sc",
-                youtube: "yt",
-                "youtube music": "ytm"
-            };
-            const source = sources[(_a = query.source) !== null && _a !== void 0 ? _a : this.options.defaultSearchPlatform];
-            let search = query.query || query;
+            const _query = typeof query === "string" ? { query } : query;
+            const _source = (_b = Manager.DEFAULT_SOURCES[(_a = _query.source) !== null && _a !== void 0 ? _a : this.options.defaultSearchPlatform]) !== null && _b !== void 0 ? _b : _query.source;
+            let search = _query.query;
             if (!/^https?:\/\//.test(search)) {
-                search = `${source}search:${search}`;
+                search = `${_source}:${search}`;
             }
             const res = yield node.makeRequest(`/loadtracks?identifier=${encodeURIComponent(search)}`, r => {
                 if (node.options.requestTimeout) {
@@ -155,7 +157,7 @@ class Manager extends events_1.EventEmitter {
             }
             const result = {
                 loadType: res.loadType,
-                exception: (_b = res.exception) !== null && _b !== void 0 ? _b : null,
+                exception: (_c = res.exception) !== null && _c !== void 0 ? _c : null,
                 tracks: res.tracks.map((track) => Utils_1.TrackUtils.build(track, requester)),
             };
             if (result.loadType === "PLAYLIST_LOADED") {
@@ -276,7 +278,7 @@ class Manager extends events_1.EventEmitter {
             }
             else {
                 /* player got disconnected. */
-                this.emit("playerDisconnect", player.bands, player.voiceChannel);
+                this.emit("playerDisconnect", player, player.voiceChannel);
                 player.voiceChannel = null;
                 player.voiceState = Object.assign({});
                 player.pause(true);
@@ -288,3 +290,8 @@ class Manager extends events_1.EventEmitter {
     }
 }
 exports.Manager = Manager;
+Manager.DEFAULT_SOURCES = {
+    "youtube music": "ytmsearch:",
+    "youtube": "ytsearch:",
+    "soundcloud": "scsearch:"
+};

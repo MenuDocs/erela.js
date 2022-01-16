@@ -100,6 +100,7 @@ export interface Manager {
  * @noInheritDoc
  */
 export declare class Manager extends EventEmitter {
+    static readonly DEFAULT_SOURCES: Record<SearchPlatform, string>;
     /** The map of players. */
     readonly players: Collection<string, Player>;
     /** The map of nodes. */
@@ -206,7 +207,7 @@ export interface ManagerOptions {
 export declare type SearchPlatform = "youtube" | "youtube music" | "soundcloud";
 export interface SearchQuery {
     /** The source to search from. */
-    source?: SearchPlatform;
+    source?: SearchPlatform | string;
     /** The query to search for. */
     query: string;
 }
