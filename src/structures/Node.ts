@@ -112,6 +112,7 @@ export class Node {
       secure: false,
       retryAmount: 5,
       retryDelay: 30e3,
+      resuming: "aresumingkey",
       ...options,
     };
 
@@ -152,6 +153,10 @@ export class Node {
       "User-Id": this.manager.options.clientId,
       "Client-Name": this.manager.options.clientName,
     };
+
+    if (this.options.resuming) {
+      headers["Resume-Key"] = this.options.resuming;
+    }
 
     this.socket = new WebSocket(
       `ws${this.options.secure ? "s" : ""}://${this.options.host}:${
@@ -425,6 +430,8 @@ export interface NodeOptions {
   retryDelay?: number;
   /** The timeout used for api calls */
   requestTimeout?: number;
+  /** The resuming key for the node*/
+  resuming?: string;
 }
 
 export interface NodeStats {
