@@ -63,7 +63,7 @@ module.exports = {
         message.channel.send(results);
 
         try {
-          collected = await message.channel.awaitMessages(filter, { max: 1, time: 30e3, errors: ['time'] });
+          collected = await message.channel.awaitMessages({filter, max: 1, time: 30e3, errors: ['time'] });
         } catch (e) {
           if (!player.queue.current) player.destroy();
           return message.reply("you didn't provide a selection.");
