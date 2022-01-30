@@ -1,9 +1,9 @@
-const { Client, Collection } = require("discord.js");
+const { Client, Collection, Intents } = require("discord.js");
 const { readdirSync } = require("fs");
 const { Manager } = require("erela.js");
 
 const client = new Client({
-  intents: 32703,
+  intents: [Intents.FlAGS.GUILDS, Intents.FLAGS.GUILD_VOICE_STATES, Intents.FLAGS.GUILD_MESSAGES]
 });
 client.commands = new Collection();
 
