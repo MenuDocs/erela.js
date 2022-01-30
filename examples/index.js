@@ -2,7 +2,7 @@ const { Client, Collection } = require("discord.js");
 const { readdirSync } = require("fs");
 const { Manager } = require("erela.js");
 
-const client = new Client();
+const client = new Client()
 client.commands = new Collection();
 
 const files = readdirSync("./commands")
