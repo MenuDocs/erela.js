@@ -2,7 +2,9 @@ const { Client, Collection } = require("discord.js");
 const { readdirSync } = require("fs");
 const { Manager } = require("erela.js");
 
-const client = new Client()
+const client = new Client({
+  intents: 32703
+})
 client.commands = new Collection();
 
 const files = readdirSync("./commands")
@@ -45,7 +47,7 @@ client.once("ready", () => {
 
 client.on("raw", d => client.manager.updateVoiceState(d));
 
-client.on("message", async message => {
+client.on("messageCreate", async message => {
   if (!message.content.startsWith("!") || !message.guild || message.author.bot) return;
   const [name, ...args] = message.content.slice(1).split(/\s+/g);
 
@@ -59,4 +61,4 @@ client.on("message", async message => {
   }
 });
 
-client.login("your bot token here");
+client.login("OTMwODA4NjU4NDEyMDcyOTkw.Yd7RHQ.DPL2iPskrXNbNKNVjNYep3BD3iY");
