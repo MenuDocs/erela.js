@@ -18,7 +18,6 @@ module.exports = {
 
     if (!channel) return message.reply("you need to join a voice channel.");
     if (channel.id !== player.voiceChannel)
-    
       return message.reply("you're not in the same voice channel.");
     if (player.paused) return message.reply("the player is already paused.");
 
