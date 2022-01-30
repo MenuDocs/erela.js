@@ -71,4 +71,4 @@ client.on("messageCreate", async (message) => {
   }
 });
 
-client.login("OTMwODA4NjU4NDEyMDcyOTkw.Yd7RHQ.DPL2iPskrXNbNKNVjNYep3BD3iY");
+client.login("your token here");
