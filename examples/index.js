@@ -59,8 +59,7 @@ client.once("ready", () => {
 client.on("raw", (d) => client.manager.updateVoiceState(d));
 
 client.on("messageCreate", async message => {
-  if (!message.content.startsWith("!") || !message.guild || message.author.bot)
-    return;
+  if (!message.content.startsWith("!") || !message.guild || message.author.bot) return;
   const [name, ...args] = message.content.slice(1).split(/\s+/g);
 
   const command = client.commands.get(name);
