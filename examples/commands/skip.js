@@ -22,9 +22,9 @@ module.exports = {
     if (!player.queue.current)
       return message.reply("there is no music playing.");
 
-    const { title } = player.queue.current;
+
 
     player.stop();
-    return message.reply(`${title} was skipped.`);
+    return message.reply(`${player.queue.current} was skipped.`);
   },
 };
