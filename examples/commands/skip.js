@@ -25,6 +25,6 @@ module.exports = {
 
 
     player.stop();
-    return message.reply(`${player.queue.current} was skipped.`);
+    return message.reply(`${player.queue.current.title} was skipped.`);
   },
 };
