@@ -81,7 +81,9 @@ export class Node {
   private reconnectTimeout?: NodeJS.Timeout;
   private reconnectAttempts = 1;
 
-  /** Returns if connected to the Node. */
+  /** Returns if connected to the Node.
+   * @returns {boolean}
+   */
   public get connected(): boolean {
     if (!this.socket) return false;
     return this.socket.readyState === WebSocket.OPEN;
@@ -94,7 +96,7 @@ export class Node {
 
   /**
    * Creates an instance of Node.
-   * @param options
+   * @param {NodeOptions} options
    */
   constructor(public options: NodeOptions) {
     if (!this.manager) this.manager = Structure.get("Node")._manager;
@@ -142,7 +144,7 @@ export class Node {
     this.manager.emit("nodeCreate", this);
   }
 
-  /** Connects to the Node. */
+  /** Connects to the Node.*/
   public connect(): void {
     if (this.connected) return;
 
@@ -185,9 +187,9 @@ export class Node {
 
   /**
    * Makes an API call to the Node
-   * @param endpoint The endpoint that we will make the call to
-   * @param modify Used to modify the request before being sent
-   * @returns The returned data
+   * @param {string} endpoint The endpoint that we will make the call to
+   * @param {ModifyRequest} [modify] Used to modify the request before being sent
+   * @returns {Promise<T>}
    */
   public async makeRequest<T>(endpoint: string, modify?: ModifyRequest): Promise<T> {
     endpoint = endpoint.replace(/^\//gm, "");
@@ -205,7 +207,8 @@ export class Node {
 
   /**
    * Sends data to the Node.
-   * @param data
+   * @param {any} data
+   * @returns {Promise<boolean>}
    */
   public send(data: unknown): Promise<boolean> {
     return new Promise((resolve, reject) => {

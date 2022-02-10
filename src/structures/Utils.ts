@@ -41,7 +41,7 @@ export abstract class TrackUtils {
 
   /**
    * Checks if the provided argument is a valid Track or UnresolvedTrack, if provided an array then every element will be checked.
-   * @param trackOrTracks
+   * @param {any} trackOrTracks
    */
   static validate(trackOrTracks: unknown): boolean {
     if (typeof trackOrTracks === "undefined")
@@ -62,7 +62,8 @@ export abstract class TrackUtils {
 
   /**
    * Checks if the provided argument is a valid UnresolvedTrack.
-   * @param track
+   * @param {any} track
+   * @return {boolean}
    */
   static isUnresolvedTrack(track: unknown): boolean {
     if (typeof track === "undefined")
@@ -72,7 +73,8 @@ export abstract class TrackUtils {
 
   /**
    * Checks if the provided argument is a valid Track.
-   * @param track
+   * @param {any} track
+   * @return {boolean}
    */
   static isTrack(track: unknown): boolean {
     if (typeof track === "undefined")
@@ -82,8 +84,9 @@ export abstract class TrackUtils {
 
   /**
    * Builds a Track from the raw data from Lavalink and a optional requester.
-   * @param data
-   * @param requester
+   * @param {TrackData} data
+   * @param {any} [requester]
+   * @return {Track}
    */
   static build(data: TrackData, requester?: unknown): Track {
     if (typeof data === "undefined")
@@ -133,8 +136,8 @@ export abstract class TrackUtils {
 
   /**
    * Builds a UnresolvedTrack to be resolved before being played  .
-   * @param query
-   * @param requester
+   * @param {string | UnresolvedQuery} query
+   * @param {any} [requester]
    */
   static buildUnresolved(query: string | UnresolvedQuery, requester?: unknown): UnresolvedTrack {
     if (typeof query === "undefined")

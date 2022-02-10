@@ -34,8 +34,8 @@ export class Queue extends Array<Track | UnresolvedTrack> {
 
   /**
    * Adds a track to the queue.
-   * @param track
-   * @param [offset=null]
+   * @param {Track | UnresolvedTrack | Array<Track> | Array<UnresolvedTrack>}track
+   * @param {number} [offset=null]
    */
   public add(
     track: (Track | UnresolvedTrack) | (Track | UnresolvedTrack)[],
@@ -75,14 +75,16 @@ export class Queue extends Array<Track | UnresolvedTrack> {
 
   /**
    * Removes a track from the queue. Defaults to the first track, returning the removed track, EXCLUDING THE `current` TRACK.
-   * @param [position=0]
+   * @param {number} [position=0]
+   * @return {Array<Track>}
    */
   public remove(position?: number): Track[];
 
   /**
    * Removes an amount of tracks using a exclusive start and end exclusive index, returning the removed tracks, EXCLUDING THE `current` TRACK.
-   * @param start
-   * @param end
+   * @param {number} start
+   * @param {number} end
+   * @return {Array<Track | UnresolvedTrack>}
    */
   public remove(start: number, end: number): (Track | UnresolvedTrack)[];
   public remove(startOrPosition = 0, end?: number): (Track | UnresolvedTrack)[] {
