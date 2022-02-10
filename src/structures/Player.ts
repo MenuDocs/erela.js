@@ -72,6 +72,8 @@ export class Player {
   public bands = new Array<number>(15).fill(0.0);
   /** The voice state object from Discord. */
   public voiceState: VoiceState;
+  /** Current audio filter being used */
+  public currentFilter: AudioFilterPayload = null;
   /** The Manager. */
   public manager: Manager;
   private static _manager: Manager;
@@ -79,8 +81,8 @@ export class Player {
 
   /**
    * Set custom data.
-   * @param key
-   * @param value
+   * @param {string} key
+   * @param {any} value
    */
   public set(key: string, value: unknown): void {
     this.data[key] = value;
@@ -101,7 +103,7 @@ export class Player {
 
   /**
    * Creates a new player, returns one if it already exists.
-   * @param options
+   * @param {PlayerOptions} options
    */
   constructor(public options: PlayerOptions) {
     if (!this.manager) this.manager = Structure.get("Player")._manager;
@@ -131,7 +133,7 @@ export class Player {
 
   /**
    * Same as Manager#search() but a shortcut on the player itself.
-   * @param query
+   * @param {string | SearchQuery} query
    * @param requester
    */
   public search(
@@ -143,9 +145,10 @@ export class Player {
 
   /**
    * Sets the players equalizer band on-top of the existing ones.
-   * @param bands
+   * @param {Array<EqualizerBand>} bands
+   * @returns {Player}
    */
-  public setEQ(...bands: EqualizerBand[]): this {
+  public setEQ(...bands: Array<EqualizerBand>): this {
     // Hacky support for providing an array
     if (Array.isArray(bands[0])) bands = bands[0] as unknown as EqualizerBand[]
 
@@ -166,7 +169,9 @@ export class Player {
     return this;
   }
 
-  /** Clears the equalizer bands. */
+  /** Clears the equalizer bands.
+   * @returns {Player}
+   */
   public clearEQ(): this {
     this.bands = new Array(15).fill(0.0);
 
@@ -179,7 +184,9 @@ export class Player {
     return this;
   }
 
-  /** Connect to the voice channel. */
+  /** Connect to the voice channel.
+   * @returns {Player}
+   */
   public connect(): this {
     if (!this.voiceChannel)
       throw new RangeError("No voice channel has been set.");
@@ -199,7 +206,9 @@ export class Player {
     return this;
   }
 
-  /** Disconnect from the voice channel. */
+  /** Disconnect from the voice channel.
+   * @returns {Player}
+   */
   public disconnect(): this {
     if (this.voiceChannel === null) return this;
     this.state = "DISCONNECTING";
@@ -220,7 +229,9 @@ export class Player {
     return this;
   }
 
-  /** Destroys the player. */
+  /** Destroys the player.
+   * @param {boolean} [disconnect = true]
+   */
   public destroy(disconnect = true): void {
     this.state = "DESTROYING";
     if (disconnect) {
@@ -238,7 +249,8 @@ export class Player {
 
   /**
    * Sets the player voice channel.
-   * @param channel
+   * @param {string} channel
+   * @returns {Player}
    */
   public setVoiceChannel(channel: string): this {
     if (typeof channel !== "string")
@@ -251,7 +263,8 @@ export class Player {
 
   /**
    * Sets the player text channel.
-   * @param channel
+   * @param {string} channel
+   * @returns {Player}
    */
   public setTextChannel(channel: string): this {
     if (typeof channel !== "string")
@@ -266,20 +279,20 @@ export class Player {
 
   /**
    * Plays the specified track.
-   * @param track
+   * @param {Track | UnresolvedTrack} track
    */
   public async play(track: Track | UnresolvedTrack): Promise<void>;
 
   /**
    * Plays the next track with some options.
-   * @param options
+   * @param {PlayerOptions} options
    */
   public async play(options: PlayOptions): Promise<void>;
 
   /**
    * Plays the specified track with some options.
-   * @param track
-   * @param options
+   * @param {Track | UnresolvedTrack} track
+   * @param {PlayerOptions} options
    */
   public async play(track: Track | UnresolvedTrack, options: PlayOptions): Promise<void>;
   public async play(
@@ -330,7 +343,8 @@ export class Player {
 
   /**
    * Sets the player volume.
-   * @param volume
+   * @param {number} volume
+   * @returns {Player}
    */
   public setVolume(volume: number): this {
     volume = Number(volume);
@@ -349,7 +363,8 @@ export class Player {
 
   /**
    * Sets the track repeat.
-   * @param repeat
+   * @param {boolean} repeat
+   * @returns {Player}
    */
   public setTrackRepeat(repeat: boolean): this {
     if (typeof repeat !== "boolean")
@@ -368,7 +383,8 @@ export class Player {
 
   /**
    * Sets the queue repeat.
-   * @param repeat
+   * @param {boolean} repeat
+   * @returns {Player}
    */
   public setQueueRepeat(repeat: boolean): this {
     if (typeof repeat !== "boolean")
@@ -385,7 +401,10 @@ export class Player {
     return this;
   }
 
-  /** Stops the current track, optionally give an amount to skip to, e.g 5 would play the 5th song. */
+  /** Stops the current track, optionally give an amount to skip to, e.g 5 would play the 5th song.
+   * @param {number} [amount]
+   * @returns {Player}
+   */
   public stop(amount?: number): this {
     if (typeof amount === "number" && amount > 1) {
       if (amount > this.queue.length) throw new RangeError("Cannot skip more than the queue length.");
@@ -402,7 +421,8 @@ export class Player {
 
   /**
    * Pauses the current track.
-   * @param pause
+   * @param {boolean} pause
+   * @returns {Player}
    */
   public pause(pause: boolean): this {
     if (typeof pause !== "boolean")
@@ -425,7 +445,8 @@ export class Player {
 
   /**
    * Seeks to the position in the current track.
-   * @param position
+   * @param {number} position
+   * @returns {Player}
    */
   public seek(position: number): this {
     if (!this.queue.current) return undefined;
@@ -445,6 +466,16 @@ export class Player {
     });
 
     return this;
+  }
+
+  /**
+   * Send Audio Filter to lavalink
+   * @param filter
+   */
+  public setFilter(filter : AudioFilterPayload): this {
+        this.currentFilter = filter;
+        this.node.send(filter);
+        return this;
   }
 }
 
@@ -517,4 +548,69 @@ export interface EqualizerBand {
   band: number;
   /** The gain amount being -0.25 to 1.00, 0.25 being double. */
   gain: number;
+}
+
+export interface AudioFilterPayload {
+  op: "filters",
+  guild: string,
+  /** Volume as the name suggest */
+  volume?: number,
+  /** Equalizer Band **/
+  equalizer?: Array<EqualizerBand>,
+  /** Uses equalization to eliminate part of a band, usually targeting vocals. */
+  karaoke?: {
+    level?: number,
+    monoLevel?: number,
+    filterBand?: number,
+    filterWidth?: number
+  },
+  /** Changes the speed, pitch, and rate. All default to 1. */
+  timescale?: {
+    speed?: number, // 0 ≤ x
+    pitch?: number, // 0 ≤ x
+    rate?: number   // 0 ≤ x
+  },
+  /**
+   * Uses amplification to create a shuddering effect, where the volume quickly oscillates.
+   * Example: https://en.wikipedia.org/wiki/File:Fuse_Electronics_Tremolo_MK-III_Quick_Demo.ogv
+   */
+  tremolo?: {
+    frequency?: number, // 0 < x
+    depth?: number      // 0 < x ≤ 1
+  },
+  /** Similar to tremolo. While tremolo oscillates the volume, vibrato oscillates the pitch. */
+  vibrato?: {
+    frequency?: number, // 0 < x ≤ 14
+    depth?: number      // 0 < x ≤ 1
+  },
+  /** Rotates the sound around the stereo channels/user headphones aka Audio Panning. It can produce an effect similar to: https://youtu.be/QB9EB8mTKcc (without the reverb) */
+  rotation?: {
+    rotationHz?: number // The frequency of the audio rotating around the listener in Hz. 0.2 is similar to the example video above.
+  },
+  /** Distortion effect. It can generate some pretty unique audio effects. */
+  distortion?: {
+    sinOffset?: number,
+    sinScale?: number,
+    cosOffset?: number,
+    cosScale?: number,
+    tanOffset?: number,
+    tanScale?: number,
+    offset?: number,
+    scale?: number
+  },
+  /**
+   * Mixes both channels (left and right), with a configurable factor on how much each channel affects the other.
+   * With the defaults, both channels are kept independent from each other.
+   * Setting all factors to 0.5 means both channels get the same audio.
+   */
+  channelMix?: {
+    leftToLeft?: number,
+    leftToRight?: number,
+    rightToLeft?: number,
+    rightToRight?: number,
+  },
+  /** Higher frequencies get suppressed, while lower frequencies pass through this filter, thus the name low pass. */
+  lowPass?: {
+    smoothing?: number
+  }
 }
