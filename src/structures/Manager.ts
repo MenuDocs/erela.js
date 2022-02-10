@@ -195,6 +195,9 @@ export interface Manager {
   /**
    * Emitted when a track has an error during playback.
    * @event Manager#trackError
+   * @param {Player} player
+   * @param {Track | UnresolvedTrack} track
+   * @param {TrackExceptionEvent} payload
    */
   on(
     event: "trackError",
@@ -208,6 +211,8 @@ export interface Manager {
   /**
    * Emitted when a voice connection is closed.
    * @event Manager#socketClosed
+   * @param {Player} player
+   * @param {WebSocketClosedEvent} payload
    */
   on(
     event: "socketClosed",
@@ -258,7 +263,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Initiates the Manager class.
-   * @param options
+   * @param {ManagerOptions} options
    */
   constructor(options: ManagerOptions) {
     super();
@@ -280,7 +285,7 @@ export class Manager extends EventEmitter {
       shards: 1,
       autoPlay: true,
       clientName: "erela.js",
-      defaultSearchPlatform: "youtube",
+      defaultSearchPlatform: "youtube music",
       ...options,
     };
 
@@ -300,7 +305,8 @@ export class Manager extends EventEmitter {
 
   /**
    * Initiates the Manager.
-   * @param clientId
+   * @param {string} [clientId]
+   * @returns {Manager}
    */
   public init(clientId?: string): this {
     if (this.initiated) return this;
@@ -328,9 +334,9 @@ export class Manager extends EventEmitter {
 
   /**
    * Searches the enabled sources based off the URL or the `source` property.
-   * @param query
-   * @param requester
-   * @returns The search result.
+   * @param {string | SearchQuery} query
+   * @param {any} [requester]
+   * @returns {Promise<SearchResult>}
    */
   public search(
     query: string | SearchQuery,
@@ -385,9 +391,9 @@ export class Manager extends EventEmitter {
 
   /**
    * Decodes the base64 encoded tracks and returns a TrackData array.
-   * @param tracks
+   * @param {Array<string>} tracks
    */
-  public decodeTracks(tracks: string[]): Promise<TrackData[]> {
+  public decodeTracks(tracks: Array<string>): Promise<TrackData[]> {
     return new Promise(async (resolve, reject) => {
       const node = this.nodes.first();
       if (!node) throw new Error("No available nodes.");
@@ -407,7 +413,8 @@ export class Manager extends EventEmitter {
 
   /**
    * Decodes the base64 encoded track and returns a TrackData.
-   * @param track
+   * @param {string} track
+   * @return {Promise<TrackData>}
    */
   public async decodeTrack(track: string): Promise<TrackData> {
     const res = await this.decodeTracks([ track ]);
@@ -416,7 +423,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Creates a player or returns one if it already exists.
-   * @param options
+   * @param {PlayerOptions} options
    */
   public create(options: PlayerOptions): Player {
     if (this.players.has(options.guild)) {
@@ -428,7 +435,8 @@ export class Manager extends EventEmitter {
 
   /**
    * Returns a player or undefined if it does not exist.
-   * @param guild
+   * @param {string} guild
+   * @returns {?Player}
    */
   public get(guild: string): Player | undefined {
     return this.players.get(guild);
@@ -436,7 +444,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Destroys a player if it exists.
-   * @param guild
+   * @param {string} guild
    */
   public destroy(guild: string): void {
     this.players.delete(guild);
@@ -444,7 +452,8 @@ export class Manager extends EventEmitter {
 
   /**
    * Creates a node or returns one if it already exists.
-   * @param options
+   * @param {NodeOptions} options
+   * @return {Node}
    */
   public createNode(options: NodeOptions): Node {
     if (this.nodes.has(options.identifier || options.host)) {
@@ -456,7 +465,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Destroys a node if it exists.
-   * @param identifier
+   * @param {string} identifier
    */
   public destroyNode(identifier: string): void {
     const node = this.nodes.get(identifier);
@@ -467,7 +476,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Sends voice data to the Lavalink server.
-   * @param data
+   * @param {VoicePacket | VoiceState | VoiceServer} data
    */
   public updateVoiceState(data: VoicePacket | VoiceServer | VoiceState): void {
     if ("t" in data && !["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) return;
@@ -540,8 +549,8 @@ export interface ManagerOptions {
   defaultSearchPlatform?: SearchPlatform;
   /**
    * Function to send data to the websocket.
-   * @param id
-   * @param payload
+   * @param {string} id
+   * @param {Payload} payload
    */
   send(id: string, payload: Payload): void;
 }
