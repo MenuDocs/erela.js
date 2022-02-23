@@ -50,6 +50,8 @@ export class Player {
   public trackRepeat = false;
   /** Whether the queue repeats the queue. */
   public queueRepeat = false;
+  /** Whether the next track is random when trackEnd */
+  public randomPlay = false;
   /** The time the player is in the track. */
   public position = 0;
   /** Whether the player is playing. */
@@ -383,6 +385,15 @@ export class Player {
     }
 
     return this;
+  }
+
+  public setRandomPlay(random: boolean): this {
+    if (typeof random !== "boolean")
+      throw new TypeError('Random can only be "true" or "false".');
+    
+      this.randomPlay = random;
+
+      return this;
   }
 
   /** Stops the current track, optionally give an amount to skip to, e.g 5 would play the 5th song. */
