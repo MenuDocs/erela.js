@@ -309,6 +309,15 @@ export class Node {
     }
   }
 
+  protected checkRandomPlay(player: Player): Track | UnresolvedTrack | undefined {
+    if (!player.queue.length) { return undefined; }
+    if (!player.randomPlay) { return player.queue.shift(); }
+    const index = Math.floor(Math.random() * player.queue.length);
+    const track = player.queue[index];
+    player.queue.splice(index, 1);
+    return track;
+  }
+
   protected trackStart(player: Player, track: Track, payload: TrackStartEvent): void {
     player.playing = true;
     player.paused = false;
@@ -319,7 +328,7 @@ export class Node {
     // If a track had an error while starting
     if (["LOAD_FAILED", "CLEAN_UP"].includes(payload.reason)) {
       player.queue.previous = player.queue.current;
-      player.queue.current = player.queue.shift();
+      player.queue.current = this.checkRandomPlay(player);
 
       if (!player.queue.current) return this.queueEnd(player, track, payload);
 
@@ -338,7 +347,7 @@ export class Node {
     if (track && player.trackRepeat) {
       if (payload.reason === "STOPPED") {
         player.queue.previous = player.queue.current;
-        player.queue.current = player.queue.shift();
+        player.queue.current = this.checkRandomPlay(player);
       }
 
       if (!player.queue.current) return this.queueEnd(player, track, payload);
@@ -353,11 +362,11 @@ export class Node {
       player.queue.previous = player.queue.current;
 
       if (payload.reason === "STOPPED") {
-        player.queue.current = player.queue.shift();
+        player.queue.current = this.checkRandomPlay(player);
         if (!player.queue.current) return this.queueEnd(player, track, payload);
       } else {
         player.queue.add(player.queue.current);
-        player.queue.current = player.queue.shift();
+        player.queue.current = this.checkRandomPlay(player);
       }
 
       this.manager.emit("trackEnd", player, track, payload);
@@ -368,7 +377,7 @@ export class Node {
     // If there is another song in the queue
     if (player.queue.length) {
       player.queue.previous = player.queue.current;
-      player.queue.current = player.queue.shift();
+      player.queue.current = this.checkRandomPlay(player);
 
       this.manager.emit("trackEnd", player, track, payload);
       if (this.manager.options.autoPlay) player.play();
