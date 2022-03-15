@@ -223,7 +223,7 @@ export class Manager extends EventEmitter {
   public static readonly DEFAULT_SOURCES: Record<SearchPlatform, string> = {
     "youtube music": "ytmsearch",
     "youtube": "ytsearch",
-    "soundcloud": "scsearch"
+    "soundcloud": "scsearch",
   }
 
   /** The map of players. */
@@ -344,7 +344,7 @@ export class Manager extends EventEmitter {
       const _source = Manager.DEFAULT_SOURCES[_query.source ?? this.options.defaultSearchPlatform] ?? _query.source;
 
       let search = _query.query;
-      if (!/^https?:\/\//.test(search)) {
+      if (_source !== "local" && /^https?:\/\//.test(search)) {
         search = `${_source}:${search}`;
       }
 
@@ -546,7 +546,7 @@ export interface ManagerOptions {
   send(id: string, payload: Payload): void;
 }
 
-export type SearchPlatform = "youtube" | "youtube music" | "soundcloud";
+export type SearchPlatform = "youtube" | "youtube music" | "soundcloud" | "local";
 
 export interface SearchQuery {
   /** The source to search from. */
