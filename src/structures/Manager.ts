@@ -220,7 +220,7 @@ export interface Manager {
  * @noInheritDoc
  */
 export class Manager extends EventEmitter {
-  public static readonly DEFAULT_SOURCES: Record<SearchPlatform, string> = {
+  public static readonly DEFAULT_SOURCES: Partial<Record<SearchPlatform, string>> = {
     "youtube music": "ytmsearch",
     "youtube": "ytsearch",
     "soundcloud": "scsearch",
@@ -342,9 +342,9 @@ export class Manager extends EventEmitter {
 
       const _query: SearchQuery = typeof query === "string" ? { query } : query;
       const _source = Manager.DEFAULT_SOURCES[_query.source ?? this.options.defaultSearchPlatform] ?? _query.source;
-
+      
       let search = _query.query;
-      if (_source !== "local" && /^https?:\/\//.test(search)) {
+      if (_source !== "local" && !/^(https?|file):\/\//.test(search)) {
         search = `${_source}:${search}`;
       }
 
