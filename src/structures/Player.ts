@@ -111,11 +111,13 @@ export class Player {
       if(this.manager.players.get(options.guild).manager.options.clientId === options.clientId) {
         return this.manager.players.get(options.guild);
       } else {
-        this.manager = options.manager;
+       if(options.manager) this.manager = options.manager;
       }
-      delete this.options.manager; delete this.options.clientId;
     }
-
+    if(this.manager.options.clientId !== options.clientId) {
+      if(options.manager) this.manager = options.manager;
+    }
+    delete this.options.manager; delete this.options.clientId;
     check(options);
 
     this.guild = options.guild;

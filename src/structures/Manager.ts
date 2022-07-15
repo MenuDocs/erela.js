@@ -419,9 +419,9 @@ export class Manager extends EventEmitter {
    * @param options
    */
   public create(options: PlayerOptions): Player {
+    Object.assign({ manager: this, clientId: this.options.clientId }, options);
     if (this.players.has(options.guild)) {
       if(this.players.get(options.guild).manager.options.clientId !== this.options.clientId) {
-         Object.assign({ manager: this, clientId: this.options.clientId }, options);
          return new (Structure.get("Player"))(options);
       }
       return this.players.get(options.guild);
