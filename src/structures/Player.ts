@@ -471,7 +471,7 @@ export interface PlayerOptions {
   /** Client Id to check if no corruption is detected. */
   clientId?: string;
   /** Manager to set in case corruption is detected. */
-  manager: Manager;
+  manager?: Manager;
 }
 
 /** If track partials are set some of these will be `undefined` as they were removed. */
