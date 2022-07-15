@@ -68,7 +68,7 @@ function check(options: ManagerOptions) {
     typeof options.clientName !== "string"
   )
     throw new TypeError('Manager option "clientName" must be a string.');
-  
+
   if (
     typeof options.defaultSearchPlatform !== "undefined" &&
     typeof options.defaultSearchPlatform !== "string"
@@ -420,6 +420,10 @@ export class Manager extends EventEmitter {
    */
   public create(options: PlayerOptions): Player {
     if (this.players.has(options.guild)) {
+      if(this.players.get(options.guild).manager.options.clientId !== this.options.clientId) {
+         Object.assign({ manager: this, clientId: this.options.clientId }, options);
+         return new (Structure.get("Player"))(options);
+      }
       return this.players.get(options.guild);
     }
 
@@ -484,7 +488,7 @@ export class Manager extends EventEmitter {
     } else {
       /* voice state update */
       if (update.user_id !== this.options.clientId) {
-        return;      
+        return;
       }
 
       if (update.channel_id) {

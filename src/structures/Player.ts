@@ -108,7 +108,12 @@ export class Player {
     if (!this.manager) throw new RangeError("Manager has not been initiated.");
 
     if (this.manager.players.has(options.guild)) {
-      return this.manager.players.get(options.guild);
+      if(this.manager.players.get(options.guild).manager.options.clientId === options.clientId) {
+        return this.manager.players.get(options.guild);
+      } else {
+        this.manager = options.manager;
+      }
+      delete this.options.manager; delete this.options.clientId;
     }
 
     check(options);
@@ -463,6 +468,10 @@ export interface PlayerOptions {
   selfMute?: boolean;
   /** If the player should deaf itself. */
   selfDeafen?: boolean;
+  /** Client Id to check if no corruption is detected. */
+  clientId?: string;
+  /** Manager to set in case corruption is detected. */
+  manager: Manager;
 }
 
 /** If track partials are set some of these will be `undefined` as they were removed. */
