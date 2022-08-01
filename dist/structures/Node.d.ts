@@ -1,13 +1,15 @@
 /// <reference types="node" />
 import WebSocket from "ws";
+import { Dispatcher, Pool } from "undici";
 import { Manager } from "./Manager";
 import { Player, Track, UnresolvedTrack } from "./Player";
 import { PlayerEvent, PlayerEvents, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from "./Utils";
-import type { PetitioRequest } from "petitio/dist/lib/PetitioRequest";
 export declare class Node {
     options: NodeOptions;
     /** The socket for the node. */
     socket: WebSocket | null;
+    /** The HTTP pool used for rest calls. */
+    http: Pool;
     /** The amount of rest calls the node has made. */
     calls: number;
     /** The stats for the node. */
@@ -18,6 +20,8 @@ export declare class Node {
     private reconnectAttempts;
     /** Returns if connected to the Node. */
     get connected(): boolean;
+    /** Returns the address for this node. */
+    get address(): string;
     /** @hidden */
     static init(manager: Manager): void;
     /**
@@ -55,7 +59,7 @@ export declare class Node {
     protected socketClosed(player: Player, payload: WebSocketClosedEvent): void;
 }
 /** Modifies any outgoing REST requests. */
-export declare type ModifyRequest = (request: PetitioRequest) => unknown;
+export declare type ModifyRequest = (options: Dispatcher.RequestOptions) => void;
 export interface NodeOptions {
     /** The host for the node. */
     host: string;
