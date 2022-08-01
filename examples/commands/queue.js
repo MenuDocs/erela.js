@@ -38,6 +38,6 @@ module.exports = {
 
     embed.setFooter({ text: `Page ${page > maxPages ? maxPages : page} of ${maxPages}` });
 
-    return message.reply(embed);
+    return message.reply({ embeds: [embed] });
   }
 }
