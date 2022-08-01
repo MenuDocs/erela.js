@@ -1,6 +1,6 @@
 /* eslint-disable no-case-declarations */
 import WebSocket from "ws";
-import fetch from "petitio";
+import { Dispatcher, Pool } from "undici";
 import { Manager } from "./Manager";
 import { Player, Track, UnresolvedTrack } from "./Player";
 import {
@@ -13,8 +13,6 @@ import {
   TrackStuckEvent,
   WebSocketClosedEvent,
 } from "./Utils";
-
-import type { PetitioRequest } from "petitio/dist/lib/PetitioRequest";
 
 function check(options: NodeOptions) {
   if (!options) throw new TypeError("NodeOptions must not be empty.");
@@ -72,11 +70,14 @@ function check(options: NodeOptions) {
 export class Node {
   /** The socket for the node. */
   public socket: WebSocket | null = null;
+  /** The HTTP pool used for rest calls. */
+  public http: Pool;
   /** The amount of rest calls the node has made. */
   public calls = 0;
   /** The stats for the node. */
   public stats: NodeStats;
   public manager: Manager
+
   private static _manager: Manager;
   private reconnectTimeout?: NodeJS.Timeout;
   private reconnectAttempts = 1;
@@ -85,6 +86,11 @@ export class Node {
   public get connected(): boolean {
     if (!this.socket) return false;
     return this.socket.readyState === WebSocket.OPEN;
+  }
+
+  /** Returns the address for this node. */
+  public get address(): string {
+    return `${this.options.host}:${this.options.port}`;
   }
 
   /** @hidden */
@@ -115,6 +121,12 @@ export class Node {
       ...options,
     };
 
+    if (this.options.secure) {
+      this.options.port = 443;
+    }
+
+    this.http = new Pool(`http${this.options.secure ? "s" : ""}://${this.address}`);
+
     this.options.identifier = options.identifier || options.host;
     this.stats = {
       players: 0,
@@ -141,7 +153,7 @@ export class Node {
     this.manager.nodes.set(this.options.identifier, this);
     this.manager.emit("nodeCreate", this);
   }
-
+  
   /** Connects to the Node. */
   public connect(): void {
     if (this.connected) return;
@@ -153,12 +165,7 @@ export class Node {
       "Client-Name": this.manager.options.clientName,
     };
 
-    this.socket = new WebSocket(
-      `ws${this.options.secure ? "s" : ""}://${this.options.host}:${
-        this.options.port
-      }/`,
-      { headers }
-    );
+    this.socket = new WebSocket(`ws${this.options.secure ? "s" : ""}://${this.address}`, { headers });
     this.socket.on("open", this.open.bind(this));
     this.socket.on("close", this.close.bind(this));
     this.socket.on("message", this.message.bind(this));
@@ -190,17 +197,21 @@ export class Node {
    * @returns The returned data
    */
   public async makeRequest<T>(endpoint: string, modify?: ModifyRequest): Promise<T> {
-    endpoint = endpoint.replace(/^\//gm, "");
-
-    const request = fetch(`http${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}/${endpoint}`)
-      .header("Authorization", this.options.password);
-
-    if (modify) {
-      await modify(request);
+    const options: Dispatcher.RequestOptions = {
+      path: `/${endpoint.replace(/^\//gm, "")}`,
+      method: "GET",
+      headers: {
+        Authorization: this.options.password
+      },
+      headersTimeout: this.options.requestTimeout,
     }
 
+    modify?.(options);
+
+    const request = await this.http.request(options);
     this.calls++;
-    return await request.json();
+
+    return await request.body.json();
   }
 
   /**
@@ -406,7 +417,7 @@ export class Node {
 }
 
 /** Modifies any outgoing REST requests. */
-export type ModifyRequest = (request: PetitioRequest) => unknown;
+export type ModifyRequest = (options: Dispatcher.RequestOptions) => void;
 
 export interface NodeOptions {
   /** The host for the node. */
