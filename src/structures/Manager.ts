@@ -1,5 +1,5 @@
 /* eslint-disable no-async-promise-executor */
-import Collection from "@discordjs/collection";
+import { Collection } from "@discordjs/collection";
 import { EventEmitter } from "events";
 import { VoiceState } from "..";
 import { Node, NodeOptions } from "./Node";
@@ -195,6 +195,9 @@ export interface Manager {
   /**
    * Emitted when a track has an error during playback.
    * @event Manager#trackError
+   * @param {Player} player
+   * @param {Track | UnresolvedTrack} track
+   * @param {TrackExceptionEvent} payload
    */
   on(
     event: "trackError",
@@ -208,6 +211,8 @@ export interface Manager {
   /**
    * Emitted when a voice connection is closed.
    * @event Manager#socketClosed
+   * @param {Player} player
+   * @param {WebSocketClosedEvent} payload
    */
   on(
     event: "socketClosed",
@@ -220,7 +225,7 @@ export interface Manager {
  * @noInheritDoc
  */
 export class Manager extends EventEmitter {
-  public static readonly DEFAULT_SOURCES: Record<SearchPlatform, string> = {
+  public static readonly DEFAULT_SOURCES: Partial<Record<SearchPlatform, string>> = {
     "youtube music": "ytmsearch",
     "youtube": "ytsearch",
     "soundcloud": "scsearch"
@@ -258,7 +263,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Initiates the Manager class.
-   * @param options
+   * @param {ManagerOptions} options
    */
   constructor(options: ManagerOptions) {
     super();
@@ -280,7 +285,7 @@ export class Manager extends EventEmitter {
       shards: 1,
       autoPlay: true,
       clientName: "erela.js",
-      defaultSearchPlatform: "youtube",
+      defaultSearchPlatform: "youtube music",
       ...options,
     };
 
@@ -300,7 +305,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Initiates the Manager.
-   * @param clientId
+   * @param {string} clientId
    */
   public init(clientId?: string): this {
     if (this.initiated) return this;
@@ -341,10 +346,10 @@ export class Manager extends EventEmitter {
       if (!node) throw new Error("No available nodes.");
 
       const _query: SearchQuery = typeof query === "string" ? { query } : query;
-      const _source = Manager.DEFAULT_SOURCES[_query.source ?? this.options.defaultSearchPlatform] ?? _query.source;
+      const _source = Manager.DEFAULT_SOURCES[(_query.source ?? this.options.defaultSearchPlatform)] ?? _query.source;
 
       let search = _query.query;
-      if (!/^https?:\/\//.test(search)) {
+      if (_source !== "local" && !/^(https?|file):\/\//.test(search)) {        
         search = `${_source}:${search}`;
       }
 
@@ -408,7 +413,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Decodes the base64 encoded track and returns a TrackData.
-   * @param track
+   * @param {string} track
    */
   public async decodeTrack(track: string): Promise<TrackData> {
     const res = await this.decodeTracks([ track ]);
@@ -417,7 +422,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Creates a player or returns one if it already exists.
-   * @param options
+   * @param {PlayerOptions} options
    */
   public create(options: PlayerOptions): Player {
     if (this.players.has(options.guild)) {
@@ -429,7 +434,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Returns a player or undefined if it does not exist.
-   * @param guild
+   * @param {string} guild
    */
   public get(guild: string): Player | undefined {
     return this.players.get(guild);
@@ -445,7 +450,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Creates a node or returns one if it already exists.
-   * @param options
+   * @param {NodeOptions} options
    */
   public createNode(options: NodeOptions): Node {
     if (this.nodes.has(options.identifier || options.host)) {
@@ -457,7 +462,7 @@ export class Manager extends EventEmitter {
 
   /**
    * Destroys a node if it exists.
-   * @param identifier
+   * @param {string} identifier
    */
   public destroyNode(identifier: string): void {
     const node = this.nodes.get(identifier);

@@ -71,7 +71,7 @@ export class Player {
   /** The equalizer bands array. */
   public bands = new Array<number>(15).fill(0.0);
   /** The voice state object from Discord. */
-  public voiceState: VoiceState;
+  public voiceState: VoiceState | undefined;
   /** The Manager. */
   public manager: Manager;
   private static _manager: Manager;
