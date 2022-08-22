@@ -1,8 +1,7 @@
-const { Client, Collection } = require("discord.js");
+const { Client, Collection, GatewayIntentBits } = require("discord.js");
 const { readdirSync } = require("fs");
 const { Manager } = require("erela.js");
-
-const client = new Client();
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.MessageContent] });
 client.commands = new Collection();
 
 const files = readdirSync("./commands")
@@ -45,7 +44,7 @@ client.once("ready", () => {
 
 client.on("raw", d => client.manager.updateVoiceState(d));
 
-client.on("message", async message => {
+client.on("messageCreate", async message => {
   if (!message.content.startsWith("!") || !message.guild || message.author.bot) return;
   const [name, ...args] = message.content.slice(1).split(/\s+/g);
 
@@ -55,7 +54,7 @@ client.on("message", async message => {
   try {
     command.run(message, args);
   } catch (err) {
-    message.reply(`an error occurred while running the command: ${err.message}`);
+    message.reply(`An error occurred while running the command: ${err.message}`);
   }
 });
 
