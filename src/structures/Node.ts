@@ -125,7 +125,7 @@ export class Node {
       this.options.port = 443;
     }
 
-    this.http = new Pool(`http${this.options.secure ? "s" : ""}://${this.address}`);
+    this.http = new Pool(`http${this.options.secure ? "s" : ""}://${this.address}`, this.options.poolOptions);
 
     this.options.identifier = options.identifier || options.host;
     this.stats = {
@@ -436,6 +436,8 @@ export interface NodeOptions {
   retryDelay?: number;
   /** The timeout used for api calls */
   requestTimeout?: number;
+  /** Options for the undici http pool used for http requests */
+  poolOptions?: Pool.Options;
 }
 
 export interface NodeStats {
