@@ -70,7 +70,7 @@ class Node {
         if (this.options.secure) {
             this.options.port = 443;
         }
-        this.http = new undici_1.Pool(`http${this.options.secure ? "s" : ""}://${this.address}`);
+        this.http = new undici_1.Pool(`http${this.options.secure ? "s" : ""}://${this.address}`, this.options.poolOptions);
         this.options.identifier = options.identifier || options.host;
         this.stats = {
             players: 0,

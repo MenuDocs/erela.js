@@ -77,6 +77,8 @@ export interface NodeOptions {
     retryDelay?: number;
     /** The timeout used for api calls */
     requestTimeout?: number;
+    /** Options for the undici http pool used for http requests */
+    poolOptions?: Pool.Options;
 }
 export interface NodeStats {
     /** The amount of players on the node. */
