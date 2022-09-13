@@ -23,8 +23,8 @@ jobs:
           key: ${{ runner.os }}-12-${{ hashFiles('**/yarn.lock') }}
       - name: Install Dependencies
         run: yarn --ignore-scripts --frozen-lockfile
-      - name: Build Code
-        run:  yarn build
+      - name: Run CI script
+        run:  yarn run ci
       - name: Push new code
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |

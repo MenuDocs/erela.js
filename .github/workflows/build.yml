@@ -10,7 +10,5 @@ jobs:
           node-version: 16
       - name: Install dependencies
         run: yarn install
-      - name: Build dist
-        run: yarn build
-      - name: Generate typings
-        run: yarn types
+      - name: Run CI script
+        run: yarn run ci
