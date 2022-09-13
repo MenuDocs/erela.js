@@ -1,0 +1,8 @@
+{
+  "name": "examples",
+  "packageManager": "yarn@3.2.0",
+  "dependencies": {
+    "discord.js": "^14.3.0",
+    "erela.js": "../"
+  }
+}

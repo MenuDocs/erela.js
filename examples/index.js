@@ -1,7 +1,7 @@
-const { Client, Collection, GatewayIntentBits } = require("discord.js");
+const { Client, Collection } = require("discord.js");
 const { readdirSync } = require("fs");
 const { Manager } = require("erela.js");
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.MessageContent] });
+const client = new Client({ intents: ["Guilds", "GuildMessages", "GuildVoiceStates", "MessageContent"] });
 client.commands = new Collection();
 
 const files = readdirSync("./commands")
@@ -15,6 +15,7 @@ for (const file of files) {
 client.manager = new Manager({
   nodes: [{
     host: "localhost",
+    port: 1212,
     retryDelay: 5000,
   }],
   autoPlay: true,
@@ -58,4 +59,4 @@ client.on("messageCreate", async message => {
   }
 });
 
-client.login("your bot token here");
+client.login("MTAwNjg1Mzk0NjE1OTE1NzI3OQ.G_UXe3.dRyQnCVUhJaA6cYGZKoQAm7SsxnUCMkZPek-Rw");
