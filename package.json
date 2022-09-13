@@ -7,11 +7,12 @@
   "files": [  "dist" ],
   "scripts": {
     "build": "tsc",
+    "types": "rtb --dist dist",
     "lint": "eslint --ext .ts ./src",
-    "types": "dts-bundle --removeSource --name erela.js --main ./dist --out ../typings/index.d.ts --baseDir ./dist",
     "docs": "typedoc --json ./docs.json --mode file --excludeProtected --excludePrivate --excludeExternals src/structures",
     "publish:stable": "yarn build && yarn types && yarn publish --access=public",
-    "publish:beta": "yarn build && yarn types && yarn publish --tag beta --access=public"
+    "publish:beta": "yarn build && yarn types && yarn publish --tag beta --access=public",
+    "ci": "run-s lint build types"
   },
   "keywords": [
     "lavalink",
@@ -31,20 +32,22 @@
   "repository": "MenuDocs/erela.js",
   "bugs": "https://github.com/MenuDocs/erela.js",
   "devDependencies": {
-    "@types/node": "^16.6.1",
-    "@types/ws": "^7.4.7",
-    "@typescript-eslint/eslint-plugin": "^4.29.2",
-    "@typescript-eslint/parser": "^4.29.2",
-    "dts-bundle": "^0.7.3",
-    "eslint": "^7.7.0",
-    "typedoc": "^0.21.5",
-    "typedoc-plugin-no-inherit": "^1.2.0",
-    "typescript": "^4.3.5"
+    "@favware/rollup-type-bundler": "^1.0.11",
+    "@types/node": "v16",
+    "@types/ws": "^8.5.3",
+    "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/parser": "^5.37.0",
+    "eslint": "^8.23.1",
+    "npm-run-all": "^4.1.5",
+    "typedoc": "^0.23.14",
+    "typedoc-plugin-no-inherit": "^1.4.0",
+    "typescript": "^4.8.3"
   },
   "dependencies": {
-    "@discordjs/collection": "^0.2.1",
-    "undici": "^4.11.0",
-    "ws": "^8.1.0"
+    "@discordjs/collection": "^1.1.0",
+    "tslib": "^2.4.0",
+    "undici": "^5.10.0",
+    "ws": "^8.8.1"
   },
   "engines": {
     "node": ">=16.0.0"
