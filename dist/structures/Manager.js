@@ -1,20 +1,8 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Manager = void 0;
 /* eslint-disable no-async-promise-executor */
-const collection_1 = __importDefault(require("@discordjs/collection"));
+const collection_1 = require("@discordjs/collection");
 const events_1 = require("events");
 const Utils_1 = require("./Utils");
 const REQUIRED_KEYS = ["event", "guildId", "op", "sessionId"];
@@ -53,38 +41,18 @@ function check(options) {
  * @noInheritDoc
  */
 class Manager extends events_1.EventEmitter {
-    /**
-     * Initiates the Manager class.
-     * @param options
-     */
-    constructor(options) {
-        super();
-        /** The map of players. */
-        this.players = new collection_1.default();
-        /** The map of nodes. */
-        this.nodes = new collection_1.default();
-        this.initiated = false;
-        check(options);
-        Utils_1.Structure.get("Player").init(this);
-        Utils_1.Structure.get("Node").init(this);
-        Utils_1.TrackUtils.init(this);
-        if (options.trackPartial) {
-            Utils_1.TrackUtils.setTrackPartial(options.trackPartial);
-            delete options.trackPartial;
-        }
-        this.options = Object.assign({ plugins: [], nodes: [{ identifier: "default", host: "localhost" }], shards: 1, autoPlay: true, clientName: "erela.js", defaultSearchPlatform: "youtube" }, options);
-        if (this.options.plugins) {
-            for (const [index, plugin] of this.options.plugins.entries()) {
-                if (!(plugin instanceof Utils_1.Plugin))
-                    throw new RangeError(`Plugin at index ${index} does not extend Plugin.`);
-                plugin.load(this);
-            }
-        }
-        if (this.options.nodes) {
-            for (const nodeOptions of this.options.nodes)
-                new (Utils_1.Structure.get("Node"))(nodeOptions);
-        }
-    }
+    static DEFAULT_SOURCES = {
+        "youtube music": "ytmsearch",
+        "youtube": "ytsearch",
+        "soundcloud": "scsearch"
+    };
+    /** The map of players. */
+    players = new collection_1.Collection();
+    /** The map of nodes. */
+    nodes = new collection_1.Collection();
+    /** The options that were set. */
+    options;
+    initiated = false;
     /** Returns the least used Nodes. */
     get leastUsedNodes() {
         return this.nodes
@@ -104,6 +72,41 @@ class Manager extends events_1.EventEmitter {
                 : 0;
             return aload - bload;
         });
+    }
+    /**
+     * Initiates the Manager class.
+     * @param options
+     */
+    constructor(options) {
+        super();
+        check(options);
+        Utils_1.Structure.get("Player").init(this);
+        Utils_1.Structure.get("Node").init(this);
+        Utils_1.TrackUtils.init(this);
+        if (options.trackPartial) {
+            Utils_1.TrackUtils.setTrackPartial(options.trackPartial);
+            delete options.trackPartial;
+        }
+        this.options = {
+            plugins: [],
+            nodes: [{ identifier: "default", host: "localhost" }],
+            shards: 1,
+            autoPlay: true,
+            clientName: "erela.js",
+            defaultSearchPlatform: "youtube",
+            ...options,
+        };
+        if (this.options.plugins) {
+            for (const [index, plugin] of this.options.plugins.entries()) {
+                if (!(plugin instanceof Utils_1.Plugin))
+                    throw new RangeError(`Plugin at index ${index} does not extend Plugin.`);
+                plugin.load(this);
+            }
+        }
+        if (this.options.nodes) {
+            for (const nodeOptions of this.options.nodes)
+                new (Utils_1.Structure.get("Node"))(nodeOptions);
+        }
     }
     /**
      * Initiates the Manager.
@@ -136,18 +139,17 @@ class Manager extends events_1.EventEmitter {
      * @returns The search result.
      */
     search(query, requester) {
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            var _a, _b, _c;
+        return new Promise(async (resolve, reject) => {
             const node = this.leastUsedNodes.first();
             if (!node)
                 throw new Error("No available nodes.");
             const _query = typeof query === "string" ? { query } : query;
-            const _source = (_b = Manager.DEFAULT_SOURCES[(_a = _query.source) !== null && _a !== void 0 ? _a : this.options.defaultSearchPlatform]) !== null && _b !== void 0 ? _b : _query.source;
+            const _source = Manager.DEFAULT_SOURCES[_query.source ?? this.options.defaultSearchPlatform] ?? _query.source;
             let search = _query.query;
             if (!/^https?:\/\//.test(search)) {
                 search = `${_source}:${search}`;
             }
-            const res = yield node
+            const res = await node
                 .makeRequest(`/loadtracks?identifier=${encodeURIComponent(search)}`)
                 .catch(err => reject(err));
             if (!res) {
@@ -155,7 +157,7 @@ class Manager extends events_1.EventEmitter {
             }
             const result = {
                 loadType: res.loadType,
-                exception: (_c = res.exception) !== null && _c !== void 0 ? _c : null,
+                exception: res.exception ?? null,
                 tracks: res.tracks.map((track) => Utils_1.TrackUtils.build(track, requester)),
             };
             if (result.loadType === "PLAYLIST_LOADED") {
@@ -168,18 +170,18 @@ class Manager extends events_1.EventEmitter {
                 };
             }
             return resolve(result);
-        }));
+        });
     }
     /**
      * Decodes the base64 encoded tracks and returns a TrackData array.
      * @param tracks
      */
     decodeTracks(tracks) {
-        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+        return new Promise(async (resolve, reject) => {
             const node = this.nodes.first();
             if (!node)
                 throw new Error("No available nodes.");
-            const res = yield node.makeRequest(`/decodetracks`, r => {
+            const res = await node.makeRequest(`/decodetracks`, r => {
                 r.method = "POST";
                 r.body = JSON.stringify(tracks);
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -190,17 +192,15 @@ class Manager extends events_1.EventEmitter {
                 return reject(new Error("No data returned from query."));
             }
             return resolve(res);
-        }));
+        });
     }
     /**
      * Decodes the base64 encoded track and returns a TrackData.
      * @param track
      */
-    decodeTrack(track) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const res = yield this.decodeTracks([track]);
-            return res[0];
-        });
+    async decodeTrack(track) {
+        const res = await this.decodeTracks([track]);
+        return res[0];
     }
     /**
      * Creates a player or returns one if it already exists.
@@ -291,8 +291,3 @@ class Manager extends events_1.EventEmitter {
     }
 }
 exports.Manager = Manager;
-Manager.DEFAULT_SOURCES = {
-    "youtube music": "ytmsearch",
-    "youtube": "ytsearch",
-    "soundcloud": "scsearch"
-};

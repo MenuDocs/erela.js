@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Player = void 0;
 const Utils_1 = require("./Utils");
@@ -33,34 +24,64 @@ function check(options) {
         throw new TypeError('Player option "selfDeafen" must be a boolean.');
 }
 class Player {
+    options;
+    /** The Queue for the Player. */
+    queue = new (Utils_1.Structure.get("Queue"))();
+    /** Whether the queue repeats the track. */
+    trackRepeat = false;
+    /** Whether the queue repeats the queue. */
+    queueRepeat = false;
+    /** The time the player is in the track. */
+    position = 0;
+    /** Whether the player is playing. */
+    playing = false;
+    /** Whether the player is paused. */
+    paused = false;
+    /** The volume for the player */
+    volume;
+    /** The Node for the Player. */
+    node;
+    /** The guild for the player. */
+    guild;
+    /** The voice channel for the player. */
+    voiceChannel = null;
+    /** The text channel for the player. */
+    textChannel = null;
+    /** The current state of the player. */
+    state = "DISCONNECTED";
+    /** The equalizer bands array. */
+    bands = new Array(15).fill(0.0);
+    /** The voice state object from Discord. */
+    voiceState;
+    /** The Manager. */
+    manager;
+    static _manager;
+    data = {};
+    /**
+     * Set custom data.
+     * @param key
+     * @param value
+     */
+    set(key, value) {
+        this.data[key] = value;
+    }
+    /**
+     * Get custom data.
+     * @param key
+     */
+    get(key) {
+        return this.data[key];
+    }
+    /** @hidden */
+    static init(manager) {
+        this._manager = manager;
+    }
     /**
      * Creates a new player, returns one if it already exists.
      * @param options
      */
     constructor(options) {
-        var _a;
         this.options = options;
-        /** The Queue for the Player. */
-        this.queue = new (Utils_1.Structure.get("Queue"))();
-        /** Whether the queue repeats the track. */
-        this.trackRepeat = false;
-        /** Whether the queue repeats the queue. */
-        this.queueRepeat = false;
-        /** The time the player is in the track. */
-        this.position = 0;
-        /** Whether the player is playing. */
-        this.playing = false;
-        /** Whether the player is paused. */
-        this.paused = false;
-        /** The voice channel for the player. */
-        this.voiceChannel = null;
-        /** The text channel for the player. */
-        this.textChannel = null;
-        /** The current state of the player. */
-        this.state = "DISCONNECTED";
-        /** The equalizer bands array. */
-        this.bands = new Array(15).fill(0.0);
-        this.data = {};
         if (!this.manager)
             this.manager = Utils_1.Structure.get("Player")._manager;
         if (!this.manager)
@@ -81,26 +102,7 @@ class Player {
             throw new RangeError("No available nodes.");
         this.manager.players.set(options.guild, this);
         this.manager.emit("playerCreate", this);
-        this.setVolume((_a = options.volume) !== null && _a !== void 0 ? _a : 100);
-    }
-    /**
-     * Set custom data.
-     * @param key
-     * @param value
-     */
-    set(key, value) {
-        this.data[key] = value;
-    }
-    /**
-     * Get custom data.
-     * @param key
-     */
-    get(key) {
-        return this.data[key];
-    }
-    /** @hidden */
-    static init(manager) {
-        this._manager = manager;
+        this.setVolume(options.volume ?? 100);
     }
     /**
      * Same as Manager#search() but a shortcut on the player itself.
@@ -209,38 +211,41 @@ class Player {
         this.textChannel = channel;
         return this;
     }
-    play(optionsOrTrack, playOptions) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (typeof optionsOrTrack !== "undefined" &&
-                Utils_1.TrackUtils.validate(optionsOrTrack)) {
-                if (this.queue.current)
-                    this.queue.previous = this.queue.current;
-                this.queue.current = optionsOrTrack;
+    async play(optionsOrTrack, playOptions) {
+        if (typeof optionsOrTrack !== "undefined" &&
+            Utils_1.TrackUtils.validate(optionsOrTrack)) {
+            if (this.queue.current)
+                this.queue.previous = this.queue.current;
+            this.queue.current = optionsOrTrack;
+        }
+        if (!this.queue.current)
+            throw new RangeError("No current track.");
+        const finalOptions = playOptions
+            ? playOptions
+            : ["startTime", "endTime", "noReplace"].every((v) => Object.keys(optionsOrTrack || {}).includes(v))
+                ? optionsOrTrack
+                : {};
+        if (Utils_1.TrackUtils.isUnresolvedTrack(this.queue.current)) {
+            try {
+                this.queue.current = await Utils_1.TrackUtils.getClosestTrack(this.queue.current);
             }
-            if (!this.queue.current)
-                throw new RangeError("No current track.");
-            const finalOptions = playOptions
-                ? playOptions
-                : ["startTime", "endTime", "noReplace"].every((v) => Object.keys(optionsOrTrack || {}).includes(v))
-                    ? optionsOrTrack
-                    : {};
-            if (Utils_1.TrackUtils.isUnresolvedTrack(this.queue.current)) {
-                try {
-                    this.queue.current = yield Utils_1.TrackUtils.getClosestTrack(this.queue.current);
-                }
-                catch (error) {
-                    this.manager.emit("trackError", this, this.queue.current, error);
-                    if (this.queue[0])
-                        return this.play(this.queue[0]);
-                    return;
-                }
+            catch (error) {
+                this.manager.emit("trackError", this, this.queue.current, error);
+                if (this.queue[0])
+                    return this.play(this.queue[0]);
+                return;
             }
-            const options = Object.assign({ op: "play", guildId: this.guild, track: this.queue.current.track }, finalOptions);
-            if (typeof options.track !== "string") {
-                options.track = options.track.track;
-            }
-            yield this.node.send(options);
-        });
+        }
+        const options = {
+            op: "play",
+            guildId: this.guild,
+            track: this.queue.current.track,
+            ...finalOptions,
+        };
+        if (typeof options.track !== "string") {
+            options.track = options.track.track;
+        }
+        await this.node.send(options);
     }
     /**
      * Sets the player volume.

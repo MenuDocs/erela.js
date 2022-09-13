@@ -7,17 +7,9 @@ const Utils_1 = require("./Utils");
  * @noInheritDoc
  */
 class Queue extends Array {
-    constructor() {
-        super(...arguments);
-        /** The current track */
-        this.current = null;
-        /** The previous track */
-        this.previous = null;
-    }
     /** The total duration of the queue. */
     get duration() {
-        var _a, _b;
-        const current = (_b = (_a = this.current) === null || _a === void 0 ? void 0 : _a.duration) !== null && _b !== void 0 ? _b : 0;
+        const current = this.current?.duration ?? 0;
         return this
             .reduce((acc, cur) => acc + (cur.duration || 0), current);
     }
@@ -29,6 +21,10 @@ class Queue extends Array {
     get size() {
         return this.length;
     }
+    /** The current track */
+    current = null;
+    /** The previous track */
+    previous = null;
     /**
      * Adds a track to the queue.
      * @param track

@@ -92,6 +92,11 @@ Note: These are the only ones shown before being published, check the GitHub rep
 - Contributor
 - Github: [@Anish-Shobith](https://github.com/Anish-Shobith)
 
+👤 **melike2d**
+
+- Contributor
+- Github: [@melike2d](https://github.com/melike2d)
+
 👤 **ayntee**
 
 - Contributor

@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Plugin = exports.Structure = exports.TrackUtils = void 0;
 /** @hidden */
@@ -26,6 +17,8 @@ UNRESOLVED_TRACK_SYMBOL = Symbol("unresolved"), SIZES = [
 /** @hidden */
 const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 class TrackUtils {
+    static trackPartial = null;
+    static manager;
     /** @hidden */
     static init(manager) {
         this.manager = manager;
@@ -94,8 +87,7 @@ class TrackUtils {
                     ? `https://img.youtube.com/vi/${data.info.identifier}/default.jpg`
                     : null,
                 displayThumbnail(size = "default") {
-                    var _a;
-                    const finalSize = (_a = SIZES.find((s) => s === size)) !== null && _a !== void 0 ? _a : "default";
+                    const finalSize = SIZES.find((s) => s === size) ?? "default";
                     return this.uri.includes("youtube")
                         ? `https://img.youtube.com/vi/${data.info.identifier}/${finalSize}.jpg`
                         : null;
@@ -130,59 +122,53 @@ class TrackUtils {
             throw new RangeError('Argument "query" must be present.');
         let unresolvedTrack = {
             requester,
-            resolve() {
-                return __awaiter(this, void 0, void 0, function* () {
-                    const resolved = yield TrackUtils.getClosestTrack(this);
-                    Object.getOwnPropertyNames(this).forEach(prop => delete this[prop]);
-                    Object.assign(this, resolved);
-                });
+            async resolve() {
+                const resolved = await TrackUtils.getClosestTrack(this);
+                Object.getOwnPropertyNames(this).forEach(prop => delete this[prop]);
+                Object.assign(this, resolved);
             }
         };
         if (typeof query === "string")
             unresolvedTrack.title = query;
         else
-            unresolvedTrack = Object.assign(Object.assign({}, unresolvedTrack), query);
+            unresolvedTrack = { ...unresolvedTrack, ...query };
         Object.defineProperty(unresolvedTrack, UNRESOLVED_TRACK_SYMBOL, {
             configurable: true,
             value: true
         });
         return unresolvedTrack;
     }
-    static getClosestTrack(unresolvedTrack) {
-        var _a;
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!TrackUtils.manager)
-                throw new RangeError("Manager has not been initiated.");
-            if (!TrackUtils.isUnresolvedTrack(unresolvedTrack))
-                throw new RangeError("Provided track is not a UnresolvedTrack.");
-            const query = [unresolvedTrack.author, unresolvedTrack.title].filter(str => !!str).join(" - ");
-            const res = yield TrackUtils.manager.search(query, unresolvedTrack.requester);
-            if (res.loadType !== "SEARCH_RESULT")
-                throw (_a = res.exception) !== null && _a !== void 0 ? _a : {
-                    message: "No tracks found.",
-                    severity: "COMMON",
-                };
-            if (unresolvedTrack.author) {
-                const channelNames = [unresolvedTrack.author, `${unresolvedTrack.author} - Topic`];
-                const originalAudio = res.tracks.find(track => {
-                    return (channelNames.some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.author)) ||
-                        new RegExp(`^${escapeRegExp(unresolvedTrack.title)}$`, "i").test(track.title));
-                });
-                if (originalAudio)
-                    return originalAudio;
-            }
-            if (unresolvedTrack.duration) {
-                const sameDuration = res.tracks.find(track => (track.duration >= (unresolvedTrack.duration - 1500)) &&
-                    (track.duration <= (unresolvedTrack.duration + 1500)));
-                if (sameDuration)
-                    return sameDuration;
-            }
-            return res.tracks[0];
-        });
+    static async getClosestTrack(unresolvedTrack) {
+        if (!TrackUtils.manager)
+            throw new RangeError("Manager has not been initiated.");
+        if (!TrackUtils.isUnresolvedTrack(unresolvedTrack))
+            throw new RangeError("Provided track is not a UnresolvedTrack.");
+        const query = [unresolvedTrack.author, unresolvedTrack.title].filter(str => !!str).join(" - ");
+        const res = await TrackUtils.manager.search(query, unresolvedTrack.requester);
+        if (res.loadType !== "SEARCH_RESULT")
+            throw res.exception ?? {
+                message: "No tracks found.",
+                severity: "COMMON",
+            };
+        if (unresolvedTrack.author) {
+            const channelNames = [unresolvedTrack.author, `${unresolvedTrack.author} - Topic`];
+            const originalAudio = res.tracks.find(track => {
+                return (channelNames.some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.author)) ||
+                    new RegExp(`^${escapeRegExp(unresolvedTrack.title)}$`, "i").test(track.title));
+            });
+            if (originalAudio)
+                return originalAudio;
+        }
+        if (unresolvedTrack.duration) {
+            const sameDuration = res.tracks.find(track => (track.duration >= (unresolvedTrack.duration - 1500)) &&
+                (track.duration <= (unresolvedTrack.duration + 1500)));
+            if (sameDuration)
+                return sameDuration;
+        }
+        return res.tracks[0];
     }
 }
 exports.TrackUtils = TrackUtils;
-TrackUtils.trackPartial = null;
 /** Gets or extends structures to extend the built in, or already extended, classes to add more functionality. */
 class Structure {
     /**
