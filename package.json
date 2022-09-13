@@ -24,9 +24,22 @@
   ],
   "author": "MenuDocs (https://github.com/MenuDocs)",
   "contributors": [
-    "Solaris9",
-    "Anish-Shobith",
-    "ayntee"
+    {
+      "name": "Solaris9",
+      "url": "https://mhargreaves.site"
+    },
+    {
+      "name": "Anish-Shobith",
+      "url": "https://anishshobithps.tech"
+    },
+    {
+      "name": "melike2d",
+      "email": "hi@2d.gay",
+      "url": "https://2d.gay"
+    },
+    {
+      "name": "ayntee"
+    }
   ],
   "license": "Apache-2.0",
   "repository": "MenuDocs/erela.js",
