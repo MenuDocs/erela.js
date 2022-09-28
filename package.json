@@ -1,6 +1,6 @@
 {
   "name": "erela.js",
-  "version": "2.3.3",
+  "version": "2.4.0",
   "description": "An easy-to-use Lavalink client for NodeJS.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
