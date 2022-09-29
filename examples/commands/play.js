@@ -52,7 +52,7 @@ module.exports = {
         if (!player.playing && !player.paused && player.queue.totalSize === res.tracks.length) player.play();
         return message.reply(`enqueuing playlist \`${res.playlist.name}\` with ${res.tracks.length} tracks.`);
       case 'SEARCH_RESULT':
-        let max = 5, collected, filter = (m) => m.author.id === message.author.id && /^(\d+|end)$/i.test(m.content);
+        let max = 5, collected, filter = (m) => m.author.id === message.author.id;
         if (res.tracks.length < max) max = res.tracks.length;
 
         const results = res.tracks
@@ -70,6 +70,11 @@ module.exports = {
         }
 
         const first = collected.first().content;
+        
+        if(isNaN(first)) {
+          if (!player.queue.current) return player.destroy();
+          return;
+        }
 
         if (first.toLowerCase() === 'end') {
           if (!player.queue.current) player.destroy();
