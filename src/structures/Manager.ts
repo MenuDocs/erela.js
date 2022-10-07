@@ -359,9 +359,9 @@ export class Manager extends EventEmitter {
       const result: SearchResult = {
         loadType: res.loadType,
         exception: res.exception ?? null,
-        tracks: res.tracks.map((track: TrackData) =>
+        tracks: res.tracks?.map((track: TrackData) =>
           TrackUtils.build(track, requester)
-        ),
+        ) ?? [],
       };
 
       if (result.loadType === "PLAYLIST_LOADED") {
