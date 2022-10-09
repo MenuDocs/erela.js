@@ -23,7 +23,7 @@
 
 ## Archived
 
-Due to a growing concern about the status of Music Bots on Discord and a lack of motivation from the team, we have decided to archive Erela and drop support for it entirely. 
+Due to a growing concern about the status of Music Bots on Discord and a lack of motivation from the team, we have decided to archive Erela. We will still provide minimal support for it in our Discord Server.
 
 You can find another lavalink client [here](https://github.com/freyacodes/lavalink#client-libraries).
 
