@@ -1,8 +1,13 @@
 {
   "name": "examples",
   "packageManager": "yarn@3.2.0",
+  "type": "module",
   "dependencies": {
     "discord.js": "^14.3.0",
+    "dotenv": "^16.0.2",
     "erela.js": "../"
+  },
+  "devDependencies": {
+    "@types/node": "^18.8.0"
   }
 }

@@ -8,7 +8,7 @@ https://solaris.codes/erelajs/guides/basics.html#first-start
 Or copy the code inside the run function as its simply the message and arguments.
 */
 
-module.exports = {
+export default {
   name: 'play',
   run: async (message, args) => {
     const { channel } = message.member.voice;
@@ -51,7 +51,7 @@ module.exports = {
 
         if (!player.playing && !player.paused && player.queue.totalSize === res.tracks.length) player.play();
         return message.reply(`enqueuing playlist \`${res.playlist.name}\` with ${res.tracks.length} tracks.`);
-      case 'SEARCH_RESULT':
+      case 'SEARCH_RESULT': {
         let max = 5, collected, filter = (m) => m.author.id === message.author.id && /^(\d+|end)$/i.test(m.content);
         if (res.tracks.length < max) max = res.tracks.length;
 
@@ -82,8 +82,12 @@ module.exports = {
         const track = res.tracks[index];
         player.queue.add(track);
 
-        if (!player.playing && !player.paused && !player.queue.size) player.play();
+        if (!player.playing && !player.paused && !player.queue.size) player.play({
+          volume: 25
+        });
+
         return message.reply(`enqueuing \`${track.title}\`.`);
+      }
     }
   },
 };

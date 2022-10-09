@@ -15,7 +15,7 @@ const levels = {
   high: 0.25,
 };
 
-module.exports = {
+export default {
   name: "bassboost",
   run: (message, args) => {
     const player = message.client.manager.get(message.guild.id);

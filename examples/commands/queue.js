@@ -8,9 +8,9 @@ https://solaris.codes/erelajs/guides/basics.html#first-start
 Or copy the code inside the run function as its simply the message and arguments.
 */
 
-const { EmbedBuilder } = require("discord.js");
+import { EmbedBuilder } from "discord.js";
 
-module.exports = {
+export default {
   name: "queue",
   run: (message, args) => {
     const player = message.client.manager.get(message.guild.id);

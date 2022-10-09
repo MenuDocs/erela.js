@@ -8,7 +8,7 @@ https://solaris.codes/erelajs/guides/basics.html#first-start
 Or copy the code inside the run function as its simply the message and arguments.
 */
 
-module.exports = {
+export default {
   name: "volume",
   run: (message, args) => {
     const player = message.client.manager.get(message.guild.id);
