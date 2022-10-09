@@ -3,29 +3,31 @@
     <hr>
     <br>
     <a href="https://discord.gg/menudocs">
-<img src="https://img.shields.io/discord/416512197590777857?color=7289DA&label=Support&logo=discord&style=for-the-badge" alt="Discord">
-</a>
-
-<a href="https://www.npmjs.com/package/erela.js">
-<img src="https://img.shields.io/npm/dw/erela.js?color=CC3534&logo=npm&style=for-the-badge" alt="Downloads">
-</a>
-
-<a href="https://www.npmjs.com/package/erela.js">
-<img src="https://img.shields.io/npm/v/erela.js?color=red&label=Version&logo=npm&style=for-the-badge" alt="Npm version">
-</a>
-
-<br>
-
-<a href="https://github.com/MenuDocs/erela.js">
-<img src="https://img.shields.io/github/stars/MenuDocs/erela.js?color=333&logo=github&style=for-the-badge" alt="Github stars">
-</a>
-
-<a href="https://github.com/MenuDocs/erela.js/blob/master/LICENSE">
-<img src="https://img.shields.io/github/license/MenuDocs/erela.js?color=6e5494&logo=github&style=for-the-badge" alt="License">
-</a>
-<hr>
+        <img src="https://img.shields.io/discord/416512197590777857?color=7289DA&label=Support&logo=discord&style=for-the-badge" alt="Discord">
+    </a>
+    <!--<a href="https://www.npmjs.com/package/erela.js">
+        <img src="https://img.shields.io/npm/dw/erela.js?color=CC3534&logo=npm&style=for-the-badge" alt="Downloads">
+    </a>
+    <a href="https://www.npmjs.com/package/erela.js">
+        <img src="https://img.shields.io/npm/v/erela.js?color=red&label=Version&logo=npm&style=for-the-badge" alt="Npm version">
+    </a>
+    <br>-->
+    <a href="https://github.com/MenuDocs/erela.js">
+        <img src="https://img.shields.io/github/stars/MenuDocs/erela.js?color=333&logo=github&style=for-the-badge" alt="Github stars">
+    </a>
+    <a href="https://github.com/MenuDocs/erela.js/blob/master/LICENSE">
+        <img src="https://img.shields.io/github/license/MenuDocs/erela.js?color=6e5494&logo=github&style=for-the-badge" alt="License">
+    </a>
+    <hr>
 </div>
 
+## Archived
+
+Due to a growing concern about the status of Music Bots on Discord and a lack of motivation from the team, we have decided to archive Erela and drop support for it entirely. 
+
+You can find another lavalink client [here](https://github.com/freyacodes/lavalink#client-libraries).
+
+<!--
 > Erela was transferred to MenuDocs, because I no longer wish to work with Discord related development. It will from now on be maintained by [MenuDocs](https://github.com/MenuDocs). ~ @Solaris9
 
 ## Documentation & Guides
@@ -92,3 +94,4 @@ Please read the guides to start: <https://erelajs-docs.netlify.app/docs/gettings
 
 - Contributor
 - Github: [@ayntee](https://github.com/ayntee)
+--!>
