@@ -23,9 +23,9 @@
 
 ## Archived
 
-Due to a growing concern about the status of Music Bots on Discord and a lack of motivation from the team, we have decided to archive Erela. We will still provide minimal support for it in our Discord Server.
+Due to a growing concern about the status of Music Bots on Discord and a lack of motivation from the team, we have decided to archive Erela and drop support for it entirely.
 
-You can find another lavalink client [here](https://github.com/freyacodes/lavalink#client-libraries).
+We recommend to use another lavalink client and not a fork, you can find another one [here](https://github.com/freyacodes/lavalink#client-libraries).
 
 <!--
 > Erela was transferred to MenuDocs, because I no longer wish to work with Discord related development. It will from now on be maintained by [MenuDocs](https://github.com/MenuDocs). ~ @Solaris9
